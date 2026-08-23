@@ -25,12 +25,6 @@ BNSS_SOURCE_NOTE = (
     "blocks automated fetches."
 )
 
-IT_ACT_SOURCE_NOTE = (
-    "Information Technology Act, 2000, Government of India. Cross-verified against "
-    "indiankanoon.org (bare-act reproduction), apnilaw.com, and sanhita.ai since "
-    "indiacode.nic.in blocks automated fetches."
-)
-
 MV_ACT_SOURCE_NOTE = (
     "Motor Vehicles Act, 1988, as amended by the Motor Vehicles (Amendment) Act, "
     "2019 (in force from 1 September 2019). Cross-verified against indiankanoon.org "
@@ -99,8 +93,6 @@ IR_CODE_SOURCE_NOTE = (
     "text on indiankanoon.org."
 )
 
-LAST_VERIFIED = "2026-08-19"
-RIGHTS_LAST_VERIFIED = "2026-08-20"
 WEBSITE_PORT_VERIFIED = "2026-08-21"
 NEW_CATEGORIES_VERIFIED = "2026-08-21"
 
