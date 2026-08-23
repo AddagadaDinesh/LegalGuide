@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
+import '../theme/app_theme.dart';
+import '../widgets/icon_badge.dart';
 import 'section_detail_screen.dart';
 
 class _DocGuide {
   final String title;
+  final IconData icon;
+  final Color color;
   final String whatItIs;
   final String whenUsed;
   final String keyParts;
@@ -13,6 +17,8 @@ class _DocGuide {
 
   const _DocGuide({
     required this.title,
+    required this.icon,
+    required this.color,
     required this.whatItIs,
     required this.whenUsed,
     required this.keyParts,
@@ -25,6 +31,8 @@ class _DocGuide {
 const _docGuides = [
   _DocGuide(
     title: 'FIR / Police Complaint',
+    icon: Icons.local_police_rounded,
+    color: Color(0xFFF43F5E),
     whatItIs: 'A First Information Report (FIR) is the written record police prepare on '
         'receiving the first information about a cognizable offence.',
     whenUsed: 'Filed at a police station to start a formal criminal investigation. '
@@ -36,6 +44,8 @@ const _docGuides = [
   ),
   _DocGuide(
     title: 'Legal Notice',
+    icon: Icons.mail_rounded,
+    color: Color(0xFFF59E0B),
     whatItIs: 'A formal written communication warning the recipient of an intended legal '
         'action if a grievance isn\'t resolved.',
     whenUsed: 'Sent before filing a civil suit, as a pre-litigation step — usually optional, '
@@ -46,6 +56,8 @@ const _docGuides = [
   ),
   _DocGuide(
     title: 'Court Summons / Notice',
+    icon: Icons.gavel_rounded,
+    color: Color(0xFF3B82F6),
     whatItIs: 'A formal court order compelling a person to appear — as a witness, to answer '
         'a civil claim, or to face a criminal charge.',
     whenUsed: 'Civil cases follow CPC Order V; criminal cases follow BNSS Section 63/204 once '
@@ -55,6 +67,8 @@ const _docGuides = [
   ),
   _DocGuide(
     title: 'Affidavit',
+    icon: Icons.fact_check_rounded,
+    color: Color(0xFF14B8A6),
     whatItIs: 'A written statement sworn under oath before a notary or magistrate, limited to '
         'facts within the deponent\'s personal knowledge.',
     whenUsed: 'Supporting a court application such as a bail bond, interim injunction, or '
@@ -65,6 +79,8 @@ const _docGuides = [
   ),
   _DocGuide(
     title: 'Complaint',
+    icon: Icons.report_rounded,
+    color: Color(0xFFFB923C),
     whatItIs: 'An allegation made to a Magistrate that a person has committed an offence, '
         'with a view to their being prosecuted.',
     whenUsed: 'When a person wants a court (rather than the police directly) to take up a '
@@ -74,6 +90,8 @@ const _docGuides = [
   ),
   _DocGuide(
     title: 'Property & Sale Deeds',
+    icon: Icons.home_work_rounded,
+    color: Color(0xFF22D3EE),
     whatItIs: 'Title deeds, sale agreements, encumbrance certificates (EC), and mutation '
         'records establishing ownership of immovable property.',
     whenUsed: 'Before buying, selling, or taking a loan against property — to verify the '
@@ -84,6 +102,8 @@ const _docGuides = [
   ),
   _DocGuide(
     title: 'Cheque Bounce Notice (Section 138, NI Act)',
+    icon: Icons.payments_rounded,
+    color: Color(0xFFA78BFA),
     whatItIs: 'A statutory demand notice sent after a cheque is dishonoured due to '
         'insufficient funds, required by the Negotiable Instruments Act.',
     whenUsed: 'Must be sent within 30 days of learning the cheque bounced, giving the '
@@ -95,6 +115,8 @@ const _docGuides = [
   ),
   _DocGuide(
     title: 'Evidence / Documents',
+    icon: Icons.folder_copy_rounded,
+    color: AppColors.accent,
     whatItIs: 'Supporting material — physical, documentary, or digital — used to prove facts '
         'in a legal proceeding.',
     whenUsed: 'Gathered during investigation or trial to support a complaint, defence, or claim.',
@@ -122,9 +144,9 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         title: Text('Legal Documents & Notice Guides',
             style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16)),
@@ -149,34 +171,34 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF334155)),
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.card),
+                  border: Border.all(color: guide.color.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.description_outlined, color: Color(0xFF6366F1), size: 20),
-                        const SizedBox(width: 8),
+                        IconBadge(icon: guide.icon, color: guide.color, size: 38, iconSize: 18),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Text(guide.title,
-                              style: GoogleFonts.inter(
-                                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                              style: GoogleFonts.outfit(
+                                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15.5)),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF334155),
-                            borderRadius: BorderRadius.circular(6),
+                            color: AppColors.border,
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text('General guide',
-                              style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 10)),
+                              style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 10)),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     _label('What it is'),
                     _body(guide.whatItIs),
                     const SizedBox(height: 8),
@@ -201,7 +223,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                             child: Text(
                               '${section.sectionNumber} — ${section.title}',
                               style: GoogleFonts.inter(
-                                  color: const Color(0xFF6366F1), fontSize: 13, fontWeight: FontWeight.w600),
+                                  color: guide.color, fontSize: 13, fontWeight: FontWeight.w600),
                             ),
                           ),
                         ),
@@ -218,7 +240,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
   Widget _label(String text) => Text(
         text,
-        style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 11, fontWeight: FontWeight.w600),
+        style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600),
       );
 
   Widget _body(String text) => Text(

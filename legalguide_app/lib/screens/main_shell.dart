@@ -12,6 +12,8 @@ import 'saved_screen.dart';
 import '../services/auth_service.dart';
 import '../services/bookmark_service.dart';
 import '../services/connectivity_status_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/icon_badge.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -52,32 +54,32 @@ class _MainShellState extends State<MainShell> {
   void _showMoreSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF1E293B),
+      backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (sheetContext) {
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               Container(
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF334155),
+                  color: AppColors.border,
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              const SizedBox(height: 8),
-              _moreTile(sheetContext, Icons.shield_outlined, 'Arrest & Detention',
+              const SizedBox(height: 12),
+              _moreTile(sheetContext, Icons.local_police_rounded, const Color(0xFFF59E0B), 'Arrest & Detention',
                   const ArrestDetentionScreen()),
-              _moreTile(sheetContext, Icons.description_outlined, 'Documents',
+              _moreTile(sheetContext, Icons.description_rounded, const Color(0xFF14B8A6), 'Documents',
                   const DocumentsScreen()),
-              _moreTile(sheetContext, Icons.support_agent_rounded, 'Legal Help',
+              _moreTile(sheetContext, Icons.support_agent_rounded, const Color(0xFFF43F5E), 'Legal Help',
                   const LegalHelpScreen()),
-              _moreTile(sheetContext, Icons.info_outline_rounded, 'About', const AboutScreen()),
+              _moreTile(sheetContext, Icons.info_rounded, AppColors.accent, 'About', const AboutScreen()),
               const SizedBox(height: 12),
             ],
           ),
@@ -86,11 +88,11 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
-  Widget _moreTile(BuildContext sheetContext, IconData icon, String label, Widget destination) {
+  Widget _moreTile(BuildContext sheetContext, IconData icon, Color color, String label, Widget destination) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF6366F1)),
+      leading: IconBadge(icon: icon, color: color, size: 40, iconSize: 20),
       title: Text(label, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600)),
-      trailing: const Icon(Icons.chevron_right, color: Color(0xFF64748B)),
+      trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
       onTap: () {
         Navigator.pop(sheetContext);
         Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
@@ -186,17 +188,45 @@ class _MainShellState extends State<MainShell> {
 
   Widget _buildStatusStrip() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: const Color(0xFF1E293B),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(bottom: BorderSide(color: AppColors.border)),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           ValueListenableBuilder<bool>(
             valueListenable: ConnectivityStatusService.isOnline,
             builder: (context, isOnline, _) {
-              return Text(
-                isOnline ? '🟢 Online' : '🟠 Offline – Using LegalGuide Knowledge',
-                style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 12, fontWeight: FontWeight.w600),
+              final color = isOnline ? AppColors.success : AppColors.warning;
+              return InkWell(
+                onTap: isOnline
+                    ? null
+                    : () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutScreen())),
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isOnline ? 'Online' : 'Offline · Using LegalGuide Knowledge',
+                        style: GoogleFonts.inter(color: color, fontSize: 12, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
           ),
@@ -204,26 +234,34 @@ class _MainShellState extends State<MainShell> {
             children: [
               InkWell(
                 onTap: _showAccountSheet,
-                child: ValueListenableBuilder<String?>(
-                  valueListenable: AuthService.currentUsername,
-                  builder: (context, username, _) {
-                    return Icon(
-                      username != null ? Icons.account_circle_rounded : Icons.account_circle_outlined,
-                      color: const Color(0xFF94A3B8),
-                      size: 18,
-                    );
-                  },
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: ValueListenableBuilder<String?>(
+                    valueListenable: AuthService.currentUsername,
+                    builder: (context, username, _) {
+                      return Icon(
+                        username != null ? Icons.account_circle_rounded : Icons.account_circle_outlined,
+                        color: AppColors.textSecondary,
+                        size: 18,
+                      );
+                    },
+                  ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 6),
               InkWell(
                 onTap: _showLanguageDialog,
-                child: Row(
-                  children: [
-                    const Icon(Icons.language_rounded, color: Color(0xFF94A3B8), size: 16),
-                    const SizedBox(width: 4),
-                    Text(_language, style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 12)),
-                  ],
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.language_rounded, color: AppColors.textSecondary, size: 16),
+                      const SizedBox(width: 4),
+                      Text(_language, style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12)),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -233,10 +271,45 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  Widget _navItem({required IconData icon, required String label, required bool selected, required VoidCallback onTap, Widget? badge}) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                decoration: BoxDecoration(
+                  color: selected ? AppColors.accent.withValues(alpha: 0.16) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                ),
+                child: badge ?? Icon(icon, color: selected ? AppColors.accent : AppColors.textMuted, size: 21),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                label,
+                style: GoogleFonts.inter(
+                  color: selected ? AppColors.accent : AppColors.textMuted,
+                  fontSize: 10.5,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.bg,
       body: Column(
         children: [
           SafeArea(bottom: false, child: _buildStatusStrip()),
@@ -256,38 +329,64 @@ class _MainShellState extends State<MainShell> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF6366F1),
-        onPressed: () => showAssistantPanel(context),
-        child: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: AppColors.accentGradient,
+          boxShadow: [BoxShadow(color: AppColors.accent.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+        ),
+        child: FloatingActionButton(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          onPressed: () => showAssistantPanel(context),
+          child: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF1E293B),
-        selectedItemColor: const Color(0xFF6366F1),
-        unselectedItemColor: const Color(0xFF64748B),
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          if (index == 3) {
-            _showMoreSheet();
-            return;
-          }
-          _openTab(index);
-        },
-        items: [
-          const BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-          const BottomNavigationBarItem(icon: Icon(Icons.travel_explore_rounded), label: 'Explore'),
-          BottomNavigationBarItem(
-            icon: Badge(
-              label: Text('$_savedCount'),
-              isLabelVisible: _savedCount > 0,
-              backgroundColor: const Color(0xFFF43F5E),
-              child: const Icon(Icons.bookmark_rounded),
-            ),
-            label: 'Saved',
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Container(
+          height: 70,
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            border: Border(top: BorderSide(color: AppColors.border)),
           ),
-          const BottomNavigationBarItem(icon: Icon(Icons.more_horiz_rounded), label: 'More'),
-        ],
+          child: Row(
+            children: [
+              _navItem(
+                icon: Icons.home_rounded,
+                label: 'Home',
+                selected: _currentIndex == 0,
+                onTap: () => _openTab(0),
+              ),
+              _navItem(
+                icon: Icons.travel_explore_rounded,
+                label: 'Explore',
+                selected: _currentIndex == 1,
+                onTap: () => _openTab(1),
+              ),
+              _navItem(
+                icon: Icons.bookmark_rounded,
+                label: 'Saved',
+                selected: _currentIndex == 2,
+                onTap: () => _openTab(2),
+                badge: Badge(
+                  label: Text('$_savedCount'),
+                  isLabelVisible: _savedCount > 0,
+                  backgroundColor: AppColors.danger,
+                  child: Icon(Icons.bookmark_rounded,
+                      color: _currentIndex == 2 ? AppColors.accent : AppColors.textMuted, size: 22),
+                ),
+              ),
+              _navItem(
+                icon: Icons.more_horiz_rounded,
+                label: 'More',
+                selected: false,
+                onTap: _showMoreSheet,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

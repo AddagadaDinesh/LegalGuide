@@ -6,7 +6,9 @@ import '../models/legal_matter.dart';
 import '../repositories/legal_data_repository.dart';
 import '../services/bookmark_service.dart';
 import '../services/view_count_service.dart';
+import '../theme/app_theme.dart';
 import '../utils/section_lookup.dart';
+import '../widgets/icon_badge.dart';
 import '../widgets/legal_section_card.dart';
 import 'section_detail_screen.dart';
 
@@ -57,16 +59,19 @@ class _MatterDetailScreenState extends State<MatterDetailScreen> {
   Widget build(BuildContext context) {
     final matter = widget.matter;
     final lookup = SectionLookup(_laws, _categories);
+    final matchingCategories = _categories.where((c) => c.id == matter.categoryId);
+    final category = matchingCategories.isEmpty ? null : matchingCategories.first;
+    final style = categoryStyleFor(category?.name ?? '');
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         title: Text(matter.name, style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)))
+          ? Center(child: CircularProgressIndicator(color: style.color))
           : FutureBuilder(
               future: LegalDataRepository.loadSections(),
               builder: (context, snapshot) {
@@ -78,24 +83,54 @@ class _MatterDetailScreenState extends State<MatterDetailScreen> {
                 return ListView(
                   padding: const EdgeInsets.all(20),
                   children: [
-                    if (matter.description.isNotEmpty) ...[
-                      Text(
-                        matter.description,
-                        style: GoogleFonts.inter(color: const Color(0xFFCBD5E1), fontSize: 14, height: 1.5),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        borderRadius: BorderRadius.circular(AppRadius.card),
+                        border: Border.all(color: style.color.withValues(alpha: 0.35)),
                       ),
-                      const SizedBox(height: 20),
-                    ],
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          IconBadge(icon: style.icon, color: style.color),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if (category != null)
+                                  Text(category.name.toUpperCase(),
+                                      style: GoogleFonts.inter(
+                                          color: style.color, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.4)),
+                                const SizedBox(height: 4),
+                                Text(
+                                  matter.description.isNotEmpty ? matter.description : matter.name,
+                                  style: GoogleFonts.inter(color: const Color(0xFFCBD5E1), fontSize: 13.5, height: 1.5),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  '${sections.length} legal section${sections.length == 1 ? '' : 's'} linked',
+                                  style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     if (sections.isEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 30.0),
                         child: Column(
                           children: [
-                            const Icon(Icons.hourglass_empty_rounded, color: Color(0xFF64748B), size: 36),
+                            const Icon(Icons.hourglass_empty_rounded, color: AppColors.textMuted, size: 36),
                             const SizedBox(height: 12),
                             Text(
                               'Verified legal sections for this topic are not available yet.',
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(color: const Color(0xFF94A3B8)),
+                              style: GoogleFonts.inter(color: AppColors.textSecondary),
                             ),
                           ],
                         ),
@@ -109,6 +144,7 @@ class _MatterDetailScreenState extends State<MatterDetailScreen> {
                           isBookmarked: _bookmarkedIds.contains(section.id),
                           isFrequentlyViewed: (_viewCounts[section.id] ?? 0) >=
                               ViewCountService.frequentThreshold,
+                          accentColor: style.color,
                           onBookmarkToggle: () => _toggleBookmark(section.id),
                           onTap: () async {
                             await Navigator.push(

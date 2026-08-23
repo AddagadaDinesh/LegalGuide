@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/category.dart';
 import '../models/legal_matter.dart';
 import '../repositories/legal_data_repository.dart';
+import '../theme/app_theme.dart';
+import '../widgets/icon_badge.dart';
 import 'law_list_screen.dart';
 import 'matter_detail_screen.dart';
 
@@ -49,19 +51,23 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final style = categoryStyleFor(widget.category.name);
+    final populated = _matters.where((m) => m.isAvailable).length;
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: AppColors.surface,
           elevation: 0,
           title: Text(widget.category.name,
               style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
           bottom: TabBar(
-            indicatorColor: const Color(0xFF6366F1),
+            indicatorColor: style.color,
+            indicatorWeight: 3,
             labelColor: Colors.white,
-            unselectedLabelColor: const Color(0xFF94A3B8),
+            unselectedLabelColor: AppColors.textSecondary,
             labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13),
             tabs: const [
               Tab(text: 'Topics'),
@@ -69,19 +75,56 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
             ],
           ),
         ),
-        body: TabBarView(
+        body: Column(
           children: [
-            _loading
-                ? const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)))
-                : _buildTopics(),
-            LawListScreen(category: widget.category, embedded: true),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              color: AppColors.surface,
+              child: Row(
+                children: [
+                  IconBadge(icon: style.icon, color: style.color, size: 48, iconSize: 24),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.category.description.isNotEmpty
+                              ? widget.category.description
+                              : widget.category.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12.5, height: 1.4),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '${_matters.length} topics · $populated with legal sections',
+                          style: GoogleFonts.inter(color: style.color, fontSize: 11.5, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _loading
+                      ? Center(child: CircularProgressIndicator(color: style.color))
+                      : _buildTopics(style),
+                  LawListScreen(category: widget.category, embedded: true),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTopics() {
+  Widget _buildTopics(CategoryStyle style) {
     if (_matters.isEmpty) {
       return Center(
         child: Text('No topics available for this category yet.',
@@ -93,7 +136,7 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 1.3,
+        childAspectRatio: 1.02,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),
@@ -103,41 +146,49 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
         final available = matter.isAvailable;
         return InkWell(
           onTap: () => _openMatter(matter),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadius.card),
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: available ? const Color(0xFF1E293B) : const Color(0xFF1E293B).withAlpha(120),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFF334155)),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              border: Border.all(color: available ? style.color.withValues(alpha: 0.35) : AppColors.border),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(
-                  available ? Icons.topic_outlined : Icons.hourglass_empty_rounded,
-                  color: available ? const Color(0xFF6366F1) : const Color(0xFF64748B),
-                  size: 22,
+                IconBadge(
+                  icon: available ? Icons.topic_rounded : Icons.hourglass_empty_rounded,
+                  color: available ? style.color : AppColors.textMuted,
+                  size: 38,
+                  iconSize: 18,
                 ),
                 Text(
                   matter.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
-                    color: available ? Colors.white : const Color(0xFF94A3B8),
+                    color: available ? Colors.white : AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 13.5,
                   ),
                 ),
-                if (!available)
+                if (available)
+                  Text(
+                    '${matter.relatedSectionIds.length} section${matter.relatedSectionIds.length == 1 ? '' : 's'}',
+                    style: GoogleFonts.inter(color: style.color, fontSize: 10.5, fontWeight: FontWeight.w600),
+                  )
+                else
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF334155),
+                      color: AppColors.border,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       'Coming soon',
-                      style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 10),
+                      style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 10),
                     ),
                   ),
               ],

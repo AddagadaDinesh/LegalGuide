@@ -6,8 +6,11 @@ import '../repositories/legal_data_repository.dart';
 import '../services/bookmark_service.dart';
 import '../services/search_history_service.dart';
 import '../services/view_count_service.dart';
+import '../theme/app_theme.dart';
 import '../utils/section_lookup.dart';
+import '../widgets/icon_badge.dart';
 import '../widgets/legal_section_card.dart';
+import '../widgets/section_heading.dart';
 import 'arrest_detention_screen.dart';
 import 'category_overview_screen.dart';
 import 'documents_screen.dart';
@@ -113,31 +116,66 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _quickAccessCard(String label, IconData icon, VoidCallback onTap) {
+  Widget _quickAccessCard(String label, IconData icon, Color color, VoidCallback onTap) {
     return SizedBox(
-      width: 100,
+      width: 102,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.card),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFF334155)),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            border: Border.all(color: AppColors.border),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: const Color(0xFF6366F1), size: 24),
-              const SizedBox(height: 8),
+              IconBadge(icon: icon, color: color),
+              const SizedBox(height: 10),
               Text(
                 label,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600, height: 1.25),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _categoryCard(Category category) {
+    final style = categoryStyleFor(category.name);
+    return InkWell(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => CategoryOverviewScreen(category: category)),
+      ),
+      borderRadius: BorderRadius.circular(AppRadius.card),
+      child: Container(
+        width: 132,
+        margin: const EdgeInsets.only(right: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconBadge(icon: style.icon, color: style.color, size: 38, iconSize: 18),
+            const SizedBox(height: 10),
+            Text(
+              category.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12.5, height: 1.3),
+            ),
+          ],
         ),
       ),
     );
@@ -147,172 +185,158 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final lookup = _lookup;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.bg,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _loadData,
-          color: const Color(0xFF6366F1),
-          backgroundColor: const Color(0xFF1E293B),
+          color: AppColors.accent,
+          backgroundColor: AppColors.surface,
           child: (_loading || lookup == null)
-              ? const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)))
+              ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
               : ListView(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'LegalGuide',
-                              style: GoogleFonts.outfit(
-                                color: Colors.white,
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -0.5,
-                              ),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: AppColors.accentGradient,
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                            Text(
-                              'Simplified Legal Knowledge & Assistance',
-                              style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 13),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1E293B),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFF334155)),
+                            child: const Icon(Icons.balance_rounded, color: Colors.white, size: 26),
                           ),
-                          child: const Icon(Icons.gavel_rounded, color: Color(0xFF6366F1), size: 24),
-                        ),
-                      ],
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'LegalGuide',
+                                  style: GoogleFonts.outfit(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                Text(
+                                  'Simplified Legal Knowledge & Assistance',
+                                  style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.85), fontSize: 12.5),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
                     InkWell(
                       onTap: widget.onOpenExplore,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: const Color(0xFF334155)),
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                          border: Border.all(color: AppColors.border),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.search, color: Color(0xFF6366F1)),
+                            const Icon(Icons.search_rounded, color: AppColors.accent),
                             const SizedBox(width: 10),
                             Text(
                               'Search laws, section numbers, topics...',
-                              style: GoogleFonts.inter(color: const Color(0xFF64748B), fontSize: 14),
+                              style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Text('Quick Actions',
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 26),
+                    const SectionHeading(title: 'Quick Actions', icon: Icons.bolt_rounded),
+                    const SizedBox(height: 12),
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
                       children: [
-                        _quickAccessCard('Search Laws', Icons.search, widget.onOpenExplore),
-                        _quickAccessCard('Ask AI', Icons.chat_bubble_outline_rounded, widget.onOpenAssistant),
-                        _quickAccessCard('Arrest &\nDetention', Icons.shield_outlined, () {
+                        _quickAccessCard('Search Laws', Icons.search_rounded, AppColors.accent, widget.onOpenExplore),
+                        _quickAccessCard('Ask AI', Icons.chat_bubble_rounded, const Color(0xFFA78BFA), widget.onOpenAssistant),
+                        _quickAccessCard('Arrest &\nDetention', Icons.local_police_rounded, const Color(0xFFF59E0B), () {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) => const ArrestDetentionScreen()));
                         }),
-                        _quickAccessCard('Legal\nDocuments', Icons.description_outlined, () {
+                        _quickAccessCard('Legal\nDocuments', Icons.description_rounded, const Color(0xFF14B8A6), () {
                           Navigator.push(
                               context, MaterialPageRoute(builder: (context) => const DocumentsScreen()));
                         }),
-                        _quickAccessCard('Need Legal\nHelp', Icons.support_agent_rounded, () {
+                        _quickAccessCard('Need Legal\nHelp', Icons.support_agent_rounded, const Color(0xFFF43F5E), () {
                           Navigator.push(
                               context, MaterialPageRoute(builder: (context) => const LegalHelpScreen()));
                         }),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 28),
                     if (_neverSynced) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20.0),
                         child: Column(
                           children: [
-                            const Icon(Icons.cloud_off_rounded, color: Color(0xFF64748B), size: 40),
+                            const Icon(Icons.cloud_off_rounded, color: AppColors.textMuted, size: 40),
                             const SizedBox(height: 16),
                             Text(
                               "You're offline and haven't synced any legal data yet.\n"
                               'Connect to the internet and pull down to refresh.',
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(color: const Color(0xFF94A3B8)),
+                              style: GoogleFonts.inter(color: AppColors.textSecondary),
                             ),
                           ],
                         ),
                       ),
                     ] else ...[
-                      Text('Popular Searches',
-                          style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 10),
+                      const SectionHeading(title: 'Popular Searches', icon: Icons.trending_up_rounded),
+                      const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         children: [
                           for (final query in _popularSearches)
                             ActionChip(
+                              avatar: const Icon(Icons.search_rounded, size: 14, color: AppColors.accent),
                               label: Text(query),
-                              backgroundColor: const Color(0xFF1E293B),
-                              side: const BorderSide(color: Color(0xFF334155)),
+                              backgroundColor: AppColors.surface,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(AppRadius.pill),
+                                side: const BorderSide(color: AppColors.border),
+                              ),
                               labelStyle: GoogleFonts.inter(color: Colors.white, fontSize: 12),
                               onPressed: () => _openSearchSuggestion(query),
                             ),
                         ],
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Browse Legal Categories',
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 28),
+                      const SectionHeading(title: 'Browse Legal Categories', icon: Icons.grid_view_rounded),
+                      const SizedBox(height: 12),
                       SizedBox(
-                        height: 36,
+                        height: 122,
                         child: ListView(
                           scrollDirection: Axis.horizontal,
-                          children: [
-                            for (final category in _categories) ...[
-                              ActionChip(
-                                label: Text(category.name),
-                                backgroundColor: const Color(0xFF1E293B),
-                                side: const BorderSide(color: Color(0xFF334155)),
-                                labelStyle: GoogleFonts.inter(color: Colors.white, fontSize: 12),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => CategoryOverviewScreen(category: category),
-                                    ),
-                                  );
-                                },
-                              ),
-                              const SizedBox(width: 8),
-                            ],
-                          ],
+                          children: [for (final category in _categories) _categoryCard(category)],
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Commonly Referenced Sections',
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 28),
+                      const SectionHeading(title: 'Commonly Referenced Sections', icon: Icons.link_rounded),
+                      const SizedBox(height: 12),
                       if (_commonlyReferenced.isEmpty)
                         Text(
                           'Sections linked from multiple topics will show up here.',
-                          style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 13),
+                          style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
                         )
                       else
                         for (final section in _commonlyReferenced)
@@ -322,19 +346,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             breadcrumb: lookup.breadcrumbFor(section),
                             isBookmarked: _bookmarkedIds.contains(section.id),
                             isFrequentlyViewed: false,
+                            accentColor: categoryStyleFor(lookup.categoryNameFor(section)).color,
                             onBookmarkToggle: () => _toggleBookmark(section.id),
                             onTap: () => _openSection(section),
                           ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Frequently Viewed',
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 16),
+                      const SectionHeading(title: 'Frequently Viewed', icon: Icons.history_rounded),
+                      const SizedBox(height: 12),
                       if (_frequentSections.isEmpty)
                         Text(
                           'Sections you open a few times will show up here.',
-                          style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 13),
+                          style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
                         )
                       else
                         for (final section in _frequentSections)
@@ -344,6 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             breadcrumb: lookup.breadcrumbFor(section),
                             isBookmarked: _bookmarkedIds.contains(section.id),
                             isFrequentlyViewed: true,
+                            accentColor: categoryStyleFor(lookup.categoryNameFor(section)).color,
                             onBookmarkToggle: () => _toggleBookmark(section.id),
                             onTap: () => _openSection(section),
                           ),

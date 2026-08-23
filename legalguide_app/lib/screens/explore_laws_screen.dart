@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/category.dart';
@@ -7,8 +8,11 @@ import '../repositories/legal_data_repository.dart';
 import '../services/bookmark_service.dart';
 import '../services/search_history_service.dart';
 import '../services/view_count_service.dart';
+import '../theme/app_theme.dart';
 import '../utils/section_lookup.dart';
+import '../widgets/icon_badge.dart';
 import '../widgets/legal_section_card.dart';
+import '../widgets/section_heading.dart';
 import 'category_overview_screen.dart';
 import 'matter_detail_screen.dart';
 import 'section_detail_screen.dart';
@@ -45,6 +49,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
   int? _selectedCategoryId;
   late final TextEditingController _searchController;
   String _query = '';
+  Timer? _searchRecordDebounce;
 
   @override
   void initState() {
@@ -75,7 +80,17 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
 
   void _onQueryChanged(String value) {
     setState(() => _query = value.trim());
-    SearchHistoryService.recordQuery(value);
+    _searchRecordDebounce?.cancel();
+    _searchRecordDebounce = Timer(const Duration(milliseconds: 900), () {
+      SearchHistoryService.recordQuery(value);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchRecordDebounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
   }
 
   List<Category> get _matchedCategories {
@@ -138,7 +153,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
       return const Center(
         child: Padding(
           padding: EdgeInsets.all(32.0),
-          child: CircularProgressIndicator(color: Color(0xFF6366F1)),
+          child: CircularProgressIndicator(color: AppColors.accent),
         ),
       );
     }
@@ -171,22 +186,22 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                   onChanged: _onQueryChanged,
                   decoration: InputDecoration(
                     hintText: 'Search laws, section numbers, topics...',
-                    hintStyle: GoogleFonts.inter(color: const Color(0xFF64748B), fontSize: 14),
-                    prefixIcon: const Icon(Icons.search, color: Color(0xFF6366F1)),
+                    hintStyle: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
+                    prefixIcon: const Icon(Icons.search_rounded, color: AppColors.accent),
                     filled: true,
-                    fillColor: const Color(0xFF1E293B),
+                    fillColor: AppColors.surface,
                     contentPadding: const EdgeInsets.symmetric(vertical: 14),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                      borderSide: const BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Color(0xFF334155)),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                      borderSide: const BorderSide(color: AppColors.border),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                      borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
                     ),
                   ),
                 ),
@@ -201,8 +216,12 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                           label: const Text('All'),
                           selected: _selectedCategoryId == null,
                           onSelected: (_) => setState(() => _selectedCategoryId = null),
-                          selectedColor: const Color(0xFF6366F1),
-                          backgroundColor: const Color(0xFF1E293B),
+                          selectedColor: AppColors.accent,
+                          backgroundColor: AppColors.surface,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                            side: const BorderSide(color: AppColors.border),
+                          ),
                           labelStyle: GoogleFonts.inter(color: Colors.white, fontSize: 12),
                         ),
                         const SizedBox(width: 8),
@@ -211,8 +230,12 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                             label: Text(category.name),
                             selected: _selectedCategoryId == category.id,
                             onSelected: (_) => setState(() => _selectedCategoryId = category.id),
-                            selectedColor: const Color(0xFF6366F1),
-                            backgroundColor: const Color(0xFF1E293B),
+                            selectedColor: categoryStyleFor(category.name).color,
+                            backgroundColor: AppColors.surface,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppRadius.pill),
+                              side: const BorderSide(color: AppColors.border),
+                            ),
                             labelStyle: GoogleFonts.inter(color: Colors.white, fontSize: 12),
                           ),
                           const SizedBox(width: 8),
@@ -233,12 +256,12 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (_matchedCategories.isNotEmpty) ...[
-                    Text('Categories (${_matchedCategories.length})',
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                    SectionHeading(title: 'Categories (${_matchedCategories.length})'),
                     const SizedBox(height: 8),
                     for (final category in _matchedCategories)
                       _buildResultTile(
-                        icon: Icons.category_outlined,
+                        icon: categoryStyleFor(category.name).icon,
+                        color: categoryStyleFor(category.name).color,
                         title: category.name,
                         subtitle: category.description,
                         onTap: () => Navigator.push(context,
@@ -247,12 +270,12 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                     const SizedBox(height: 12),
                   ],
                   if (_matchedMatters.isNotEmpty) ...[
-                    Text('Topics (${_matchedMatters.length})',
-                        style: GoogleFonts.inter(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                    SectionHeading(title: 'Topics (${_matchedMatters.length})'),
                     const SizedBox(height: 8),
                     for (final matter in _matchedMatters)
                       _buildResultTile(
-                        icon: matter.isAvailable ? Icons.topic_outlined : Icons.hourglass_empty_rounded,
+                        icon: matter.isAvailable ? Icons.topic_rounded : Icons.hourglass_empty_rounded,
+                        color: matter.isAvailable ? AppColors.accent : AppColors.textMuted,
                         title: matter.name,
                         subtitle: matter.description.isNotEmpty
                             ? matter.description
@@ -279,13 +302,13 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Text(
-              _query.isEmpty ? 'Available Provisions (${filtered.length})' : 'Sections (${filtered.length})',
-              style: GoogleFonts.inter(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+            child: SectionHeading(
+              title: _query.isEmpty ? 'Available Provisions (${filtered.length})' : 'Sections (${filtered.length})',
+              icon: Icons.menu_book_rounded,
             ),
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 10)),
+        const SliverToBoxAdapter(child: SizedBox(height: 12)),
         if (filtered.isEmpty)
           SliverToBoxAdapter(
             child: Padding(
@@ -310,6 +333,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                     isBookmarked: _bookmarkedIds.contains(section.id),
                     isFrequentlyViewed:
                         (_viewCounts[section.id] ?? 0) >= ViewCountService.frequentThreshold,
+                    accentColor: categoryStyleFor(lookup.categoryNameFor(section)).color,
                     onBookmarkToggle: () => _toggleBookmark(section.id),
                     onTap: () => _openSection(section),
                   );
@@ -325,6 +349,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
 
   Widget _buildResultTile({
     required IconData icon,
+    required Color color,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
@@ -332,21 +357,21 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF334155)),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border),
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: ListTile(
-          leading: Icon(icon, color: const Color(0xFF6366F1)),
+          leading: IconBadge(icon: icon, color: color, size: 40, iconSize: 20),
           title: Text(title, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
           subtitle: Text(subtitle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 12)),
-          trailing: const Icon(Icons.chevron_right, color: Color(0xFF64748B)),
+              style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12)),
+          trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
           onTap: onTap,
         ),
       ),
@@ -357,9 +382,9 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
   Widget build(BuildContext context) {
     if (widget.showAppBar) {
       return Scaffold(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: AppColors.bg,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF1E293B),
+          backgroundColor: AppColors.surface,
           elevation: 0,
           title: Text(
             widget.title,
@@ -371,7 +396,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.bg,
       body: SafeArea(child: _buildContent()),
     );
   }

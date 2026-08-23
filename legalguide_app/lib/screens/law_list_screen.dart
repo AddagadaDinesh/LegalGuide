@@ -4,6 +4,7 @@ import '../models/category.dart';
 import '../models/law.dart';
 import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
+import '../theme/app_theme.dart';
 import 'section_detail_screen.dart';
 
 class LawListScreen extends StatefulWidget {
@@ -29,14 +30,15 @@ class _LawListScreenState extends State<LawListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final style = categoryStyleFor(widget.category.name);
     final body = Container(
-      color: const Color(0xFF0F172A),
+      color: AppColors.bg,
       child: FutureBuilder<List<Law>>(
         future: _lawsFuture,
         builder: (context, lawSnapshot) {
           if (lawSnapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF6366F1)),
+            return Center(
+              child: CircularProgressIndicator(color: style.color),
             );
           }
 
@@ -66,22 +68,23 @@ class _LawListScreenState extends State<LawListScreen> {
                       .toList();
 
                   return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
+                    margin: const EdgeInsets.only(bottom: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E293B),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFF334155)),
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.card),
+                      border: Border.all(color: AppColors.border),
                     ),
+                    clipBehavior: Clip.antiAlias,
                     child: ExpansionTile(
                       shape: const Border(),
-                      iconColor: const Color(0xFF6366F1),
+                      iconColor: style.color,
                       collapsedIconColor: Colors.white70,
                       title: Text(
                         law.name,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.outfit(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 15.5,
                         ),
                       ),
                       subtitle: Padding(
@@ -93,20 +96,20 @@ class _LawListScreenState extends State<LawListScreen> {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
-                            color: const Color(0xFF94A3B8),
-                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                            fontSize: 12.5,
                           ),
                         ),
                       ),
                       children: [
-                        const Divider(color: Color(0xFF334155), height: 1),
+                        Divider(color: AppColors.border, height: 1),
                         if (lawSections.isEmpty)
                           Padding(
                             padding: const EdgeInsets.all(16),
                             child: Text(
                               'No sections loaded for this law.',
                               style: GoogleFonts.inter(
-                                color: const Color(0xFF64748B),
+                                color: AppColors.textMuted,
                                 fontSize: 13,
                               ),
                             ),
@@ -128,7 +131,7 @@ class _LawListScreenState extends State<LawListScreen> {
                                   title: Text(
                                     '${sec.sectionNumber} - ${sec.title}',
                                     style: GoogleFonts.inter(
-                                      color: Colors.cyanAccent,
+                                      color: style.color,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 14,
                                     ),
@@ -143,8 +146,8 @@ class _LawListScreenState extends State<LawListScreen> {
                                     ),
                                   ),
                                   trailing: const Icon(
-                                    Icons.chevron_right,
-                                    color: Color(0xFF64748B),
+                                    Icons.chevron_right_rounded,
+                                    color: AppColors.textMuted,
                                   ),
                                   onTap: () {
                                     Navigator.push(
@@ -175,9 +178,9 @@ class _LawListScreenState extends State<LawListScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         title: Text(
           widget.category.name,
@@ -187,7 +190,7 @@ class _LawListScreenState extends State<LawListScreen> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ),

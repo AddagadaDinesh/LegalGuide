@@ -4,6 +4,7 @@ import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
 import '../services/bookmark_service.dart';
 import '../services/view_count_service.dart';
+import '../theme/app_theme.dart';
 import '../utils/section_lookup.dart';
 import '../widgets/legal_section_card.dart';
 import 'section_detail_screen.dart';
@@ -60,22 +61,37 @@ class _SavedScreenState extends State<SavedScreen> {
   Widget build(BuildContext context) {
     final lookup = _lookup;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.bg,
       body: SafeArea(
         child: _loading || lookup == null
-            ? const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1)))
+            ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
             : CustomScrollView(
                 slivers: [
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.bookmark_rounded, color: AppColors.accent, size: 22),
+                          const SizedBox(width: 8),
+                          Text(
+                            'My Saved',
+                            style: GoogleFonts.outfit(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
                       child: Text(
-                        'My Saved',
-                        style: GoogleFonts.outfit(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        _saved.isEmpty ? 'Nothing saved yet' : '${_saved.length} section${_saved.length == 1 ? '' : 's'} bookmarked',
+                        style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
                       ),
                     ),
                   ),
@@ -86,13 +102,13 @@ class _SavedScreenState extends State<SavedScreen> {
                         child: Column(
                           children: [
                             const Icon(Icons.bookmark_border_rounded,
-                                color: Color(0xFF64748B), size: 40),
+                                color: AppColors.textMuted, size: 40),
                             const SizedBox(height: 16),
                             Text(
                               'No saved sections yet — tap the bookmark icon on any '
                               'section to save it here.',
                               textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(color: const Color(0xFF94A3B8)),
+                              style: GoogleFonts.inter(color: AppColors.textSecondary),
                             ),
                           ],
                         ),
@@ -112,6 +128,7 @@ class _SavedScreenState extends State<SavedScreen> {
                               isBookmarked: true,
                               isFrequentlyViewed: (_viewCounts[section.id] ?? 0) >=
                                   ViewCountService.frequentThreshold,
+                              accentColor: categoryStyleFor(lookup.categoryNameFor(section)).color,
                               onBookmarkToggle: () => _toggleBookmark(section.id),
                               onTap: () async {
                                 await Navigator.push(

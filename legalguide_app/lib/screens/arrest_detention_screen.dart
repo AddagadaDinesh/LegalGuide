@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../repositories/legal_data_repository.dart';
+import '../theme/app_theme.dart';
 import 'explore_laws_screen.dart';
 
 const arrestDetentionCategoryName = 'Arrest & Detention';
@@ -33,9 +34,9 @@ class _ArrestDetentionScreenState extends State<ArrestDetentionScreen> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            backgroundColor: Color(0xFF0F172A),
+            backgroundColor: AppColors.bg,
             body: Center(
-              child: CircularProgressIndicator(color: Color(0xFF6366F1)),
+              child: CircularProgressIndicator(color: AppColors.accent),
             ),
           );
         }

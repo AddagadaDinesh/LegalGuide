@@ -2,6 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../data/legal_help_contacts.dart';
+import '../theme/app_theme.dart';
+import '../widgets/icon_badge.dart';
+
+IconData _iconForContact(String name) {
+  final lower = name.toLowerCase();
+  if (lower.contains('women')) return Icons.volunteer_activism_rounded;
+  if (lower.contains('child')) return Icons.child_care_rounded;
+  if (lower.contains('cyber')) return Icons.security_rounded;
+  if (lower.contains('consumer')) return Icons.shopping_cart_rounded;
+  if (lower.contains('legal aid') || lower.contains('nalsa')) return Icons.balance_rounded;
+  if (lower.contains('police')) return Icons.local_police_rounded;
+  return Icons.support_agent_rounded;
+}
 
 class LegalHelpScreen extends StatelessWidget {
   const LegalHelpScreen({super.key});
@@ -27,9 +40,9 @@ class LegalHelpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E293B),
+        backgroundColor: AppColors.surface,
         elevation: 0,
         title: Text('Legal Help', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
       ),
@@ -42,12 +55,14 @@ class LegalHelpScreen extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFF334155)),
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              border: Border.all(color: AppColors.border),
             ),
             child: Row(
               children: [
+                IconBadge(icon: _iconForContact(contact.name), color: AppColors.accent),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +74,7 @@ class LegalHelpScreen extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         contact.description,
-                        style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 12),
+                        style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12),
                       ),
                     ],
                   ),
@@ -67,16 +82,16 @@ class LegalHelpScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 InkWell(
                   onTap: () => _call(context, contact.number),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppRadius.chip),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF6366F1),
-                      borderRadius: BorderRadius.circular(12),
+                      gradient: AppColors.accentGradient,
+                      borderRadius: BorderRadius.circular(AppRadius.chip),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.call, color: Colors.white, size: 16),
+                        const Icon(Icons.call_rounded, color: Colors.white, size: 16),
                         const SizedBox(width: 6),
                         Text(
                           contact.number,
