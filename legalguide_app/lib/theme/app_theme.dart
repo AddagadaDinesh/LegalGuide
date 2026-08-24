@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const bg = Color(0xFF0B1120);
-  static const surface = Color(0xFF1A2436);
-  static const surfaceRaised = Color(0xFF212D42);
-  static const border = Color(0xFF2E3B52);
-  static const textPrimary = Colors.white;
-  static const textSecondary = Color(0xFF9AACC4);
+  static const bg = Color(0xFFF8FAFC);
+  static const surface = Color(0xFFFFFFFF);
+  static const surfaceRaised = Color(0xFFF1F5F9);
+  static const border = Color(0xFFE2E8F0);
+  static const textPrimary = Color(0xFF0F172A);
+  static const textSecondary = Color(0xFF475569);
   static const textMuted = Color(0xFF64748B);
   static const accent = Color(0xFF6366F1);
   static const accentDark = Color(0xFF4338CA);
   static const accentLight = Color(0xFF818CF8);
-  static const success = Color(0xFF34D399);
-  static const warning = Color(0xFFFBBF24);
-  static const danger = Color(0xFFF87171);
+  static const success = Color(0xFF059669);
+  static const warning = Color(0xFFD97706);
+  static const danger = Color(0xFFDC2626);
 
   static const accentGradient = LinearGradient(
     begin: Alignment.topLeft,

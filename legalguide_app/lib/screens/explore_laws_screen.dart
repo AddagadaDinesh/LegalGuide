@@ -174,7 +174,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                     child: Text(
                       widget.title,
                       style: GoogleFonts.outfit(
-                        color: Colors.white,
+                        color: AppColors.textPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -182,7 +182,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                   ),
                 TextField(
                   controller: _searchController,
-                  style: GoogleFonts.inter(color: Colors.white),
+                  style: GoogleFonts.inter(color: AppColors.textPrimary),
                   onChanged: _onQueryChanged,
                   decoration: InputDecoration(
                     hintText: 'Search laws, section numbers, topics...',
@@ -222,7 +222,10 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                             borderRadius: BorderRadius.circular(AppRadius.pill),
                             side: const BorderSide(color: AppColors.border),
                           ),
-                          labelStyle: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                          labelStyle: GoogleFonts.inter(
+                            color: _selectedCategoryId == null ? Colors.white : AppColors.textPrimary,
+                            fontSize: 12,
+                          ),
                         ),
                         const SizedBox(width: 8),
                         for (final category in _categories) ...[
@@ -236,7 +239,10 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                               borderRadius: BorderRadius.circular(AppRadius.pill),
                               side: const BorderSide(color: AppColors.border),
                             ),
-                            labelStyle: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                            labelStyle: GoogleFonts.inter(
+                              color: _selectedCategoryId == category.id ? Colors.white : AppColors.textPrimary,
+                              fontSize: 12,
+                            ),
                           ),
                           const SizedBox(width: 8),
                         ],
@@ -315,7 +321,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
               padding: const EdgeInsets.all(20.0),
               child: Text(
                 'No matching legal sections found.',
-                style: GoogleFonts.inter(color: Colors.white70),
+                style: GoogleFonts.inter(color: AppColors.textSecondary),
               ),
             ),
           )
@@ -366,7 +372,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
         borderRadius: BorderRadius.circular(14),
         child: ListTile(
           leading: IconBadge(icon: icon, color: color, size: 40, iconSize: 20),
-          title: Text(title, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14)),
+          title: Text(title, style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
           subtitle: Text(subtitle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -388,7 +394,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
           elevation: 0,
           title: Text(
             widget.title,
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white),
+            style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
         ),
         body: SafeArea(child: _buildContent()),

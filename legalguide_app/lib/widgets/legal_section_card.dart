@@ -35,7 +35,7 @@ class LegalSectionCard extends StatelessWidget {
       child: Text(
         text,
         style: GoogleFonts.inter(
-          color: fg ?? const Color(0xFFCBD5E1),
+          color: fg ?? AppColors.textSecondary,
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
@@ -128,7 +128,7 @@ class LegalSectionCard extends StatelessWidget {
                           section.simpleExplanation,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(color: const Color(0xFFCBD5E1), fontSize: 13, height: 1.4),
+                          style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
                         ),
                       ],
                     ),

@@ -68,11 +68,11 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
           section.sectionNumber,
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.textPrimary,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -134,7 +134,7 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
             Text(
               section.title,
               style: GoogleFonts.outfit(
-                color: Colors.white,
+                color: AppColors.textPrimary,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 height: 1.2,
@@ -211,7 +211,7 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
                   Text(
                     'Related Legal Provisions',
                     style: GoogleFonts.inter(
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -255,7 +255,7 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
                                 ),
                                 Text(
                                   related.title,
-                                  style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+                                  style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13),
                                 ),
                               ],
                             ),
@@ -339,7 +339,7 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
           Text(
             content,
             style: GoogleFonts.inter(
-              color: Colors.white,
+              color: AppColors.textPrimary,
               fontSize: 15,
               height: 1.5,
             ),
@@ -399,7 +399,7 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
                     child: Text(
                       item,
                       style: GoogleFonts.inter(
-                        color: const Color(0xFFCBD5E1),
+                        color: AppColors.textSecondary,
                         fontSize: 14,
                         height: 1.45,
                       ),
@@ -447,7 +447,7 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
           Text(
             content,
             style: GoogleFonts.inter(
-              color: const Color(0xFFCBD5E1),
+              color: AppColors.textSecondary,
               fontSize: 14,
               height: 1.45,
             ),

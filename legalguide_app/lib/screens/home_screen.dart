@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/category.dart';
 import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
+import '../services/auth_service.dart';
 import '../services/bookmark_service.dart';
 import '../services/search_history_service.dart';
 import '../services/view_count_service.dart';
@@ -137,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 label,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600, height: 1.25),
+                style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w600, height: 1.25),
               ),
             ],
           ),
@@ -173,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
               category.name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12.5, height: 1.3),
+              style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 12.5, height: 1.3),
             ),
           ],
         ),
@@ -226,9 +227,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                     letterSpacing: -0.5,
                                   ),
                                 ),
-                                Text(
-                                  'Simplified Legal Knowledge & Assistance',
-                                  style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.85), fontSize: 12.5),
+                                ValueListenableBuilder<String?>(
+                                  valueListenable: AuthService.currentUsername,
+                                  builder: (context, username, _) {
+                                    return Text(
+                                      username != null
+                                          ? 'Welcome, $username'
+                                          : 'Simplified Legal Knowledge & Assistance',
+                                      style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.85), fontSize: 12.5),
+                                    );
+                                  },
                                 ),
                               ],
                             ),
@@ -315,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 borderRadius: BorderRadius.circular(AppRadius.pill),
                                 side: const BorderSide(color: AppColors.border),
                               ),
-                              labelStyle: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                              labelStyle: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12),
                               onPressed: () => _openSearchSuggestion(query),
                             ),
                         ],

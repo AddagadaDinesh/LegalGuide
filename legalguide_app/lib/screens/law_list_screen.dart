@@ -48,7 +48,7 @@ class _LawListScreenState extends State<LawListScreen> {
             return Center(
               child: Text(
                 'No laws found for ${widget.category.name}',
-                style: GoogleFonts.inter(color: Colors.white70),
+                style: GoogleFonts.inter(color: AppColors.textSecondary),
               ),
             );
           }
@@ -78,11 +78,11 @@ class _LawListScreenState extends State<LawListScreen> {
                     child: ExpansionTile(
                       shape: const Border(),
                       iconColor: style.color,
-                      collapsedIconColor: Colors.white70,
+                      collapsedIconColor: AppColors.textSecondary,
                       title: Text(
                         law.name,
                         style: GoogleFonts.outfit(
-                          color: Colors.white,
+                          color: AppColors.textPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 15.5,
                         ),
@@ -141,7 +141,7 @@ class _LawListScreenState extends State<LawListScreen> {
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.inter(
-                                      color: const Color(0xFFCBD5E1),
+                                      color: AppColors.textSecondary,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -186,11 +186,11 @@ class _LawListScreenState extends State<LawListScreen> {
           widget.category.name,
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppColors.textPrimary,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),

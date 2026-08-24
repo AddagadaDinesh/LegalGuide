@@ -62,11 +62,11 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
           backgroundColor: AppColors.surface,
           elevation: 0,
           title: Text(widget.category.name,
-              style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+              style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           bottom: TabBar(
             indicatorColor: style.color,
             indicatorWeight: 3,
-            labelColor: Colors.white,
+            labelColor: AppColors.textPrimary,
             unselectedLabelColor: AppColors.textSecondary,
             labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13),
             tabs: const [
@@ -128,7 +128,7 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
     if (_matters.isEmpty) {
       return Center(
         child: Text('No topics available for this category yet.',
-            style: GoogleFonts.inter(color: Colors.white70)),
+            style: GoogleFonts.inter(color: AppColors.textSecondary)),
       );
     }
 
@@ -169,7 +169,7 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
-                    color: available ? Colors.white : AppColors.textSecondary,
+                    color: available ? AppColors.textPrimary : AppColors.textSecondary,
                     fontWeight: FontWeight.w600,
                     fontSize: 13.5,
                   ),

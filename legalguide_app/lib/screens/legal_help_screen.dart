@@ -44,7 +44,7 @@ class LegalHelpScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,
-        title: Text('Legal Help', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+        title: Text('Legal Help', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -69,7 +69,7 @@ class LegalHelpScreen extends StatelessWidget {
                     children: [
                       Text(
                         contact.name,
-                        style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                        style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 15),
                       ),
                       const SizedBox(height: 4),
                       Text(

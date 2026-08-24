@@ -77,7 +77,7 @@ class _SavedScreenState extends State<SavedScreen> {
                           Text(
                             'My Saved',
                             style: GoogleFonts.outfit(
-                              color: Colors.white,
+                              color: AppColors.textPrimary,
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),

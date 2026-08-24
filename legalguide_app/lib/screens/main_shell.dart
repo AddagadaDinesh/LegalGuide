@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'about_screen.dart';
 import 'arrest_detention_screen.dart';
 import 'assistant_chat_screen.dart';
@@ -73,13 +74,34 @@ class _MainShellState extends State<MainShell> {
                 ),
               ),
               const SizedBox(height: 12),
-              _moreTile(sheetContext, Icons.local_police_rounded, const Color(0xFFF59E0B), 'Arrest & Detention',
-                  const ArrestDetentionScreen()),
-              _moreTile(sheetContext, Icons.description_rounded, const Color(0xFF14B8A6), 'Documents',
-                  const DocumentsScreen()),
-              _moreTile(sheetContext, Icons.support_agent_rounded, const Color(0xFFF43F5E), 'Legal Help',
-                  const LegalHelpScreen()),
-              _moreTile(sheetContext, Icons.info_rounded, AppColors.accent, 'About', const AboutScreen()),
+              _moreTile(
+                sheetContext,
+                Icons.local_police_rounded,
+                const Color(0xFFF59E0B),
+                'Arrest & Detention',
+                const ArrestDetentionScreen(),
+              ),
+              _moreTile(
+                sheetContext,
+                Icons.description_rounded,
+                const Color(0xFF14B8A6),
+                'Documents',
+                const DocumentsScreen(),
+              ),
+              _moreTile(
+                sheetContext,
+                Icons.support_agent_rounded,
+                const Color(0xFFF43F5E),
+                'Legal Help',
+                const LegalHelpScreen(),
+              ),
+              _moreTile(
+                sheetContext,
+                Icons.info_rounded,
+                AppColors.accent,
+                'About',
+                const AboutScreen(),
+              ),
               const SizedBox(height: 12),
             ],
           ),
@@ -88,14 +110,32 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
-  Widget _moreTile(BuildContext sheetContext, IconData icon, Color color, String label, Widget destination) {
+  Widget _moreTile(
+    BuildContext sheetContext,
+    IconData icon,
+    Color color,
+    String label,
+    Widget destination,
+  ) {
     return ListTile(
       leading: IconBadge(icon: icon, color: color, size: 40, iconSize: 20),
-      title: Text(label, style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600)),
-      trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+      title: Text(
+        label,
+        style: GoogleFonts.inter(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      trailing: const Icon(
+        Icons.chevron_right_rounded,
+        color: AppColors.textMuted,
+      ),
       onTap: () {
         Navigator.pop(sheetContext);
-        Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => destination),
+        );
       },
     );
   }
@@ -107,42 +147,91 @@ class _MainShellState extends State<MainShell> {
       builder: (dialogContext) {
         if (username == null) {
           return AlertDialog(
-            backgroundColor: const Color(0xFF1E293B),
-            title: Text('Log in', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+            backgroundColor: AppColors.surface,
+            title: Text(
+              'Log in',
+              style: GoogleFonts.inter(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             content: Text(
               "An account is only needed for the AI Assistant's online mode. Browsing and searching legal content never requires one.",
-              style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 13),
+              style: GoogleFonts.inter(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
-                child: Text('Cancel', style: GoogleFonts.inter(color: const Color(0xFF94A3B8))),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.inter(color: AppColors.textSecondary),
+                ),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(dialogContext);
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginScreen(),
+                    ),
+                  );
                 },
-                child: Text('Log in', style: GoogleFonts.inter(color: const Color(0xFF6366F1), fontWeight: FontWeight.w600)),
+                child: Text(
+                  'Log in',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF6366F1),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           );
         }
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          title: Text('Account', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
-          content: Text('Logged in as $username', style: GoogleFonts.inter(color: const Color(0xFF94A3B8))),
+          backgroundColor: AppColors.surface,
+          title: Text(
+            'Account',
+            style: GoogleFonts.inter(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text(
+            'Logged in as $username',
+            style: GoogleFonts.inter(color: AppColors.textSecondary),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: Text('Close', style: GoogleFonts.inter(color: const Color(0xFF94A3B8))),
+              child: Text(
+                'Close',
+                style: GoogleFonts.inter(color: AppColors.textSecondary),
+              ),
             ),
             TextButton(
               onPressed: () async {
                 Navigator.pop(dialogContext);
                 await AuthService.logout();
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Logged out. You can still browse offline legal content.',
+                    ),
+                  ),
+                );
               },
-              child: Text('Log out', style: GoogleFonts.inter(color: const Color(0xFFF87171), fontWeight: FontWeight.w600)),
+              child: Text(
+                'Log out',
+                style: GoogleFonts.inter(
+                  color: AppColors.danger,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         );
@@ -155,15 +244,24 @@ class _MainShellState extends State<MainShell> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          backgroundColor: const Color(0xFF1E293B),
-          title: Text('Language', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+          backgroundColor: AppColors.surface,
+          title: Text(
+            'Language',
+            style: GoogleFonts.inter(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: Text('English', style: GoogleFonts.inter(color: Colors.white)),
+                title: Text(
+                  'English',
+                  style: GoogleFonts.inter(color: AppColors.textPrimary),
+                ),
                 trailing: _language == 'English'
-                    ? const Icon(Icons.check_circle, color: Color(0xFF6366F1))
+                    ? const Icon(Icons.check_circle, color: AppColors.accent)
                     : null,
                 onTap: () {
                   setState(() => _language = 'English');
@@ -172,12 +270,17 @@ class _MainShellState extends State<MainShell> {
               ),
               ListTile(
                 enabled: false,
-                title: Text('Hindi — Coming soon', style: GoogleFonts.inter(color: const Color(0xFF64748B))),
+                title: Text(
+                  'Hindi — Coming soon',
+                  style: GoogleFonts.inter(color: AppColors.textMuted),
+                ),
               ),
               ListTile(
                 enabled: false,
-                title: Text('Other languages — Coming soon',
-                    style: GoogleFonts.inter(color: const Color(0xFF64748B))),
+                title: Text(
+                  'Other languages — Coming soon',
+                  style: GoogleFonts.inter(color: AppColors.textMuted),
+                ),
               ),
             ],
           ),
@@ -196,39 +299,62 @@ class _MainShellState extends State<MainShell> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          ValueListenableBuilder<bool>(
-            valueListenable: ConnectivityStatusService.isOnline,
-            builder: (context, isOnline, _) {
-              final color = isOnline ? AppColors.success : AppColors.warning;
-              return InkWell(
-                onTap: isOnline
-                    ? null
-                    : () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutScreen())),
-                borderRadius: BorderRadius.circular(AppRadius.pill),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
+          Flexible(
+            child: ValueListenableBuilder<bool>(
+              valueListenable: ConnectivityStatusService.isOnline,
+              builder: (context, isOnline, _) {
+                final color = isOnline ? AppColors.success : AppColors.warning;
+                return InkWell(
+                  onTap: isOnline
+                      ? null
+                      : () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AboutScreen(),
+                          ),
+                        ),
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 7,
+                          height: 7,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            isOnline
+                                ? 'Online'
+                                : 'Offline · Using LegalGuide Knowledge',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              color: color,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 7,
-                        height: 7,
-                        decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        isOnline ? 'Online' : 'Offline · Using LegalGuide Knowledge',
-                        style: GoogleFonts.inter(color: color, fontSize: 12, fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
           Row(
             children: [
@@ -241,7 +367,9 @@ class _MainShellState extends State<MainShell> {
                     valueListenable: AuthService.currentUsername,
                     builder: (context, username, _) {
                       return Icon(
-                        username != null ? Icons.account_circle_rounded : Icons.account_circle_outlined,
+                        username != null
+                            ? Icons.account_circle_rounded
+                            : Icons.account_circle_outlined,
                         color: AppColors.textSecondary,
                         size: 18,
                       );
@@ -257,9 +385,19 @@ class _MainShellState extends State<MainShell> {
                   padding: const EdgeInsets.all(4),
                   child: Row(
                     children: [
-                      const Icon(Icons.language_rounded, color: AppColors.textSecondary, size: 16),
+                      const Icon(
+                        Icons.language_rounded,
+                        color: AppColors.textSecondary,
+                        size: 16,
+                      ),
                       const SizedBox(width: 4),
-                      Text(_language, style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12)),
+                      Text(
+                        _language,
+                        style: GoogleFonts.inter(
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -271,7 +409,13 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
-  Widget _navItem({required IconData icon, required String label, required bool selected, required VoidCallback onTap, Widget? badge}) {
+  Widget _navItem({
+    required IconData icon,
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+    Widget? badge,
+  }) {
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -283,12 +427,23 @@ class _MainShellState extends State<MainShell> {
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  color: selected ? AppColors.accent.withValues(alpha: 0.16) : Colors.transparent,
+                  color: selected
+                      ? AppColors.accent.withValues(alpha: 0.16)
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
-                child: badge ?? Icon(icon, color: selected ? AppColors.accent : AppColors.textMuted, size: 21),
+                child:
+                    badge ??
+                    Icon(
+                      icon,
+                      color: selected ? AppColors.accent : AppColors.textMuted,
+                      size: 21,
+                    ),
               ),
               const SizedBox(height: 3),
               Text(
@@ -333,12 +488,20 @@ class _MainShellState extends State<MainShell> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
           gradient: AppColors.accentGradient,
-          boxShadow: [BoxShadow(color: AppColors.accent.withValues(alpha: 0.4), blurRadius: 16, offset: const Offset(0, 6))],
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accent.withValues(alpha: 0.4),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: FloatingActionButton(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
           onPressed: () => showAssistantPanel(context),
           child: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
         ),
@@ -374,8 +537,13 @@ class _MainShellState extends State<MainShell> {
                   label: Text('$_savedCount'),
                   isLabelVisible: _savedCount > 0,
                   backgroundColor: AppColors.danger,
-                  child: Icon(Icons.bookmark_rounded,
-                      color: _currentIndex == 2 ? AppColors.accent : AppColors.textMuted, size: 22),
+                  child: Icon(
+                    Icons.bookmark_rounded,
+                    color: _currentIndex == 2
+                        ? AppColors.accent
+                        : AppColors.textMuted,
+                    size: 22,
+                  ),
                 ),
               ),
               _navItem(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -31,6 +32,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     setState(() => _isSubmitting = false);
     if (result.success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Welcome back, ${AuthService.currentUsername.value}!')),
+      );
       Navigator.pop(context, true);
     } else {
       setState(() => _error = result.error);
@@ -47,11 +51,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: AppColors.bg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -60,11 +64,11 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 12),
-              Text('Log in', style: GoogleFonts.outfit(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold)),
+              Text('Log in', style: GoogleFonts.outfit(color: AppColors.textPrimary, fontSize: 26, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               Text(
                 'Needed only for the AI Assistant\'s online mode. Browsing and searching legal content never requires an account.',
-                style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 13),
+                style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
               ),
               const SizedBox(height: 28),
               _field('Username', _usernameController),
@@ -72,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
               _field('Password', _passwordController, obscure: true),
               if (_error != null) ...[
                 const SizedBox(height: 14),
-                Text(_error!, style: GoogleFonts.inter(color: const Color(0xFFF87171), fontSize: 13)),
+                Text(_error!, style: GoogleFonts.inter(color: AppColors.danger, fontSize: 13)),
               ],
               const SizedBox(height: 24),
               SizedBox(
@@ -104,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: Text(
                     "Don't have an account? Sign up",
-                    style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 13),
+                    style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
                   ),
                 ),
               ),
@@ -119,24 +123,24 @@ class _LoginScreenState extends State<LoginScreen> {
     return TextField(
       controller: controller,
       obscureText: obscure,
-      style: GoogleFonts.inter(color: Colors.white),
+      style: GoogleFonts.inter(color: AppColors.textPrimary),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.inter(color: const Color(0xFF94A3B8)),
+        labelStyle: GoogleFonts.inter(color: AppColors.textSecondary),
         filled: true,
-        fillColor: const Color(0xFF1E293B),
+        fillColor: AppColors.surface,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF334155)),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+          borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
         ),
       ),
     );

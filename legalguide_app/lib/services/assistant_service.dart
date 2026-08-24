@@ -8,19 +8,25 @@ import 'offline_qa_service.dart';
 class AssistantAnswer {
   final String reply;
   final bool isOnline;
-  AssistantAnswer({required this.reply, required this.isOnline});
+  final bool requiresLogin;
+  AssistantAnswer({required this.reply, required this.isOnline, this.requiresLogin = false});
 }
 
 class AssistantService {
   static Future<AssistantAnswer> ask(String message) async {
+    final token = AuthService.token;
+
+    if (token == null) {
+      return _offlineAnswer(message, requiresLogin: true);
+    }
+
     try {
-      final token = AuthService.token;
       final response = await http
           .post(
             Uri.parse('${ApiService.baseUrl}/assistant/chat/'),
             headers: {
               'Content-Type': 'application/json',
-              if (token != null) 'Authorization': 'Token $token',
+              'Authorization': 'Token $token',
             },
             body: jsonEncode({'message': message}),
           )
@@ -35,11 +41,16 @@ class AssistantService {
       }
       throw Exception('Assistant request failed (${response.statusCode})');
     } catch (_) {
-      final sections = await LegalDataRepository.loadSections();
-      return AssistantAnswer(
-        reply: OfflineQaService.answer(message, sections),
-        isOnline: false,
-      );
+      return _offlineAnswer(message, requiresLogin: false);
     }
+  }
+
+  static Future<AssistantAnswer> _offlineAnswer(String message, {required bool requiresLogin}) async {
+    final sections = await LegalDataRepository.loadSections();
+    return AssistantAnswer(
+      reply: OfflineQaService.answer(message, sections),
+      isOnline: false,
+      requiresLogin: requiresLogin,
+    );
   }
 }

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../models/chat_message.dart';
 import '../services/assistant_service.dart';
 import '../services/auth_service.dart';
+import '../theme/app_theme.dart';
 import 'login_screen.dart';
 
 Future<void> showAssistantPanel(BuildContext context) {
@@ -62,6 +63,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
         text: answer.reply,
         isUser: false,
         isOnline: answer.isOnline,
+        requiresLogin: answer.requiresLogin,
         timestamp: DateTime.now(),
       ));
       _isSending = false;
@@ -93,7 +95,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
     return ClipRRect(
       borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       child: Container(
-        color: const Color(0xFF0F172A),
+        color: AppColors.bg,
         child: SafeArea(
           top: false,
           child: Column(
@@ -106,13 +108,13 @@ class _AssistantPanelState extends State<AssistantPanel> {
                   return Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    color: const Color(0xFF1E293B),
+                    color: AppColors.surface,
                     child: Row(
                       children: [
                         Expanded(
                           child: Text(
                             'Log in to unlock online AI answers. Offline answers from the LegalGuide library always work.',
-                            style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 12),
+                            style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12),
                           ),
                         ),
                         TextButton(
@@ -120,7 +122,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
                             context,
                             MaterialPageRoute(builder: (context) => const LoginScreen()),
                           ),
-                          child: Text('Log in', style: GoogleFonts.inter(color: const Color(0xFF6366F1), fontWeight: FontWeight.w600)),
+                          child: Text('Log in', style: GoogleFonts.inter(color: AppColors.accent, fontWeight: FontWeight.w600)),
                         ),
                       ],
                     ),
@@ -204,19 +206,19 @@ class _AssistantPanelState extends State<AssistantPanel> {
               width: 64,
               height: 64,
               decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
+                color: AppColors.surface,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF6366F1), size: 30),
+              child: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.accent, size: 30),
             ),
             const SizedBox(height: 16),
             Text('Welcome to LegalGuide!',
-                style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                style: GoogleFonts.outfit(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 6),
             Text(
               'When you\'re online I can answer anything; offline, I can only use the legal data stored in this app.',
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(color: const Color(0xFF94A3B8)),
+              style: GoogleFonts.inter(color: AppColors.textSecondary),
             ),
             const SizedBox(height: 20),
             Wrap(
@@ -227,9 +229,9 @@ class _AssistantPanelState extends State<AssistantPanel> {
                 for (final entry in _quickQuestions.entries)
                   ActionChip(
                     label: Text(entry.key),
-                    backgroundColor: const Color(0xFF1E293B),
-                    side: const BorderSide(color: Color(0xFF334155)),
-                    labelStyle: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+                    backgroundColor: AppColors.surface,
+                    side: const BorderSide(color: AppColors.border),
+                    labelStyle: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12),
                     onPressed: () => _askQuick(entry.value),
                   ),
               ],
@@ -249,14 +251,29 @@ class _AssistantPanelState extends State<AssistantPanel> {
         padding: const EdgeInsets.all(14),
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
         decoration: BoxDecoration(
-          color: isUser ? const Color(0xFF6366F1) : const Color(0xFF1E293B),
+          color: isUser ? AppColors.accent : AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: isUser ? null : Border.all(color: const Color(0xFF334155)),
+          border: isUser ? null : Border.all(color: AppColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (!isUser && message.isOnline == false)
+            if (!isUser && message.requiresLogin)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF334155),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '🔒 Log in or create an account for answers beyond app content',
+                    style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 11),
+                  ),
+                ),
+              )
+            else if (!isUser && message.isOnline == false)
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Container(
@@ -288,8 +305,31 @@ class _AssistantPanelState extends State<AssistantPanel> {
               ),
             Text(
               message.text,
-              style: GoogleFonts.inter(color: Colors.white, fontSize: 14, height: 1.4),
+              style: GoogleFonts.inter(
+                color: isUser ? Colors.white : AppColors.textPrimary,
+                fontSize: 14,
+                height: 1.4,
+              ),
             ),
+            if (!isUser && message.requiresLogin)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  ),
+                  child: Text(
+                    'Log in or create an account →',
+                    style: GoogleFonts.inter(color: AppColors.accent, fontWeight: FontWeight.w600, fontSize: 12.5),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -304,32 +344,32 @@ class _AssistantPanelState extends State<AssistantPanel> {
           Expanded(
             child: TextField(
               controller: _controller,
-              style: GoogleFonts.inter(color: Colors.white),
+              style: GoogleFonts.inter(color: AppColors.textPrimary),
               onSubmitted: (_) => _sendMessage(),
               decoration: InputDecoration(
                 hintText: 'Ask a question...',
-                hintStyle: GoogleFonts.inter(color: const Color(0xFF64748B)),
+                hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
                 filled: true,
-                fillColor: const Color(0xFF1E293B),
+                fillColor: AppColors.surface,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: Color(0xFF334155)),
+                  borderSide: const BorderSide(color: AppColors.border),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: Color(0xFF334155)),
+                  borderSide: const BorderSide(color: AppColors.border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: Color(0xFF6366F1), width: 1.5),
+                  borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 8),
           Container(
-            decoration: const BoxDecoration(color: Color(0xFF6366F1), shape: BoxShape.circle),
+            decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
             child: IconButton(
               icon: const Icon(Icons.send_rounded, color: Colors.white),
               onPressed: _isSending ? null : _sendMessage,

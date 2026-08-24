@@ -149,7 +149,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         title: Text('Legal Documents & Notice Guides',
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 16)),
+            style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary, fontSize: 16)),
       ),
       body: FutureBuilder<List<LegalSection>>(
         future: _sectionsFuture,
@@ -185,7 +185,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                         Expanded(
                           child: Text(guide.title,
                               style: GoogleFonts.outfit(
-                                  color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15.5)),
+                                  color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 15.5)),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -245,6 +245,6 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
   Widget _body(String text) => Text(
         text,
-        style: GoogleFonts.inter(color: const Color(0xFFCBD5E1), fontSize: 13, height: 1.4),
+        style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
       );
 }

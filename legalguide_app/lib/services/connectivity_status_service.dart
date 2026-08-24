@@ -36,7 +36,7 @@ class ConnectivityStatusService {
     try {
       final response = await http
           .get(Uri.parse('${ApiService.baseUrl}/categories/'))
-          .timeout(const Duration(seconds: 3));
+          .timeout(const Duration(seconds: 8));
       if (thisCheck == _checkId) isOnline.value = response.statusCode == 200;
     } catch (_) {
       if (thisCheck == _checkId) isOnline.value = false;

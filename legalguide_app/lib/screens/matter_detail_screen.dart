@@ -68,7 +68,7 @@ class _MatterDetailScreenState extends State<MatterDetailScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,
-        title: Text(matter.name, style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.white)),
+        title: Text(matter.name, style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
       ),
       body: _loading
           ? Center(child: CircularProgressIndicator(color: style.color))
@@ -106,7 +106,7 @@ class _MatterDetailScreenState extends State<MatterDetailScreen> {
                                 const SizedBox(height: 4),
                                 Text(
                                   matter.description.isNotEmpty ? matter.description : matter.name,
-                                  style: GoogleFonts.inter(color: const Color(0xFFCBD5E1), fontSize: 13.5, height: 1.5),
+                                  style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13.5, height: 1.5),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
