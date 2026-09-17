@@ -93,8 +93,473 @@ IR_CODE_SOURCE_NOTE = (
     "text on indiankanoon.org."
 )
 
+ARTICLE_14_SOURCE_NOTE = (
+    "The Constitution of India, Article 14. Official text at "
+    "indiacode.nic.in / legislative.gov.in blocks automated fetches; "
+    "verbatim wording cross-verified identically across indiankanoon.org, "
+    "constitutionofindia.net, drishtijudiciary.com, and lawbhoomi.com."
+)
+
+MORTGAGE_SOURCE_NOTE = (
+    "Transfer of Property Act, 1882, Sections 58, 59, and 67. Official "
+    "text at indiacode.nic.in blocks automated fetches; cross-verified "
+    "against indiankanoon.org (per-clause text), lawbhoomi.com, and "
+    "ibclaw.in, which independently agree on the same six mortgage types "
+    "and clause-letter mapping."
+)
+
 WEBSITE_PORT_VERIFIED = "2026-08-21"
 NEW_CATEGORIES_VERIFIED = "2026-08-21"
+MATTER_CONTENT_VERIFIED = "2026-08-28"
+
+# --- Telugu translations ---------------------------------------------
+# name_te / description_te for each Category: (name_te, description_te)
+CATEGORY_TE = {
+    "Criminal Law": (
+        "క్రిమినల్ చట్టం",
+        "వ్యక్తులు, ఆస్తికి వ్యతిరేకంగా జరిగే నేరాలు, ప్రజా భద్రతకు సంబంధించిన "
+        "నేరాలు మరియు భారత క్రిమినల్ చట్టం ప్రకారం వాటికి నిర్దేశించిన శిక్షలు.",
+    ),
+    "Constitutional Law": (
+        "రాజ్యాంగ చట్టం",
+        "పౌరుల ప్రాథమిక హక్కులు, విధులు మరియు భారత రాజ్యాంగం నిర్దేశించిన "
+        "పాలనా చట్రం.",
+    ),
+    "Arrest & Detention": (
+        "అరెస్టు & నిర్బంధం",
+        "మిమ్మల్ని లేదా మీకు తెలిసిన వారిని ఆపినప్పుడు, నిర్బంధించినప్పుడు లేదా "
+        "అరెస్టు చేసినప్పుడు తెలుసుకోవలసినవి — ప్రక్రియ సమయంలో మీ హక్కులు, నిజమైన "
+        "చట్టపరమైన నిబంధనల నుండి తీసుకోబడ్డాయి.",
+    ),
+    "Family Law": (
+        "కుటుంబ చట్టం",
+        "వివాహం, విడాకులు, భరణం, గృహ సంబంధాలు మరియు భారత చట్టం ప్రకారం "
+        "పిల్లలకు సంబంధించిన కుటుంబ విషయాలు.",
+    ),
+    "Property Law": (
+        "ఆస్తి చట్టం",
+        "కదిలే మరియు స్థిరాస్తికి సంబంధించిన యాజమాన్యం, బదిలీ, రిజిస్ట్రేషన్ "
+        "మరియు వివాదాలు.",
+    ),
+    "Consumer Law": (
+        "వినియోగదారుల చట్టం",
+        "అన్యాయ వాణిజ్య పద్ధతులు, లోపభూయిష్ట వస్తువులు మరియు లోపభూయిష్ట "
+        "సేవలకు వ్యతిరేకంగా వినియోగదారుల హక్కులు.",
+    ),
+    "Motor Vehicle Law": (
+        "మోటారు వాహన చట్టం",
+        "భారత రహదారులపై ట్రాఫిక్ నియంత్రణ, లైసెన్సింగ్, రిజిస్ట్రేషన్ మరియు "
+        "ప్రమాద క్లెయిమ్‌లు.",
+    ),
+    "Women's Rights": (
+        "మహిళల హక్కులు",
+        "భారత చట్టం ప్రకారం మహిళలకు ప్రత్యేకమైన చట్టపరమైన రక్షణలు మరియు భద్రతలు.",
+    ),
+    "Child Protection": (
+        "శిశు సంరక్షణ",
+        "విద్య, కార్మిక మరియు జువెనైల్ జస్టిస్ భద్రతలతో సహా పిల్లల కోసం "
+        "చట్టపరమైన రక్షణలు.",
+    ),
+    "Labour & Employment": (
+        "కార్మిక & ఉపాధి",
+        "వేతనాలు, కార్యాలయ భద్రత మరియు పారిశ్రామిక వివాదాలకు సంబంధించిన "
+        "హక్కులు మరియు బాధ్యతలు.",
+    ),
+    "Cyber Law": (
+        "సైబర్ చట్టం",
+        "డిజిటల్ భద్రత, ఆన్‌లైన్ మోసం, డేటా గోప్యత మరియు భారత చట్టం ప్రకారం "
+        "సైబర్ నేరాలు.",
+    ),
+}
+
+# name_te for each LegalMatter, keyed by its (English) name.
+MATTER_NAME_TE = {
+    "Arrest": "అరెస్టు",
+    "Theft & Snatching": "దొంగతనం & చోరీ",
+    "Cheating & Fraud": "మోసం & వంచన",
+    "Robbery": "దోపిడీ",
+    "Assault & Hurt": "దాడి & గాయం",
+    "Criminal Intimidation": "నేర బెదిరింపు",
+    "Defamation": "పరువు నష్టం",
+    "Murder": "హత్య",
+    "Bail": "జామీను",
+    "FIR": "FIR (ఎఫ్‌ఐఆర్)",
+    "Criminal complaint": "క్రిమినల్ ఫిర్యాదు",
+    "Search and seizure": "సోదా & స్వాధీనం",
+    "Investigation": "దర్యాప్తు",
+    "Evidence": "సాక్ష్యం",
+    "Summons": "సమన్లు",
+    "Warrant": "వారెంట్",
+    "Trial": "విచారణ",
+    "Anticipatory bail": "ముందస్తు జామీను",
+    "Bailable vs non-bailable offences": "జామీను పొందదగిన & జామీను పొందలేని నేరాలు",
+    "Cognizable vs non-cognizable offences": "కాగ్నిజబుల్ & నాన్-కాగ్నిజబుల్ నేరాలు",
+    "Appeal against conviction": "నేరారోపణపై అప్పీలు",
+    "Compounding of offences": "నేరాల రాజీ (కాంపౌండింగ్)",
+    "Right to Life & Liberty": "జీవించే & స్వేచ్ఛ హక్కు",
+    "Right to Legal Counsel": "న్యాయవాది హక్కు",
+    "Right to Equality": "సమానత్వ హక్కు",
+    "Right to Freedom of Speech & Expression": "వాక్ & భావ ప్రకటన స్వేచ్ఛ హక్కు",
+    "Right against Exploitation": "దోపిడీకి వ్యతిరేక హక్కు",
+    "Right to Freedom of Religion": "మత స్వేచ్ఛ హక్కు",
+    "Right to Constitutional Remedies": "రాజ్యాంగ పరిష్కారాల హక్కు",
+    "Fundamental Duties": "ప్రాథమిక విధులు",
+    "Marriage": "వివాహం",
+    "Divorce": "విడాకులు",
+    "Maintenance": "భరణం",
+    "Domestic violence": "గృహ హింస",
+    "Child custody": "పిల్లల సంరక్షణ (కస్టడీ)",
+    "Adoption": "దత్తత",
+    "Inheritance": "వారసత్వం",
+    "Restitution of conjugal rights": "దాంపత్య హక్కుల పునరుద్ధరణ",
+    "Judicial separation": "న్యాయపరమైన విడిపోవడం",
+    "Live-in relationships": "లివ్-ఇన్ సంబంధాలు",
+    "Guardianship": "సంరక్షకత్వం",
+    "Property ownership": "ఆస్తి యాజమాన్యం",
+    "Rent disputes": "అద్దె వివాదాలు",
+    "Sale of property": "ఆస్తి అమ్మకం",
+    "Registration": "రిజిస్ట్రేషన్",
+    "Property documents": "ఆస్తి పత్రాలు",
+    "Land disputes": "భూ వివాదాలు",
+    "Mortgage": "తనఖా",
+    "Gift deed": "దానం దస్తావేజు",
+    "Will & succession": "వీలునామా & వారసత్వం",
+    "Partition of property": "ఆస్తి విభజన",
+    "Tenant rights": "అద్దెదారు హక్కులు",
+    "Consumer complaints": "వినియోగదారుల ఫిర్యాదులు",
+    "Defective products": "లోపభూయిష్ట ఉత్పత్తులు",
+    "Deficiency in service": "సేవా లోపం",
+    "Refunds": "వాపసు (రీఫండ్)",
+    "Consumer forums": "వినియోగదారుల ఫోరమ్‌లు",
+    "E-commerce disputes": "ఈ-కామర్స్ వివాదాలు",
+    "Unfair trade practices": "అన్యాయ వాణిజ్య పద్ధతులు",
+    "Warranty & guarantee claims": "వారంటీ & గ్యారంటీ క్లెయిమ్‌లు",
+    "Drunk driving": "మద్యం సేవించి వాహనం నడపడం",
+    "Traffic violations": "ట్రాఫిక్ ఉల్లంఘనలు",
+    "Accident claims": "ప్రమాద క్లెయిమ్‌లు",
+    "Driving license": "డ్రైవింగ్ లైసెన్స్",
+    "Vehicle registration": "వాహన రిజిస్ట్రేషన్",
+    "Hit and run cases": "కొట్టి పారిపోయే కేసులు",
+    "Insurance claims": "బీమా క్లెయిమ్‌లు",
+    "Vehicle impounding & challans": "వాహన స్వాధీనం & చలాన్‌లు",
+    "Assault on Modesty / Harassment": "గౌరవానికి భంగం / వేధింపు",
+    "Domestic violence protection": "గృహ హింస రక్షణ",
+    "Workplace harassment": "కార్యాలయ వేధింపు",
+    "Maintenance rights": "భరణం హక్కులు",
+    "Dowry harassment": "వరకట్న వేధింపు",
+    "Stalking": "వెంబడించడం (స్టాకింగ్)",
+    "Property & inheritance rights": "ఆస్తి & వారసత్వ హక్కులు",
+    "Child labour protection": "బాల కార్మిక రక్షణ",
+    "Juvenile justice": "జువెనైల్ న్యాయం",
+    "Right to education": "విద్యా హక్కు",
+    "Child sexual abuse protection": "పిల్లల లైంగిక వేధింపుల రక్షణ",
+    "Child marriage prevention": "బాల్య వివాహాల నివారణ",
+    "Child trafficking": "పిల్లల అక్రమ రవాణా",
+    "Wages": "వేతనాలు",
+    "Industrial disputes": "పారిశ్రామిక వివాదాలు",
+    "Workplace safety": "కార్యాలయ భద్రత",
+    "Termination": "ఉద్యోగం నుండి తొలగింపు",
+    "Maternity benefits": "ప్రసూతి ప్రయోజనాలు",
+    "Provident fund": "ప్రావిడెంట్ ఫండ్",
+    "Gratuity": "గ్రాట్యుటీ",
+    "Minimum wages": "కనీస వేతనాలు",
+    "Online financial fraud": "ఆన్‌లైన్ ఆర్థిక మోసం",
+    "Identity theft": "గుర్తింపు దొంగతనం",
+    "Cyber harassment": "సైబర్ వేధింపు",
+    "Data/privacy issues": "డేటా/గోప్యతా సమస్యలు",
+    "Cyber complaints": "సైబర్ ఫిర్యాదులు",
+    "Hacking & unauthorized access": "హ్యాకింగ్ & అనధికార ప్రవేశం",
+    "Online defamation": "ఆన్‌లైన్ పరువు నష్టం",
+    "Cyberstalking": "సైబర్ వెంబడింపు",
+}
+
+# Full Telugu translations for a priority batch of LegalSections, keyed by
+# section_number. The remaining sections fall back to English until
+# translated in a later pass. legal_text (the official statutory wording)
+# is intentionally left untranslated everywhere.
+SECTION_TE = {
+    "BNSS Section 35": dict(
+        title_te="వారెంట్ లేకుండా పోలీసులు ఎప్పుడు అరెస్టు చేయవచ్చు",
+        simple_explanation_te=(
+            "మేజిస్ట్రేట్ వారెంట్ లేకుండా పోలీసులు ఎప్పుడు ఒక వ్యక్తిని అరెస్టు "
+            "చేయవచ్చో ఇది వివరిస్తుంది. 7 సంవత్సరాల కంటే తక్కువ శిక్ష ఉన్న "
+            "నేరాలకు, అరెస్టు మినహాయింపుగా ఉండాలి: నిర్దిష్టమైన, రికార్డు "
+            "చేయబడిన కారణం లేకపోతే, అధికారి సాధారణంగా అరెస్టుకు బదులుగా "
+            "హాజరు నోటీసు జారీ చేయాలి."
+        ),
+        purpose_te="ఏకపక్ష నిర్బంధానికి వ్యతిరేకంగా రాజ్యాంగ హక్కులతో చట్ట అమలు అధికారాన్ని సమతుల్యం చేస్తుంది.",
+        punishment_te="ఇది శిక్షార్హమైన నిబంధన కాదు — అరెస్టు ఎప్పుడు, ఎలా చేయాలో నియంత్రించే విధానపరమైన రక్షణ.",
+        key_elements_te=(
+            "పోలీసు అధికారి సమక్షంలో కాగ్నిజబుల్ నేరం జరిగింది.\n"
+            "నిర్దేశిత శిక్షలు ఉన్న నేరాలకు సహేతుకమైన ఫిర్యాదు లేదా విశ్వసనీయ సమాచారం.\n"
+            "7 సంవత్సరాల కంటే తక్కువ శిక్ష ఉన్న నేరాలకు: అరెస్టుకు బదులుగా సాధారణంగా హాజరు నోటీసు జారీ చేస్తారు.\n"
+            "అరెస్టు చేసినా, చేయకపోయినా కారణాలను తప్పనిసరిగా వ్రాతపూర్వకంగా నమోదు చేయాలి."
+        ),
+        relevant_information_te=(
+            "అధికారి అరెస్టుకు ఖచ్చితమైన కారణాలను తెలియజేశారా?\n"
+            "తేదీ, సమయం, సాక్షి సంతకంతో అరెస్టు మెమో తయారు చేశారా?\n"
+            "కుటుంబ సభ్యుడు లేదా స్నేహితుడికి వెంటనే తెలియజేశారా?"
+        ),
+        relevant_documents_te="అరెస్టు మెమో కాపీ, FIR/ఫిర్యాదు కాపీ, కుటుంబం/నామినేట్ చేసిన వ్యక్తికి పంపిన సమాచార మెమో.",
+    ),
+    "BNSS Section 47": dict(
+        title_te="అరెస్టు కారణాలు మరియు జామీను హక్కు గురించి తెలియజేయాలి",
+        simple_explanation_te=(
+            "మిమ్మల్ని అరెస్టు చేస్తే, మిమ్మల్ని ఎందుకు అరెస్టు చేస్తున్నారో "
+            "పోలీసులు వెంటనే తెలియజేయాలి — మరియు అది జామీను పొందగల నేరం "
+            "అయితే, మీకు జామీను హక్కు ఉందని కూడా వారు తెలియజేయాలి."
+        ),
+        purpose_te="ఆర్టికల్ 22ను సమర్థిస్తూ, కారణాన్ని వెంటనే తెలియజేయాలని కోరడం ద్వారా ఏకపక్ష అరెస్టును నిరోధిస్తుంది.",
+        punishment_te=(
+            "ఇది శిక్షార్హమైన నిబంధన కాదు — విధానపరమైన రక్షణ; దీన్ని పాటించకపోతే "
+            "అరెస్టు చట్టవిరుద్ధమైనదిగా పరిగణించి, హేబియస్ కార్పస్ ద్వారా విడుదలకు దారితీయవచ్చు."
+        ),
+        key_elements_te=(
+            "ఆరోపణలు మరియు సెక్షన్ నంబర్లతో సహా వెంటనే తెలియజేయాలి.\n"
+            "నేరం జామీను పొందదగినదా కాదా అనే సమాచారం (జామీను పొందదగిన నేరాలకు మాత్రమే).\n"
+            "నేరం జామీను పొందదగినది అయితే ష్యూరిటీలు ఏర్పాటు చేసుకునే హక్కు."
+        ),
+        relevant_information_te=(
+            "నేరం జామీను పొందదగినదా, కాదా అనేది.\n"
+            "అరెస్టు చేసిన అధికారి పేరు మరియు బ్యాడ్జ్ నంబర్."
+        ),
+        relevant_documents_te="కారణాలను తెలిపే అరెస్టు మెమో, జామీను దరఖాస్తు, ష్యూరిటీ గుర్తింపు పత్రాలు.",
+    ),
+    "BNSS Section 48": dict(
+        title_te="బంధువుకు లేదా స్నేహితుడికి అరెస్టు గురించి తెలియజేసే హక్కు",
+        simple_explanation_te=(
+            "మిమ్మల్ని అరెస్టు చేశారని, మిమ్మల్ని ఎక్కడ ఉంచారని మీరు ఎంచుకున్న "
+            "బంధువుకు లేదా స్నేహితుడికి పోలీసులు తెలియజేయాలని మీకు హక్కు ఉంది."
+        ),
+        purpose_te="అరెస్టు చేసిన వ్యక్తిని బయటి ప్రపంచంతో సంబంధం లేకుండా ఉంచకుండా చూస్తుంది.",
+        punishment_te="ఇది శిక్షార్హమైన నిబంధన కాదు — అరెస్టు చేసిన వ్యక్తి కోసం విధానపరమైన రక్షణ.",
+        relevant_documents_te="తెలియజేయబడిన వ్యక్తి పేరుతో ఉన్న అరెస్టు మెమో.",
+    ),
+    "BNSS Section 43(5)": dict(
+        title_te="సూర్యాస్తమయం తర్వాత మహిళలను అరెస్టు చేయడంపై పరిమితి",
+        simple_explanation_te=(
+            "సాధారణంగా, రాత్రి సమయంలో ఒక మహిళను అరెస్టు చేయకూడదు. అసాధారణ "
+            "కారణం ఉంటే, అరెస్టు చేసేది మహిళా పోలీసు అధికారి అయి ఉండాలి "
+            "మరియు మేజిస్ట్రేట్ ముందస్తు వ్రాతపూర్వక అనుమతి తప్పనిసరి."
+        ),
+        purpose_te="అసాధారణ కారణం లేకుండా రాత్రిపూట అరెస్టు విధానాల నుండి మహిళలను రక్షిస్తుంది.",
+        punishment_te="ఇది శిక్షార్హమైన నిబంధన కాదు — అరెస్టు చేయబడుతున్న మహిళల కోసం విధానపరమైన రక్షణ.",
+        relevant_documents_te="మేజిస్ట్రేట్ వ్రాతపూర్వక అనుమతి (అసాధారణ సందర్భాల్లో).",
+    ),
+    "BNSS Section 58": dict(
+        title_te="24 గంటల్లోపు మేజిస్ట్రేట్ ముందు హాజరుపరచాలి",
+        simple_explanation_te=(
+            "మేజిస్ట్రేట్ ఉత్తర్వు లేకుండా పోలీసులు మిమ్మల్ని 24 గంటల కంటే "
+            "ఎక్కువసేపు (కోర్టుకు ప్రయాణించే సమయం మినహాయించి) నిర్బంధంలో "
+            "ఉంచలేరు — ఆ సమయంలోపు మిమ్మల్ని సమీప మేజిస్ట్రేట్ ముందు హాజరుపరచాలి."
+        ),
+        purpose_te="న్యాయపరమైన పర్యవేక్షణ లేకుండా అనిశ్చిత నిర్బంధాన్ని నివారిస్తుంది.",
+        punishment_te="ఇది శిక్షార్హమైన నిబంధన కాదు — అరెస్టు చేయబడిన వ్యక్తి కోసం విధానపరమైన రక్షణ.",
+        relevant_documents_te="రిమాండ్ ఉత్తర్వు, హాజరు రికార్డు.",
+    ),
+    "Article 22(1)": dict(
+        title_te="న్యాయవాదిని సంప్రదించి, రక్షణ పొందే హక్కు",
+        simple_explanation_te=(
+            "మీకు నచ్చిన న్యాయవాదిని సంప్రదించి, ఆయన/ఆమె ద్వారా రక్షణ పొందే "
+            "రాజ్యాంగ హక్కు మీకు ఉంది. మీరు భరించలేకపోతే, రాష్ట్రం ఉచిత న్యాయ "
+            "సహాయం అందించాలని సుప్రీంకోర్టు (హుస్సేనారా ఖాతూన్ వర్సెస్ బీహార్ "
+            "రాష్ట్రం, 1980) తీర్పు ఇచ్చింది — ఈ యాప్‌లోని లీగల్ హెల్ప్ విభాగంలో "
+            "NALSA హెల్ప్‌లైన్ చూడండి."
+        ),
+        purpose_te="న్యాయ ప్రాతినిధ్యానికి ప్రాథమిక హక్కుగా హామీ ఇస్తుంది.",
+        punishment_te="ఇది శిక్షార్హమైన నిబంధన కాదు — ఇది ఒక ప్రాథమిక రాజ్యాంగ హక్కు.",
+        relevant_documents_te="ఈ హక్కును వినియోగించుకోవడానికి ఎలాంటి పత్రాలు అవసరం లేదు.",
+    ),
+    "Article 21": dict(
+        title_te="జీవించే మరియు వ్యక్తిగత స్వేచ్ఛ హక్కు రక్షణ",
+        simple_explanation_te=(
+            "ప్రతి వ్యక్తికి — పౌరుడైనా కాకపోయినా — చట్టం నిర్దేశించిన "
+            "సక్రమమైన ప్రక్రియ ద్వారా తప్ప, జీవితం లేదా వ్యక్తిగత స్వేచ్ఛను "
+            "కోల్పోకుండా ఉండే ప్రాథమిక హక్కు ఉంది. గౌరవం, గోప్యత, జీవనోపాధి, "
+            "పరిశుభ్రమైన పర్యావరణం మరియు ఆరోగ్యం వంటి హక్కులను కూడా ఇందులో "
+            "భాగంగా న్యాయస్థానాలు విస్తృతంగా వ్యాఖ్యానించాయి."
+        ),
+        purpose_te="ఏకపక్ష రాజ్య చర్యకు వ్యతిరేకంగా జీవించే మరియు వ్యక్తిగత స్వేచ్ఛ హక్కుకు హామీ ఇస్తుంది.",
+        punishment_te=(
+            "ఇది శిక్షార్హమైన నిబంధన కాదు — పరిష్కారాలు రాజ్యాంగపరమైనవి, "
+            "ఆర్టికల్ 32 (సుప్రీంకోర్టు) లేదా ఆర్టికల్ 226 (హైకోర్టు) కింద "
+            "రిట్ పిటిషన్ ద్వారా."
+        ),
+        relevant_documents_te="రిట్ పిటిషన్, హక్కుల ఉల్లంఘనకు సంబంధించిన ఆధారాలు.",
+    ),
+    "Article 14": dict(
+        title_te="చట్టం ముందు సమానత్వం",
+        simple_explanation_te=(
+            "పౌరుడు, విదేశీ పౌరుడు లేదా కంపెనీ అయినా — ఏ వ్యక్తికైనా ప్రభుత్వం "
+            "'చట్టం ముందు సమానత్వం' లేదా 'చట్టాల సమాన రక్షణ'ను నిరాకరించకూడదు. "
+            "ఆచరణలో దీని అర్థం: ప్రభుత్వంతో సహా ఎవరూ చట్టానికి అతీతులు కారు; "
+            "మరియు ఒకే విధమైన పరిస్థితుల్లో నిజంగా సమానమైన వ్యక్తులను సమానంగా "
+            "చూడాలి, అయితే నిజమైన వ్యత్యాసం చట్టం యొక్క ఉద్దేశ్యానికి "
+            "తార్కికంగా అనుసంధానించబడి ఉంటే వేర్వేరు వర్గాలను ప్రభుత్వం "
+            "వేర్వేరుగా చూడవచ్చు. ఏకపక్ష ప్రభుత్వ చర్య, ఇద్దరు వ్యక్తుల మధ్య "
+            "అసమాన ప్రవర్తనను చూపించాల్సిన అవసరం లేకుండానే, ఈ ఆర్టికల్‌ను "
+            "ఉల్లంఘించవచ్చని కూడా న్యాయస్థానాలు తీర్పు ఇచ్చాయి."
+        ),
+        purpose_te=(
+            "భారతదేశ భూభాగంలో ఉన్న ప్రతి ఒక్కరూ చట్టానికి సమానంగా లోబడి "
+            "ఉండాలని మరియు దాని కింద సమాన ప్రవర్తనకు అర్హులని హామీ ఇస్తుంది, "
+            "మరియు ఏకపక్ష రాజ్య చర్యను నిషేధిస్తుంది."
+        ),
+        punishment_te=(
+            "ఇది శిక్షార్హమైన నిబంధన కాదు — పరిష్కారాలు రాజ్యాంగపరమైనవి, "
+            "ఆర్టికల్ 32 (సుప్రీంకోర్టు) లేదా ఆర్టికల్ 226 (హైకోర్టు) కింద "
+            "రిట్ పిటిషన్ ద్వారా."
+        ),
+        key_elements_te=(
+            "భారతదేశ భూభాగంలో ఉన్న ఏ వ్యక్తికైనా వర్తిస్తుంది — పౌరులు, "
+            "పౌరులు కానివారు మరియు కంపెనీలు అందరికీ సమానంగా.\n"
+            "చట్టం ముందు సమానత్వం: ప్రభుత్వంతో సహా ఎవరూ సాధారణ చట్టానికి అతీతులు కారు.\n"
+            "చట్టాల సమాన రక్షణ: సమానులను సమానంగా చూడాలి, కానీ వర్గీకరణకు "
+            "స్పష్టమైన ప్రాతిపదిక మరియు చట్టం లక్ష్యానికి తార్కిక సంబంధం ఉంటే "
+            "ప్రభుత్వం వేర్వేరు వర్గాలను వేర్వేరుగా వర్గీకరించవచ్చు ('సహేతుక "
+            "వర్గీకరణ' పరీక్ష).\n"
+            "ఏకపక్ష లేదా అసమంజసమైన రాజ్య చర్యను, మరొక సమూహంతో పోల్చకుండానే, "
+            "ఈ ఆర్టికల్ కింద కొట్టివేయవచ్చు."
+        ),
+        relevant_information_te=(
+            "సవాలు చేయబడుతున్న వర్గీకరణ లేదా నియమానికి దాని ప్రకటిత "
+            "ఉద్దేశ్యానికి సంబంధించిన నిజమైన, సహేతుకమైన ప్రాతిపదిక ఉందా.\n"
+            "రాజ్య చర్య ఏకపక్షంగా ఉందా లేదా హేతుబద్ధమైన సమర్థన లేకుండా ఉందా.\n"
+            "ఈ పరిస్థితికి మరింత నేరుగా వర్తించే మరింత నిర్దిష్టమైన హక్కు "
+            "(ఉదా. ఆర్టికల్ 15 లేదా 16) ఉందా."
+        ),
+        relevant_documents_te="రిట్ పిటిషన్, వ్యత్యాసమైన లేదా ఏకపక్ష ప్రవర్తనకు సంబంధించిన ఆధారాలు.",
+    ),
+    "Section 303": dict(
+        title_te="దొంగతనం",
+        simple_explanation_te=(
+            "ఒక వ్యక్తి అనుమతి లేకుండా, నిజాయితీ లేకుండా ఉంచుకోవాలనే "
+            "ఉద్దేశ్యంతో మరొకరి కదిలే ఆస్తిని తీసుకోవడం దొంగతనం — "
+            "ఉదాహరణకు, అనుమతి లేకుండా తీసుకున్న ఫోన్, వాహనం లేదా నగదు."
+        ),
+        purpose_te="ఇతరులు నిజాయితీ లేకుండా తీసుకెళ్లకుండా వ్యక్తిగత ఆస్తిని రక్షిస్తుంది.",
+        punishment_te=(
+            "మొదటి నేరారోపణ: 3 సంవత్సరాల వరకు జైలు శిక్ష, లేదా జరిమానా, లేదా "
+            "రెండూ. రెండవ లేదా తదుపరి నేరారోపణ: 1 నుండి 5 సంవత్సరాల కఠిన "
+            "కారాగార శిక్ష, జరిమానాతో సహా. రూ. 5,000 లోపు విలువైన ఆస్తికి "
+            "మొదటిసారి దొంగతనం జరిగి, ఆస్తిని తిరిగి ఇచ్చినట్లయితే, జైలుకు "
+            "బదులుగా సామాజిక సేవ విధించవచ్చు."
+        ),
+        key_elements_te=(
+            "ఆస్తి కదిలేదిగా ఉండాలి (ఫోన్, వాహనం, నగలు, నగదు).\n"
+            "ఆస్తి మరొక వ్యక్తి స్వాధీనంలో ఉండాలి.\n"
+            "యజమాని అనుమతి లేకుండా నిజాయితీ లేకుండా తీసుకున్నారు.\n"
+            "తీసుకోవడానికి ఆస్తిని కదిలించారు."
+        ),
+        relevant_information_te=(
+            "ఆస్తి చివరిగా కనిపించిన ఖచ్చితమైన తేదీ, సమయం, స్థలం.\n"
+            "యాజమాన్య రుజువు (ఇన్వాయిస్, IMEI నంబర్, రిజిస్ట్రేషన్ సర్టిఫికేట్).\n"
+            "వస్తువు లాక్ చేయబడిందా, వాహనంలో ఉందా, బహిరంగ ప్రదేశంలో ఉందా."
+        ),
+        relevant_documents_te=(
+            "FIR / పోలీసు ఫిర్యాదు, యాజమాన్యం/స్వాధీన రుజువు, పోలీసు స్వాధీన "
+            "మెమో, IMEI/సీరియల్ నంబర్ డాక్యుమెంటేషన్."
+        ),
+    ),
+    "Section 318": dict(
+        title_te="మోసం",
+        simple_explanation_te=(
+            "ఎవరైనా ఆస్తి, డబ్బు లేదా పత్రాన్ని అప్పగించేలా, లేదా వారికి హాని "
+            "కలిగించే పనిని చేసేలా/చేయకుండా ఉండేలా మోసం చేసి లేదా వంచించి "
+            "ప్రేరేపించడం మోసంగా పరిగణించబడుతుంది. ఉపవిభాగం 318(4) — ఆస్తిని "
+            "అప్పగించేలా నిజాయితీ లేకుండా ప్రేరేపించడం — పాత 'సెక్షన్ 420' "
+            "మోసం నేరానికి నేరుగా వారసత్వం."
+        ),
+        purpose_te="వ్యక్తులను మరియు వ్యాపారాలను మోసం మరియు వంచన నుండి రక్షిస్తుంది.",
+        punishment_te=(
+            "ఉపవిభాగాన్ని బట్టి తీవ్రత మారుతుంది: సాధారణ మోసం (318(2)) — 3 "
+            "సంవత్సరాల వరకు, లేదా జరిమానా, లేదా రెండూ. బాధితుడి ప్రయోజనాలను "
+            "రక్షించే బాధ్యతను ఉల్లంఘించే మోసం (318(3)) — 5 సంవత్సరాల వరకు, "
+            "లేదా జరిమానా, లేదా రెండూ. ఆస్తి అప్పగింతకు లేదా విలువైన సెక్యూరిటీ "
+            "మార్పుకు దారితీసే మోసం (318(4), పాత 'సెక్షన్ 420' నేరం) — 7 "
+            "సంవత్సరాల వరకు మరియు జరిమానా (ఈ స్థాయిలో తప్పనిసరి)."
+        ),
+        key_elements_te=(
+            "ఏదైనా వ్యక్తిని మోసగించడం.\n"
+            "ఆస్తిని అప్పగించేలా లేదా చెల్లింపులు చేసేలా మోసపూరితంగా లేదా "
+            "నిజాయితీ లేకుండా ప్రేరేపించడం.\n"
+            "మోసగించబడిన వ్యక్తికి హాని కలిగించే ఉద్దేశపూర్వక ప్రేరేపణ."
+        ),
+        relevant_information_te=(
+            "కమ్యూనికేషన్ రికార్డులు (సందేశాలు, ఇమెయిల్‌లు, కాల్ లాగ్‌లు).\n"
+            "బ్యాంక్ బదిలీ రసీదులు, UPI లావాదేవీ IDలు, చెక్కు కాపీలు.\n"
+            "వ్రాతపూర్వకంగా లేదా మౌఖికంగా ఇచ్చిన వాగ్దానాలు."
+        ),
+        relevant_documents_te=(
+            "మోసపూరిత లావాదేవీలను చూపే బ్యాంక్ స్టేట్‌మెంట్, ఒప్పందాలు/రసీదులు/"
+            "ఇన్వాయిస్‌లు, చాట్‌ల స్క్రీన్‌షాట్‌లు, పోలీసు ఫిర్యాదు కాపీ."
+        ),
+    ),
+    "Section 103(1)": dict(
+        title_te="హత్యకు శిక్ష",
+        simple_explanation_te=(
+            "చంపాలనే ఉద్దేశంతో (లేదా తన చర్య మరణానికి దారితీసే అవకాశం ఉందని "
+            "తెలిసి) ఎవరైనా మరొక వ్యక్తిని చట్టవిరుద్ధంగా చంపితే, అది హత్య "
+            "అవుతుంది, మరియు భారత క్రిమినల్ చట్టంలో ఇది అత్యంత కఠినమైన "
+            "శిక్షలను కలిగి ఉంటుంది."
+        ),
+        purpose_te="చట్టవిరుద్ధమైన హత్యను నిరోధించడం మరియు శిక్షించడం ద్వారా జీవించే హక్కును రక్షిస్తుంది.",
+        punishment_te="మరణశిక్ష లేదా జీవిత ఖైదు, మరియు జరిమానా కూడా విధించవచ్చు.",
+        relevant_documents_te="FIR, పోస్ట్‌మార్టం/వైద్య నివేదిక, ఫోరెన్సిక్ ఆధారాలు, సాక్షుల వాంగ్మూలాలు.",
+    ),
+    "Section 58": dict(
+        title_te="స్థిరాస్తి తనఖా నిర్వచనం",
+        simple_explanation_te=(
+            "మీరు ఆస్తిపై రుణం తీసుకున్నప్పుడు (గృహ రుణం వంటివి), రుణదాత మీ "
+            "తిరిగి చెల్లిస్తానన్న వాగ్దానంపై మాత్రమే ఆధారపడడు — అతను ఆస్తిపై "
+            "చట్టపరమైన హక్కును భద్రతగా తీసుకుంటాడు, దీన్ని తనఖా అంటారు. మీరు "
+            "'తనఖాదారు' (మార్ట్‌గేజర్), రుణదాత 'తనఖా గ్రహీత' (మార్ట్‌గేజీ). దీన్ని "
+            "రిజిస్టర్డ్ తనఖా దస్తావేజు ద్వారా చేయవచ్చు, లేదా — గృహ రుణాల "
+            "విషయంలో సాధారణంగా — ఆస్తి యొక్క అసలు టైటిల్ డీడ్‌లను రుణదాతకు "
+            "అప్పగించడం ద్వారా చేయవచ్చు ('ఈక్విటబుల్ మార్ట్‌గేజ్'), దీనికి "
+            "వేరుగా వ్రాతపూర్వక, రిజిస్టర్డ్ పత్రం అవసరం లేదు."
+        ),
+        purpose_te=(
+            "రుణం లేదా అప్పుకు భద్రతగా స్థిరాస్తిని ఉపయోగించడానికి చట్టపరమైన "
+            "చట్రాన్ని ఏర్పరుస్తుంది, మరియు తనఖాదారులు మరియు తనఖా గ్రహీతల "
+            "హక్కులను నిర్వచిస్తుంది."
+        ),
+        punishment_te=(
+            "ఇది శిక్షార్హమైన నిబంధన కాదు — తనఖాదారు మరియు తనఖా గ్రహీత మధ్య "
+            "పౌర హక్కులను నియంత్రిస్తుంది; డిఫాల్ట్ అయినప్పుడు, తనఖా గ్రహీత "
+            "పరిష్కారం విక్రయం లేదా ఫోర్‌క్లోజర్ కోసం పౌర దావా (సెక్షన్ 67), "
+            "క్రిమినల్ శిక్ష కాదు."
+        ),
+        key_elements_te=(
+            "ఆరు రకాల తనఖాలు గుర్తించబడ్డాయి: సాధారణ తనఖా, షరతులతో కూడిన "
+            "అమ్మకం ద్వారా తనఖా, యూసుఫ్రక్చురీ తనఖా, ఇంగ్లీష్ తనఖా, టైటిల్ "
+            "డీడ్‌ల డిపాజిట్ ద్వారా తనఖా, మరియు అసాధారణ తనఖా (సెక్షన్ "
+            "58(b)-(g)).\n"
+            "రూ. 100 లేదా అంతకంటే ఎక్కువ మొత్తానికి భద్రత కల్పించే తనఖా "
+            "(టైటిల్ డీడ్‌ల డిపాజిట్ మినహా) తనఖాదారు సంతకం చేసి, కనీసం ఇద్దరు "
+            "సాక్షుల సమక్షంలో రిజిస్టర్డ్ పత్రం ద్వారా చేయాలి (సెక్షన్ 59).\n"
+            "టైటిల్ డీడ్‌ల డిపాజిట్ ద్వారా తనఖాకు వ్రాతపూర్వక లేదా రిజిస్టర్డ్ "
+            "పత్రం అవసరం లేదు — భద్రత కల్పించే ఉద్దేశంతో టైటిల్ డీడ్‌లను "
+            "అప్పగించడమే సరిపోతుంది.\n"
+            "డిఫాల్ట్ అయినప్పుడు, తనఖా గ్రహీత విక్రయం, ఫోర్‌క్లోజర్, లేదా "
+            "రెండింటికీ దావా వేయగలరా అనేది సృష్టించిన తనఖా రకంపై ఆధారపడి "
+            "ఉంటుంది (సెక్షన్ 67)."
+        ),
+        relevant_information_te=(
+            "మీ తనఖా నిజంగా సబ్-రిజిస్ట్రార్ కార్యాలయంలో రిజిస్టర్డ్ "
+            "పత్రమేనా, కేవలం ప్రైవేట్ లేదా నోటరైజ్డ్ ఒప్పందం కాదా.\n"
+            "మీ రుణానికి ఆరు రకాల తనఖాలలో ఏది వర్తిస్తుంది, ఎందుకంటే మీరు "
+            "డిఫాల్ట్ అయితే రుణదాత హక్కులపై దీని ప్రత్యక్ష ప్రభావం ఉంటుంది.\n"
+            "లావాదేవీ నిజంగా తనఖానా లేదా వాస్తవానికి ఆస్తి యొక్క షరతులతో "
+            "కూడిన అమ్మకం — అసలు అప్పు ఇంకా ఉందా లేదా అనే దాని ఆధారంగా ఈ "
+            "రెండింటినీ వేరు చేస్తారు."
+        ),
+        relevant_documents_te=(
+            "రిజిస్టర్డ్ తనఖా దస్తావేజు (లేదా టైటిల్ డీడ్‌ల డిపాజిట్ తనఖా "
+            "అయితే అసలు టైటిల్ డీడ్‌లు), రుణ ఒప్పందం, ఎన్‌కంబరెన్స్ సర్టిఫికేట్."
+        ),
+    ),
+}
 
 
 class Command(BaseCommand):
@@ -195,6 +660,13 @@ class Command(BaseCommand):
                 name=name, defaults={"description": description}
             )
             categories_by_name[name] = cat
+
+        for name, category in categories_by_name.items():
+            name_te, description_te = CATEGORY_TE.get(name, ("", ""))
+            if name_te or description_te:
+                category.name_te = name_te
+                category.description_te = description_te
+                category.save(update_fields=["name_te", "description_te"])
 
         cyber_law = categories_by_name["Cyber Law"]
         motor_vehicle_law = categories_by_name["Motor Vehicle Law"]
@@ -1554,6 +2026,91 @@ class Command(BaseCommand):
             ),
         ]
 
+        matter_content_sections = [
+            dict(
+                law=constitution,
+                section_number="Article 14",
+                title="Equality Before Law",
+                legal_text=(
+                    "The State shall not deny to any person equality "
+                    "before the law or the equal protection of the laws "
+                    "within the territory of India."
+                ),
+                simple_explanation=(
+                    "The government cannot deny any person — citizen, "
+                    "foreign national, or company — either 'equality "
+                    "before the law' or 'the equal protection of the "
+                    "laws.' In practice: no one, including the State "
+                    "itself, is above the law; and people who are truly "
+                    "alike in similar situations must be treated alike, "
+                    "though the State may treat genuinely different "
+                    "groups differently if the distinction is real and "
+                    "logically connected to the law's purpose. Courts "
+                    "have also held that arbitrary government action by "
+                    "itself can violate this article, even without "
+                    "needing to show unequal treatment between two people."
+                ),
+                purpose="Guarantees that everyone within India's territory is equally subject to the law and entitled to equal treatment under it, and forbids arbitrary state action.",
+                punishment="Not a penal provision — remedies are constitutional, via a writ petition under Article 32 (Supreme Court) or Article 226 (High Court).",
+                key_elements=(
+                    "Applies to any person within India's territory — citizens, non-citizens, and companies alike.\n"
+                    "Equality before law: no one, including the State, is above the ordinary law.\n"
+                    "Equal protection of the laws: equals must be treated alike, but the State may classify people differently if the classification has an intelligible differentia with a rational nexus to the law's object (the 'reasonable classification' test).\n"
+                    "Arbitrary or unreasonable state action can itself be struck down under this article, independent of any comparison to another group."
+                ),
+                relevant_information=(
+                    "Whether the classification or rule being challenged has a real, sensible basis connected to its stated purpose.\n"
+                    "Whether the state action was arbitrary or lacked any rational justification.\n"
+                    "Whether a more specific right (e.g. Articles 15 or 16, which bar discrimination on specific grounds) applies more directly to the situation."
+                ),
+                relevant_documents="Writ petition, evidence of the differential or arbitrary treatment.",
+                keywords="equality, article 14, equal protection, reasonable classification, arbitrary state action, discrimination, constitution",
+                source=ARTICLE_14_SOURCE_NOTE,
+            ),
+            dict(
+                law=tpa,
+                section_number="Section 58",
+                title="Mortgage of Immovable Property Defined",
+                legal_text=(
+                    "A mortgage is the transfer of an interest in "
+                    "specific immoveable property for the purpose of "
+                    "securing the payment of money advanced or to be "
+                    "advanced by way of loan, an existing or future "
+                    "debt, or the performance of an engagement which "
+                    "may give rise to a pecuniary liability."
+                ),
+                simple_explanation=(
+                    "When you take a loan against property (like a home "
+                    "loan), the lender doesn't just rely on your promise "
+                    "to repay — it takes a legal interest in the "
+                    "property as security, called a mortgage. You are "
+                    "the 'mortgagor' and the lender is the 'mortgagee.' "
+                    "Depending on how it's structured, this can be done "
+                    "through a registered mortgage deed, or — commonly "
+                    "for housing finance — simply by handing over the "
+                    "property's original title deeds to the lender (an "
+                    "'equitable mortgage'), which unusually needs no "
+                    "separate written, registered document."
+                ),
+                purpose="Establishes the legal framework for using immovable property as security for a loan or debt, and defines the rights of mortgagors and mortgagees.",
+                punishment="Not a penal provision — governs civil rights between mortgagor and mortgagee; on default, the mortgagee's remedy is a civil suit for sale or foreclosure (Section 67), not a criminal penalty.",
+                key_elements=(
+                    "Six recognized kinds of mortgage: simple mortgage, mortgage by conditional sale, usufructuary mortgage, English mortgage, mortgage by deposit of title-deeds, and anomalous mortgage (Section 58(b)-(g)).\n"
+                    "A mortgage (other than by deposit of title-deeds) securing Rs. 100 or more must be made by a registered instrument, signed by the mortgagor and attested by at least two witnesses (Section 59).\n"
+                    "A mortgage by deposit of title-deeds needs no written or registered instrument — simply handing over the property's title deeds with intent to create security is enough.\n"
+                    "On default, whether the mortgagee can sue for sale, foreclosure, or both depends on which kind of mortgage was created (Section 67)."
+                ),
+                relevant_information=(
+                    "Whether your mortgage is actually a registered instrument at the Sub-Registrar's office, not just a private or notarized agreement.\n"
+                    "Which of the six kinds of mortgage applies to your loan, since it directly affects the lender's rights if you default.\n"
+                    "Whether the transaction is genuinely a mortgage or actually a conditional sale of the property — the two are distinguished by whether the underlying debt still exists."
+                ),
+                relevant_documents="Registered mortgage deed (or the original title deeds, for a deposit-of-title-deeds mortgage), loan agreement, encumbrance certificate.",
+                keywords="mortgage, home loan, property security, mortgagor, mortgagee, equitable mortgage, title deeds, section 58, transfer of property act",
+                source=MORTGAGE_SOURCE_NOTE,
+            ),
+        ]
+
         section_by_number = {}
 
         for data in sections:
@@ -1588,6 +2145,24 @@ class Command(BaseCommand):
             )
             section_by_number[data["section_number"]] = obj
 
+        for data in matter_content_sections:
+            obj, _ = LegalSection.objects.update_or_create(
+                law=data["law"],
+                section_number=data["section_number"],
+                defaults={**data, "last_verified": MATTER_CONTENT_VERIFIED},
+            )
+            section_by_number[data["section_number"]] = obj
+
+        translated_count = 0
+        for number, te_fields in SECTION_TE.items():
+            section = section_by_number.get(number)
+            if not section:
+                continue
+            for field, value in te_fields.items():
+                setattr(section, field, value)
+            section.save(update_fields=list(te_fields.keys()))
+            translated_count += 1
+
         # --- Cross-links between related sections (mirrors the relationships
         # already surfaced in the source website's data). ---
         related_links = {
@@ -1608,8 +2183,9 @@ class Command(BaseCommand):
             "Section 13": ["BNSS Section 144", "Section 12"],
             "Section 12": ["BNSS Section 144", "Section 13", "Section 3"],
             "BNSS Section 144": ["Section 13", "Section 12"],
-            "Section 54": ["Section 17"],
-            "Section 17": ["Section 54"],
+            "Section 54": ["Section 17", "Section 58"],
+            "Section 17": ["Section 54", "Section 58"],
+            "Section 58": ["Section 54", "Section 17"],
             "Section 9": ["Section 74"],
             "Section 3": ["Section 12"],
             "Section 4": ["Section 19 & 21"],
@@ -1660,10 +2236,22 @@ class Command(BaseCommand):
             dict(category=criminal_law, name="Summons", description="", section_numbers=[]),
             dict(category=criminal_law, name="Warrant", description="", section_numbers=[]),
             dict(category=criminal_law, name="Trial", description="", section_numbers=[]),
+            dict(category=criminal_law, name="Anticipatory bail", description="", section_numbers=[]),
+            dict(category=criminal_law, name="Bailable vs non-bailable offences", description="", section_numbers=[]),
+            dict(category=criminal_law, name="Cognizable vs non-cognizable offences", description="", section_numbers=[]),
+            dict(category=criminal_law, name="Appeal against conviction", description="", section_numbers=[]),
+            dict(category=criminal_law, name="Compounding of offences", description="", section_numbers=[]),
             dict(category=constitutional_law, name="Right to Life & Liberty", description="",
                  section_numbers=["Article 21"]),
             dict(category=constitutional_law, name="Right to Legal Counsel", description="",
                  section_numbers=["Article 22(1)"]),
+            dict(category=constitutional_law, name="Right to Equality", description="",
+                 section_numbers=["Article 14"]),
+            dict(category=constitutional_law, name="Right to Freedom of Speech & Expression", description="", section_numbers=[]),
+            dict(category=constitutional_law, name="Right against Exploitation", description="", section_numbers=[]),
+            dict(category=constitutional_law, name="Right to Freedom of Religion", description="", section_numbers=[]),
+            dict(category=constitutional_law, name="Right to Constitutional Remedies", description="", section_numbers=[]),
+            dict(category=constitutional_law, name="Fundamental Duties", description="", section_numbers=[]),
             dict(category=categories_by_name["Family Law"], name="Marriage", description="", section_numbers=[]),
             dict(category=categories_by_name["Family Law"], name="Divorce", description="",
                  section_numbers=["Section 13"]),
@@ -1674,6 +2262,10 @@ class Command(BaseCommand):
             dict(category=categories_by_name["Family Law"], name="Child custody", description="", section_numbers=[]),
             dict(category=categories_by_name["Family Law"], name="Adoption", description="", section_numbers=[]),
             dict(category=categories_by_name["Family Law"], name="Inheritance", description="", section_numbers=[]),
+            dict(category=categories_by_name["Family Law"], name="Restitution of conjugal rights", description="", section_numbers=[]),
+            dict(category=categories_by_name["Family Law"], name="Judicial separation", description="", section_numbers=[]),
+            dict(category=categories_by_name["Family Law"], name="Live-in relationships", description="", section_numbers=[]),
+            dict(category=categories_by_name["Family Law"], name="Guardianship", description="", section_numbers=[]),
             dict(category=categories_by_name["Property Law"], name="Property ownership", description="", section_numbers=[]),
             dict(category=categories_by_name["Property Law"], name="Rent disputes", description="", section_numbers=[]),
             dict(category=categories_by_name["Property Law"], name="Sale of property", description="",
@@ -1682,6 +2274,12 @@ class Command(BaseCommand):
                  section_numbers=["Section 17"]),
             dict(category=categories_by_name["Property Law"], name="Property documents", description="", section_numbers=[]),
             dict(category=categories_by_name["Property Law"], name="Land disputes", description="", section_numbers=[]),
+            dict(category=categories_by_name["Property Law"], name="Mortgage", description="",
+                 section_numbers=["Section 58"]),
+            dict(category=categories_by_name["Property Law"], name="Gift deed", description="", section_numbers=[]),
+            dict(category=categories_by_name["Property Law"], name="Will & succession", description="", section_numbers=[]),
+            dict(category=categories_by_name["Property Law"], name="Partition of property", description="", section_numbers=[]),
+            dict(category=categories_by_name["Property Law"], name="Tenant rights", description="", section_numbers=[]),
             dict(category=consumer_law, name="Consumer complaints", description=(
                 "How to file a complaint before the District Consumer Commission."
             ), section_numbers=["Section 35"]),
@@ -1689,12 +2287,18 @@ class Command(BaseCommand):
             dict(category=consumer_law, name="Deficiency in service", description="", section_numbers=[]),
             dict(category=consumer_law, name="Refunds", description="", section_numbers=[]),
             dict(category=consumer_law, name="Consumer forums", description="", section_numbers=[]),
+            dict(category=consumer_law, name="E-commerce disputes", description="", section_numbers=[]),
+            dict(category=consumer_law, name="Unfair trade practices", description="", section_numbers=[]),
+            dict(category=consumer_law, name="Warranty & guarantee claims", description="", section_numbers=[]),
             dict(category=motor_vehicle_law, name="Drunk driving", description="",
                  section_numbers=["Section 185"]),
             dict(category=motor_vehicle_law, name="Traffic violations", description="", section_numbers=[]),
             dict(category=motor_vehicle_law, name="Accident claims", description="", section_numbers=[]),
             dict(category=motor_vehicle_law, name="Driving license", description="", section_numbers=[]),
             dict(category=motor_vehicle_law, name="Vehicle registration", description="", section_numbers=[]),
+            dict(category=motor_vehicle_law, name="Hit and run cases", description="", section_numbers=[]),
+            dict(category=motor_vehicle_law, name="Insurance claims", description="", section_numbers=[]),
+            dict(category=motor_vehicle_law, name="Vehicle impounding & challans", description="", section_numbers=[]),
             dict(category=womens_rights, name="Assault on Modesty / Harassment", description="",
                  section_numbers=["Section 74"]),
             dict(category=womens_rights, name="Domestic violence protection", description="",
@@ -1705,11 +2309,15 @@ class Command(BaseCommand):
                  section_numbers=["BNSS Section 144"]),
             dict(category=womens_rights, name="Dowry harassment", description="",
                  section_numbers=["Section 3"]),
+            dict(category=womens_rights, name="Stalking", description="", section_numbers=[]),
+            dict(category=womens_rights, name="Property & inheritance rights", description="", section_numbers=[]),
             dict(category=categories_by_name["Child Protection"], name="Child labour protection", description="", section_numbers=[]),
             dict(category=categories_by_name["Child Protection"], name="Juvenile justice", description="", section_numbers=[]),
             dict(category=categories_by_name["Child Protection"], name="Right to education", description="", section_numbers=[]),
             dict(category=categories_by_name["Child Protection"], name="Child sexual abuse protection", description="",
                  section_numbers=["Section 4", "Section 19 & 21"]),
+            dict(category=categories_by_name["Child Protection"], name="Child marriage prevention", description="", section_numbers=[]),
+            dict(category=categories_by_name["Child Protection"], name="Child trafficking", description="", section_numbers=[]),
             dict(category=categories_by_name["Labour & Employment"], name="Wages", description="", section_numbers=[]),
             dict(category=categories_by_name["Labour & Employment"], name="Industrial disputes", description="", section_numbers=[]),
             dict(category=categories_by_name["Labour & Employment"], name="Workplace safety", description="", section_numbers=[]),
@@ -1717,6 +2325,9 @@ class Command(BaseCommand):
                  section_numbers=["Section 70"]),
             dict(category=categories_by_name["Labour & Employment"], name="Maternity benefits", description="",
                  section_numbers=["Section 60"]),
+            dict(category=categories_by_name["Labour & Employment"], name="Provident fund", description="", section_numbers=[]),
+            dict(category=categories_by_name["Labour & Employment"], name="Gratuity", description="", section_numbers=[]),
+            dict(category=categories_by_name["Labour & Employment"], name="Minimum wages", description="", section_numbers=[]),
             dict(category=cyber_law, name="Online financial fraud", description=(
                 "Being tricked online, over the phone, or via a fake profile "
                 "into transferring money or sharing credentials."
@@ -1728,6 +2339,9 @@ class Command(BaseCommand):
             dict(category=cyber_law, name="Cyber harassment", description="", section_numbers=[]),
             dict(category=cyber_law, name="Data/privacy issues", description="", section_numbers=[]),
             dict(category=cyber_law, name="Cyber complaints", description="", section_numbers=[]),
+            dict(category=cyber_law, name="Hacking & unauthorized access", description="", section_numbers=[]),
+            dict(category=cyber_law, name="Online defamation", description="", section_numbers=[]),
+            dict(category=cyber_law, name="Cyberstalking", description="", section_numbers=[]),
         ]
 
         matters_created = 0
@@ -1735,7 +2349,10 @@ class Command(BaseCommand):
             matter, _ = LegalMatter.objects.update_or_create(
                 category=m["category"],
                 name=m["name"],
-                defaults={"description": m["description"]},
+                defaults={
+                    "description": m["description"],
+                    "name_te": MATTER_NAME_TE.get(m["name"], ""),
+                },
             )
             linked = [section_by_number[num] for num in m["section_numbers"] if num in section_by_number]
             matter.related_sections.set(linked)
@@ -1743,10 +2360,11 @@ class Command(BaseCommand):
 
         total = (
             len(sections) + len(rights_sections) + len(website_port_sections)
-            + len(new_categories_sections)
+            + len(new_categories_sections) + len(matter_content_sections)
         )
         self.stdout.write(self.style.SUCCESS(
             f"Seeded {total} real, source-cited legal sections, "
             f"{len(categories_by_name)} categories, and {matters_created} matters "
-            f"({sum(1 for m in matters if m['section_numbers'] or m['description'])} populated)."
+            f"({sum(1 for m in matters if m['section_numbers'] or m['description'])} populated). "
+            f"Telugu: {translated_count} sections fully translated."
         ))

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
@@ -23,7 +25,7 @@ class _SignupScreenState extends State<SignupScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     if (username.isEmpty || password.isEmpty) {
-      setState(() => _error = 'Enter a username and password.');
+      setState(() => _error = tr('Enter a username and password.'));
       return;
     }
     setState(() {
@@ -34,9 +36,39 @@ class _SignupScreenState extends State<SignupScreen> {
     if (!mounted) return;
     setState(() => _isSubmitting = false);
     if (result.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Account created! Welcome, ${AuthService.currentUsername.value}.')),
+      // Trigger Google Password Manager / Android Autofill to save credentials to Google/Email
+      TextInput.finishAutofillContext(shouldSave: true);
+
+      await showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          backgroundColor: AppColors.surface,
+          title: Text(
+            tr('Account created'),
+            style: GoogleFonts.inter(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          content: Text(
+            '${tr("Welcome,")} ${AuthService.currentUsername.value}!',
+            style: GoogleFonts.inter(color: AppColors.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(
+                tr('OK'),
+                style: GoogleFonts.inter(
+                  color: AppColors.accent,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
       );
+      if (!mounted) return;
       Navigator.pop(context, true);
     } else {
       setState(() => _error = result.error);
@@ -63,71 +95,129 @@ class _SignupScreenState extends State<SignupScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-              Text('Create an account', style: GoogleFonts.outfit(color: AppColors.textPrimary, fontSize: 26, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              Text(
-                "Only used to unlock the AI Assistant's online mode. We don't store your search or chat history against this account.",
-                style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
-              ),
-              const SizedBox(height: 28),
-              _field('Username', _usernameController),
-              const SizedBox(height: 14),
-              _field('Email (optional)', _emailController),
-              const SizedBox(height: 14),
-              _field('Password', _passwordController, obscure: true),
-              if (_error != null) ...[
+          child: AutofillGroup(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+                Text(
+                  tr('Create an account'),
+                  style: GoogleFonts.outfit(
+                    color: AppColors.textPrimary,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  tr(
+                    "Only used to unlock the AI Assistant's online mode. We don't store your search or chat history against this account.",
+                  ),
+                  style: GoogleFonts.inter(
+                    color: AppColors.textSecondary,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                _field(
+                  tr('Username'),
+                  _usernameController,
+                  autofillHints: const [AutofillHints.newUsername],
+                ),
                 const SizedBox(height: 14),
-                Text(_error!, style: GoogleFonts.inter(color: AppColors.danger, fontSize: 13)),
+                _field(
+                  tr('Email (optional)'),
+                  _emailController,
+                  autofillHints: const [AutofillHints.email],
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 14),
+                _field(
+                  tr('Password'),
+                  _passwordController,
+                  obscure: true,
+                  autofillHints: const [AutofillHints.newPassword],
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 14),
+                  Text(
+                    _error!,
+                    style: GoogleFonts.inter(
+                      color: AppColors.danger,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6366F1),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            tr('Sign up'),
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      tr('Already have an account? Log in'),
+                      style: GoogleFonts.inter(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ),
               ],
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6366F1),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
-                      : Text('Sign up', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w600)),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
-                    );
-                  },
-                  child: Text(
-                    'Already have an account? Log in',
-                    style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _field(String label, TextEditingController controller, {bool obscure = false}) {
+  Widget _field(
+    String label,
+    TextEditingController controller, {
+    bool obscure = false,
+    Iterable<String>? autofillHints,
+    TextInputType? keyboardType,
+  }) {
     return TextField(
       controller: controller,
       obscureText: obscure,
+      autofillHints: autofillHints,
+      keyboardType: keyboardType,
       style: GoogleFonts.inter(color: AppColors.textPrimary),
       decoration: InputDecoration(
         labelText: label,

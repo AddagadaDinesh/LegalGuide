@@ -3,6 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'api_service.dart';
+import 'backend_config_service.dart';
 
 class ConnectivityStatusService {
   static final ValueNotifier<bool> isOnline = ValueNotifier<bool>(false);
@@ -33,6 +34,7 @@ class ConnectivityStatusService {
 
   static Future<void> _checkNow() async {
     final thisCheck = ++_checkId;
+    await BackendConfigService.refreshFromPointer();
     try {
       final response = await http
           .get(Uri.parse('${ApiService.baseUrl}/categories/'))

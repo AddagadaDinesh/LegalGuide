@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
 import '../models/category.dart';
 import '../models/legal_matter.dart';
 import '../models/legal_section.dart';
@@ -172,7 +173,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 14),
                     child: Text(
-                      widget.title,
+                      tr(widget.title),
                       style: GoogleFonts.outfit(
                         color: AppColors.textPrimary,
                         fontSize: 24,
@@ -185,7 +186,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                   style: GoogleFonts.inter(color: AppColors.textPrimary),
                   onChanged: _onQueryChanged,
                   decoration: InputDecoration(
-                    hintText: 'Search laws, section numbers, topics...',
+                    hintText: tr('Search laws, section numbers, topics...'),
                     hintStyle: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
                     prefixIcon: const Icon(Icons.search_rounded, color: AppColors.accent),
                     filled: true,
@@ -213,7 +214,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                       scrollDirection: Axis.horizontal,
                       children: [
                         ChoiceChip(
-                          label: const Text('All'),
+                          label: Text(tr('All')),
                           selected: _selectedCategoryId == null,
                           onSelected: (_) => setState(() => _selectedCategoryId = null),
                           selectedColor: AppColors.accent,
@@ -230,7 +231,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                         const SizedBox(width: 8),
                         for (final category in _categories) ...[
                           ChoiceChip(
-                            label: Text(category.name),
+                            label: Text(category.displayName),
                             selected: _selectedCategoryId == category.id,
                             onSelected: (_) => setState(() => _selectedCategoryId = category.id),
                             selectedColor: categoryStyleFor(category.name).color,
@@ -262,36 +263,36 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (_matchedCategories.isNotEmpty) ...[
-                    SectionHeading(title: 'Categories (${_matchedCategories.length})'),
+                    SectionHeading(title: '${tr("Categories")} (${_matchedCategories.length})'),
                     const SizedBox(height: 8),
                     for (final category in _matchedCategories)
                       _buildResultTile(
                         icon: categoryStyleFor(category.name).icon,
                         color: categoryStyleFor(category.name).color,
-                        title: category.name,
-                        subtitle: category.description,
+                        title: category.displayName,
+                        subtitle: category.displayDescription,
                         onTap: () => Navigator.push(context,
                             MaterialPageRoute(builder: (context) => CategoryOverviewScreen(category: category))),
                       ),
                     const SizedBox(height: 12),
                   ],
                   if (_matchedMatters.isNotEmpty) ...[
-                    SectionHeading(title: 'Topics (${_matchedMatters.length})'),
+                    SectionHeading(title: '${tr("Topics")} (${_matchedMatters.length})'),
                     const SizedBox(height: 8),
                     for (final matter in _matchedMatters)
                       _buildResultTile(
                         icon: matter.isAvailable ? Icons.topic_rounded : Icons.hourglass_empty_rounded,
                         color: matter.isAvailable ? AppColors.accent : AppColors.textMuted,
-                        title: matter.name,
-                        subtitle: matter.description.isNotEmpty
-                            ? matter.description
+                        title: matter.displayName,
+                        subtitle: matter.displayDescription.isNotEmpty
+                            ? matter.displayDescription
                             : (matter.isAvailable
-                                ? 'View related legal sections'
-                                : 'Content coming soon — not yet verified'),
+                                ? tr('View related legal sections')
+                                : tr('Content coming soon — not yet verified')),
                         onTap: () {
                           if (!matter.isAvailable) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('"${matter.name}" content is coming soon — not yet verified.')),
+                              SnackBar(content: Text('"${matter.displayName}" ${tr("content is coming soon — not yet verified.")}')),
                             );
                             return;
                           }
@@ -309,7 +310,9 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: SectionHeading(
-              title: _query.isEmpty ? 'Available Provisions (${filtered.length})' : 'Sections (${filtered.length})',
+              title: _query.isEmpty
+                  ? '${tr("Available Provisions")} (${filtered.length})'
+                  : '${tr("Sections")} (${filtered.length})',
               icon: Icons.menu_book_rounded,
             ),
           ),
@@ -320,7 +323,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Text(
-                'No matching legal sections found.',
+                tr('No matching legal sections found.'),
                 style: GoogleFonts.inter(color: AppColors.textSecondary),
               ),
             ),
@@ -393,7 +396,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
           backgroundColor: AppColors.surface,
           elevation: 0,
           title: Text(
-            widget.title,
+            tr(widget.title),
             style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
           ),
         ),

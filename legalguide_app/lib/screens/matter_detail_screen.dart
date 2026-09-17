@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
 import '../models/category.dart';
 import '../models/law.dart';
 import '../models/legal_matter.dart';
@@ -68,7 +69,7 @@ class _MatterDetailScreenState extends State<MatterDetailScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,
-        title: Text(matter.name, style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        title: Text(matter.displayName, style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
       ),
       body: _loading
           ? Center(child: CircularProgressIndicator(color: style.color))
@@ -100,17 +101,17 @@ class _MatterDetailScreenState extends State<MatterDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 if (category != null)
-                                  Text(category.name.toUpperCase(),
+                                  Text(category.displayName.toUpperCase(),
                                       style: GoogleFonts.inter(
                                           color: style.color, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.4)),
                                 const SizedBox(height: 4),
                                 Text(
-                                  matter.description.isNotEmpty ? matter.description : matter.name,
+                                  matter.displayDescription.isNotEmpty ? matter.displayDescription : matter.displayName,
                                   style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13.5, height: 1.5),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  '${sections.length} legal section${sections.length == 1 ? '' : 's'} linked',
+                                  '${sections.length} ${tr(sections.length == 1 ? "legal section" : "legal sections")} ${tr("linked")}',
                                   style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 11.5, fontWeight: FontWeight.w600),
                                 ),
                               ],
@@ -128,7 +129,7 @@ class _MatterDetailScreenState extends State<MatterDetailScreen> {
                             const Icon(Icons.hourglass_empty_rounded, color: AppColors.textMuted, size: 36),
                             const SizedBox(height: 12),
                             Text(
-                              'Verified legal sections for this topic are not available yet.',
+                              tr('Verified legal sections for this topic are not available yet.'),
                               textAlign: TextAlign.center,
                               style: GoogleFonts.inter(color: AppColors.textSecondary),
                             ),

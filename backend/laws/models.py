@@ -4,6 +4,8 @@ from django.db import models
 class Category(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+    name_te = models.CharField(max_length=150, blank=True)
+    description_te = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
@@ -65,6 +67,17 @@ class LegalSection(models.Model):
         symmetrical=False
     )
 
+    # Telugu translations of the interpretive/explanatory fields. The
+    # official statutory text (legal_text) is deliberately left untranslated
+    # — it must stay the verbatim bare-act wording, not a paraphrase.
+    title_te = models.CharField(max_length=300, blank=True)
+    simple_explanation_te = models.TextField(blank=True)
+    purpose_te = models.TextField(blank=True)
+    punishment_te = models.TextField(blank=True)
+    key_elements_te = models.TextField(blank=True)
+    relevant_information_te = models.TextField(blank=True)
+    relevant_documents_te = models.TextField(blank=True)
+
     def __str__(self):
         return f"{self.law.short_name or self.law.name} - Section {self.section_number}"
 
@@ -77,6 +90,8 @@ class LegalMatter(models.Model):
     )
     name = models.CharField(max_length=150)
     description = models.TextField(blank=True)
+    name_te = models.CharField(max_length=200, blank=True)
+    description_te = models.TextField(blank=True)
     related_sections = models.ManyToManyField(
         LegalSection,
         blank=True,

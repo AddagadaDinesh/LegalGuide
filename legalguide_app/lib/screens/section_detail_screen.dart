@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
 import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
 import '../services/bookmark_service.dart';
+import '../services/locale_service.dart';
 import '../services/view_count_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/section_lookup.dart';
+import '../utils/section_visual.dart';
 
 class SectionDetailScreen extends StatefulWidget {
   final LegalSection section;
@@ -90,6 +93,8 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildVisualBanner(),
+            const SizedBox(height: 20),
             Row(
               children: [
                 Icon(_style.icon, color: _style.color, size: 16),
@@ -132,7 +137,7 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
             ],
             const SizedBox(height: 12),
             Text(
-              section.title,
+              section.displayTitle,
               style: GoogleFonts.outfit(
                 color: AppColors.textPrimary,
                 fontSize: 24,
@@ -143,25 +148,25 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
             const SizedBox(height: 24),
 
             _buildHighlightBox(
-              title: 'Key Takeaway (Plain Explanation)',
+              title: tr('Key Takeaway (Plain Explanation)'),
               icon: Icons.lightbulb_rounded,
-              content: section.simpleExplanation,
+              content: section.displaySimpleExplanation,
               color: _style.color,
             ),
             const SizedBox(height: 16),
 
             if (section.purpose.isNotEmpty)
               _buildDetailBox(
-                title: 'Purpose & Legal Context',
+                title: tr('Purpose & Legal Context'),
                 icon: Icons.track_changes_rounded,
-                content: section.purpose,
+                content: section.displayPurpose,
                 accentColor: const Color(0xFF22D3EE),
               ),
             if (section.purpose.isNotEmpty) const SizedBox(height: 16),
 
             if (section.keyElementsList.isNotEmpty)
               _buildBulletBox(
-                title: 'Key Elements',
+                title: tr('Key Elements'),
                 icon: Icons.checklist_rounded,
                 items: section.keyElementsList,
                 accentColor: const Color(0xFF38BDF8),
@@ -170,16 +175,16 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
 
             if (section.punishment.isNotEmpty)
               _buildDetailBox(
-                title: 'Punishment & Penalties',
+                title: tr('Punishment & Penalties'),
                 icon: Icons.gavel_rounded,
-                content: section.punishment,
+                content: section.displayPunishment,
                 accentColor: AppColors.danger,
               ),
             if (section.punishment.isNotEmpty) const SizedBox(height: 16),
 
             if (section.relevantInformationList.isNotEmpty)
               _buildBulletBox(
-                title: 'What Information May Matter',
+                title: tr('What Information May Matter'),
                 icon: Icons.fact_check_rounded,
                 items: section.relevantInformationList,
                 accentColor: AppColors.warning,
@@ -188,18 +193,21 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
 
             if (section.relevantDocuments.isNotEmpty)
               _buildDetailBox(
-                title: 'Required / Relevant Documents',
+                title: tr('Required / Relevant Documents'),
                 icon: Icons.folder_copy_rounded,
-                content: section.relevantDocuments,
+                content: section.displayRelevantDocuments,
                 accentColor: AppColors.success,
               ),
             if (section.relevantDocuments.isNotEmpty) const SizedBox(height: 16),
 
             _buildDetailBox(
-              title: 'Official Statutory Legal Text',
+              title: tr('Official Statutory Legal Text'),
               icon: Icons.menu_book_rounded,
               content: section.legalText,
               accentColor: const Color(0xFFA855F7),
+              note: LocaleService.isTelugu
+                  ? tr('(Official text is kept in English to preserve its exact legal wording.)')
+                  : null,
             ),
             const SizedBox(height: 24),
 
@@ -209,7 +217,7 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
                   Icon(Icons.link_rounded, color: _style.color, size: 16),
                   const SizedBox(width: 6),
                   Text(
-                    'Related Legal Provisions',
+                    tr('Related Legal Provisions'),
                     style: GoogleFonts.inter(
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.bold,
@@ -254,7 +262,7 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
                                   ),
                                 ),
                                 Text(
-                                  related.title,
+                                  related.displayTitle,
                                   style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 13),
                                 ),
                               ],
@@ -284,8 +292,8 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Verified from ${section.source.isEmpty ? "Official Gazette" : section.source}'
-                        '${section.lastVerified != null ? " • Last updated ${section.lastVerified}" : ""}',
+                        '${tr("Verified from")} ${section.source.isEmpty ? tr("Official Gazette") : section.source}'
+                        '${section.lastVerified != null ? " • ${tr("Last updated")} ${section.lastVerified}" : ""}',
                         style: GoogleFonts.inter(
                           color: AppColors.textSecondary,
                           fontSize: 12,
@@ -297,6 +305,48 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildVisualBanner() {
+    final icon = sectionIconFor(section);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 28),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [_style.color.withValues(alpha: 0.85), _style.color.withValues(alpha: 0.55)],
+        ),
+        borderRadius: BorderRadius.circular(AppRadius.card),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.white, size: 36),
+          ),
+          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              section.title,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.outfit(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -418,6 +468,7 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
     required IconData icon,
     required String content,
     required Color accentColor,
+    String? note,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -452,6 +503,17 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
               height: 1.45,
             ),
           ),
+          if (note != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              note,
+              style: GoogleFonts.inter(
+                color: AppColors.textMuted,
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
         ],
       ),
     );

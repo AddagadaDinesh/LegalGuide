@@ -41,6 +41,40 @@ class AuthService {
     });
   }
 
+  static Future<AuthResult> resetPassword(
+    String username,
+    String email,
+    String newPassword,
+  ) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${ApiService.baseUrl}/auth/forgot-password/'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'username': username,
+              'email': email,
+              'new_password': newPassword,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        return AuthResult(success: true);
+      }
+      final errorMsg =
+          data['detail'] as String? ?? 'Failed to reset password.';
+      return AuthResult(success: false, error: errorMsg);
+    } catch (_) {
+      return AuthResult(
+        success: false,
+        error:
+            'Unable to connect to server. Please check your internet connection.',
+      );
+    }
+  }
+
   static Future<AuthResult> _authRequest(String endpoint, Map<String, String> body) async {
     try {
       final response = await http

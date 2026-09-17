@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
 import '../models/category.dart';
 import '../models/legal_matter.dart';
 import '../repositories/legal_data_repository.dart';
@@ -39,7 +40,7 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
   void _openMatter(LegalMatter matter) {
     if (!matter.isAvailable) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('"${matter.name}" content is coming soon — not yet verified.')),
+        SnackBar(content: Text('"${matter.displayName}" ${tr("content is coming soon — not yet verified.")}')),
       );
       return;
     }
@@ -61,7 +62,7 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
         appBar: AppBar(
           backgroundColor: AppColors.surface,
           elevation: 0,
-          title: Text(widget.category.name,
+          title: Text(widget.category.displayName,
               style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
           bottom: TabBar(
             indicatorColor: style.color,
@@ -69,9 +70,9 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
             labelColor: AppColors.textPrimary,
             unselectedLabelColor: AppColors.textSecondary,
             labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13),
-            tabs: const [
-              Tab(text: 'Topics'),
-              Tab(text: 'Laws & Sections'),
+            tabs: [
+              Tab(text: tr('Topics')),
+              Tab(text: tr('Laws & Sections')),
             ],
           ),
         ),
@@ -90,16 +91,16 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.category.description.isNotEmpty
-                              ? widget.category.description
-                              : widget.category.name,
+                          widget.category.displayDescription.isNotEmpty
+                              ? widget.category.displayDescription
+                              : widget.category.displayName,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12.5, height: 1.4),
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          '${_matters.length} topics · $populated with legal sections',
+                          '${_matters.length} ${tr("topics")} · $populated ${tr("with legal sections")}',
                           style: GoogleFonts.inter(color: style.color, fontSize: 11.5, fontWeight: FontWeight.w600),
                         ),
                       ],
@@ -127,7 +128,7 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
   Widget _buildTopics(CategoryStyle style) {
     if (_matters.isEmpty) {
       return Center(
-        child: Text('No topics available for this category yet.',
+        child: Text(tr('No topics available for this category yet.'),
             style: GoogleFonts.inter(color: AppColors.textSecondary)),
       );
     }
@@ -165,7 +166,7 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
                   iconSize: 18,
                 ),
                 Text(
-                  matter.name,
+                  matter.displayName,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
@@ -176,7 +177,7 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
                 ),
                 if (available)
                   Text(
-                    '${matter.relatedSectionIds.length} section${matter.relatedSectionIds.length == 1 ? '' : 's'}',
+                    '${matter.relatedSectionIds.length} ${tr(matter.relatedSectionIds.length == 1 ? "section" : "sections")}',
                     style: GoogleFonts.inter(color: style.color, fontSize: 10.5, fontWeight: FontWeight.w600),
                   )
                 else
@@ -187,7 +188,7 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      'Coming soon',
+                      tr('Coming soon'),
                       style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 10),
                     ),
                   ),

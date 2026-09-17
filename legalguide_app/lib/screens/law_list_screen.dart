@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
 import '../models/category.dart';
 import '../models/law.dart';
 import '../models/legal_section.dart';
@@ -47,7 +48,7 @@ class _LawListScreenState extends State<LawListScreen> {
           if (laws.isEmpty) {
             return Center(
               child: Text(
-                'No laws found for ${widget.category.name}',
+                '${tr("No laws found for")} ${widget.category.displayName}',
                 style: GoogleFonts.inter(color: AppColors.textSecondary),
               ),
             );
@@ -107,7 +108,7 @@ class _LawListScreenState extends State<LawListScreen> {
                           Padding(
                             padding: const EdgeInsets.all(16),
                             child: Text(
-                              'No sections loaded for this law.',
+                              tr('No sections loaded for this law.'),
                               style: GoogleFonts.inter(
                                 color: AppColors.textMuted,
                                 fontSize: 13,
@@ -129,7 +130,7 @@ class _LawListScreenState extends State<LawListScreen> {
                                     vertical: 4,
                                   ),
                                   title: Text(
-                                    '${sec.sectionNumber} - ${sec.title}',
+                                    '${sec.sectionNumber} - ${sec.displayTitle}',
                                     style: GoogleFonts.inter(
                                       color: style.color,
                                       fontWeight: FontWeight.w600,
@@ -137,7 +138,7 @@ class _LawListScreenState extends State<LawListScreen> {
                                     ),
                                   ),
                                   subtitle: Text(
-                                    sec.simpleExplanation,
+                                    sec.displaySimpleExplanation,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.inter(
@@ -183,7 +184,7 @@ class _LawListScreenState extends State<LawListScreen> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         title: Text(
-          widget.category.name,
+          widget.category.displayName,
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,

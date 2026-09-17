@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../data/legal_help_contacts.dart';
+import '../localization/app_strings.dart';
 import '../theme/app_theme.dart';
 import '../widgets/icon_badge.dart';
 
@@ -25,13 +26,13 @@ class LegalHelpScreen extends StatelessWidget {
       final launched = await canLaunchUrl(uri) && await launchUrl(uri);
       if (!launched && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open dialer for $number')),
+          SnackBar(content: Text('${tr("Could not open dialer for")} $number')),
         );
       }
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Calling is not supported on this device — dial $number manually.')),
+          SnackBar(content: Text('${tr("Calling is not supported on this device — dial")} $number ${tr("manually.")}')),
         );
       }
     }
@@ -44,7 +45,7 @@ class LegalHelpScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,
-        title: Text('Legal Help', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+        title: Text(tr('Legal Help'), style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),

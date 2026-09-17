@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
 import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
 import '../services/bookmark_service.dart';
@@ -75,7 +76,7 @@ class _SavedScreenState extends State<SavedScreen> {
                           const Icon(Icons.bookmark_rounded, color: AppColors.accent, size: 22),
                           const SizedBox(width: 8),
                           Text(
-                            'My Saved',
+                            tr('My Saved'),
                             style: GoogleFonts.outfit(
                               color: AppColors.textPrimary,
                               fontSize: 24,
@@ -90,7 +91,9 @@ class _SavedScreenState extends State<SavedScreen> {
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
                       child: Text(
-                        _saved.isEmpty ? 'Nothing saved yet' : '${_saved.length} section${_saved.length == 1 ? '' : 's'} bookmarked',
+                        _saved.isEmpty
+                            ? tr('Nothing saved yet')
+                            : '${_saved.length} ${tr(_saved.length == 1 ? "section" : "sections")} ${tr("bookmarked")}',
                         style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
                       ),
                     ),
@@ -105,8 +108,8 @@ class _SavedScreenState extends State<SavedScreen> {
                                 color: AppColors.textMuted, size: 40),
                             const SizedBox(height: 16),
                             Text(
-                              'No saved sections yet — tap the bookmark icon on any '
-                              'section to save it here.',
+                              tr('No saved sections yet — tap the bookmark icon on any '
+                                  'section to save it here.'),
                               textAlign: TextAlign.center,
                               style: GoogleFonts.inter(color: AppColors.textSecondary),
                             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
 import '../models/chat_message.dart';
 import '../services/assistant_service.dart';
 import '../services/auth_service.dart';
@@ -11,9 +12,13 @@ Future<void> showAssistantPanel(BuildContext context) {
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => const FractionallySizedBox(
-      heightFactor: 0.9,
-      child: AssistantPanel(),
+    builder: (context) => AnimatedPadding(
+      duration: const Duration(milliseconds: 100),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: const FractionallySizedBox(
+        heightFactor: 0.9,
+        child: AssistantPanel(),
+      ),
     ),
   );
 }
@@ -113,7 +118,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
                       children: [
                         Expanded(
                           child: Text(
-                            'Log in to unlock online AI answers. Offline answers from the LegalGuide library always work.',
+                            tr('Log in to unlock online AI answers. Offline answers from the LegalGuide library always work.'),
                             style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12),
                           ),
                         ),
@@ -122,7 +127,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
                             context,
                             MaterialPageRoute(builder: (context) => const LoginScreen()),
                           ),
-                          child: Text('Log in', style: GoogleFonts.inter(color: AppColors.accent, fontWeight: FontWeight.w600)),
+                          child: Text(tr('Log in'), style: GoogleFonts.inter(color: AppColors.accent, fontWeight: FontWeight.w600)),
                         ),
                       ],
                     ),
@@ -179,9 +184,9 @@ class _AssistantPanelState extends State<AssistantPanel> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('LegalGuide Assistant',
+                Text(tr('LegalGuide Assistant'),
                     style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                Text('Ask about Indian law, sections & your rights',
+                Text(tr('Ask about Indian law, sections & your rights'),
                     style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
               ],
             ),
@@ -212,11 +217,11 @@ class _AssistantPanelState extends State<AssistantPanel> {
               child: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.accent, size: 30),
             ),
             const SizedBox(height: 16),
-            Text('Welcome to LegalGuide!',
+            Text(tr('Welcome to LegalGuide!'),
                 style: GoogleFonts.outfit(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 6),
             Text(
-              'When you\'re online I can answer anything; offline, I can only use the legal data stored in this app.',
+              tr('When you\'re online I can answer anything; offline, I can only use the legal data stored in this app.'),
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(color: AppColors.textSecondary),
             ),
@@ -228,7 +233,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
               children: [
                 for (final entry in _quickQuestions.entries)
                   ActionChip(
-                    label: Text(entry.key),
+                    label: Text(tr(entry.key)),
                     backgroundColor: AppColors.surface,
                     side: const BorderSide(color: AppColors.border),
                     labelStyle: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12),
@@ -268,7 +273,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '🔒 Log in or create an account for answers beyond app content',
+                    tr('🔒 Log in or create an account for answers beyond app content'),
                     style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 11),
                   ),
                 ),
@@ -283,7 +288,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '🟠 Offline – Using LegalGuide Knowledge',
+                    tr('🟠 Offline – Using LegalGuide Knowledge'),
                     style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 11),
                   ),
                 ),
@@ -298,7 +303,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '🟢 Online',
+                    tr('🟢 Online'),
                     style: GoogleFonts.inter(color: const Color(0xFFFDE68A), fontSize: 11),
                   ),
                 ),
@@ -325,7 +330,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
                     MaterialPageRoute(builder: (context) => const LoginScreen()),
                   ),
                   child: Text(
-                    'Log in or create an account →',
+                    tr('Log in or create an account →'),
                     style: GoogleFonts.inter(color: AppColors.accent, fontWeight: FontWeight.w600, fontSize: 12.5),
                   ),
                 ),
@@ -347,7 +352,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
               style: GoogleFonts.inter(color: AppColors.textPrimary),
               onSubmitted: (_) => _sendMessage(),
               decoration: InputDecoration(
-                hintText: 'Ask a question...',
+                hintText: tr('Ask a question...'),
                 hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
                 filled: true,
                 fillColor: AppColors.surface,

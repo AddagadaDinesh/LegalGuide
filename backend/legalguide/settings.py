@@ -28,9 +28,9 @@ load_dotenv(BASE_DIR / ".env")
 SECRET_KEY = 'django-insecure-1m(l0-+a3dquu_so3o#5p*@6hip30-m2d9=hk=s%#5r+6mn#lx'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '10.0.2.2', '172.16.0.33', '.trycloudflare.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '10.0.2.2', '172.16.0.33', '.trycloudflare.com', '.pythonanywhere.com']
 
 
 # Application definition
@@ -152,8 +152,8 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.ScopedRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "ai_assistant": "10/min",
-        "auth": "10/hour",
+        "ai_assistant": "30/min",
+        "auth": "120/hour",
     },
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
 import '../models/legal_section.dart';
 import '../theme/app_theme.dart';
 
@@ -81,7 +82,7 @@ class LegalSectionCard extends StatelessWidget {
                             ],
                             if (isFrequentlyViewed) ...[
                               const SizedBox(width: 6),
-                              _tag('Frequent', bg: const Color(0xFF854D0E), fg: const Color(0xFFFDE68A)),
+                              _tag(tr('Frequent'), bg: const Color(0xFF854D0E), fg: const Color(0xFFFDE68A)),
                             ],
                             const Spacer(),
                             IconButton(
@@ -98,7 +99,7 @@ class LegalSectionCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 9),
                         Text(
-                          section.title,
+                          section.displayTitle,
                           style: GoogleFonts.outfit(
                             color: AppColors.textPrimary,
                             fontWeight: FontWeight.bold,
@@ -115,7 +116,7 @@ class LegalSectionCard extends StatelessWidget {
                         ],
                         const SizedBox(height: 9),
                         Text(
-                          'IN SIMPLE WORDS',
+                          tr('IN SIMPLE WORDS'),
                           style: GoogleFonts.inter(
                             color: accentColor,
                             fontSize: 10.5,
@@ -125,7 +126,7 @@ class LegalSectionCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          section.simpleExplanation,
+                          section.displaySimpleExplanation,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13, height: 1.4),

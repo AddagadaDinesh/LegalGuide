@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
 import '../models/category.dart';
+import '../models/law.dart';
+import '../models/legal_matter.dart';
 import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
 import '../services/auth_service.dart';
@@ -17,6 +20,7 @@ import 'category_overview_screen.dart';
 import 'documents_screen.dart';
 import 'explore_laws_screen.dart';
 import 'legal_help_screen.dart';
+import 'railway_rules_screen.dart';
 import 'section_detail_screen.dart';
 
 const _fallbackSearchSuggestions = ['theft', 'arrest', 'cheating', 'murder', 'article 21'];
@@ -55,14 +59,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadData() async {
     final synced = await LegalDataRepository.syncAll();
-    final hasSyncedBefore = await LegalDataRepository.hasSyncedBefore();
-    final categories = await LegalDataRepository.loadCategories();
-    final laws = await LegalDataRepository.loadLaws();
-    final sections = await LegalDataRepository.loadSections();
-    final matters = await LegalDataRepository.loadMatters();
-    final bookmarks = await BookmarkService.getBookmarkedIds();
-    final counts = await ViewCountService.getAllCounts();
-    final topSearches = await SearchHistoryService.getTopQueries();
+    final results = await Future.wait([
+      LegalDataRepository.hasSyncedBefore(),
+      LegalDataRepository.loadCategories(),
+      LegalDataRepository.loadLaws(),
+      LegalDataRepository.loadSections(),
+      LegalDataRepository.loadMatters(),
+      BookmarkService.getBookmarkedIds(),
+      ViewCountService.getAllCounts(),
+      SearchHistoryService.getTopQueries(),
+    ]);
+    final hasSyncedBefore = results[0] as bool;
+    final categories = results[1] as List<Category>;
+    final laws = results[2] as List<Law>;
+    final sections = results[3] as List<LegalSection>;
+    final matters = results[4] as List<LegalMatter>;
+    final bookmarks = results[5] as Set<int>;
+    final counts = results[6] as Map<int, int>;
+    final topSearches = results[7] as List<String>;
 
     final frequent = sections
         .where((s) => (counts[s.id] ?? 0) >= ViewCountService.frequentThreshold)
@@ -171,7 +185,7 @@ class _HomeScreenState extends State<HomeScreen> {
             IconBadge(icon: style.icon, color: style.color, size: 38, iconSize: 18),
             const SizedBox(height: 10),
             Text(
-              category.name,
+              category.displayName,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 12.5, height: 1.3),
@@ -232,8 +246,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   builder: (context, username, _) {
                                     return Text(
                                       username != null
-                                          ? 'Welcome, $username'
-                                          : 'Simplified Legal Knowledge & Assistance',
+                                          ? '${tr("Welcome,")} $username'
+                                          : tr('Simplified Legal Knowledge & Assistance'),
                                       style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.85), fontSize: 12.5),
                                     );
                                   },
@@ -260,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             const Icon(Icons.search_rounded, color: AppColors.accent),
                             const SizedBox(width: 10),
                             Text(
-                              'Search laws, section numbers, topics...',
+                              tr('Search laws, section numbers, topics...'),
                               style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
                             ),
                           ],
@@ -268,29 +282,99 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 26),
-                    const SectionHeading(title: 'Quick Actions', icon: Icons.bolt_rounded),
+                    SectionHeading(title: tr('Quick Actions'), icon: Icons.bolt_rounded),
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 10,
                       runSpacing: 10,
                       children: [
-                        _quickAccessCard('Search Laws', Icons.search_rounded, AppColors.accent, widget.onOpenExplore),
-                        _quickAccessCard('Ask AI', Icons.chat_bubble_rounded, const Color(0xFFA78BFA), widget.onOpenAssistant),
-                        _quickAccessCard('Arrest &\nDetention', Icons.local_police_rounded, const Color(0xFFF59E0B), () {
+                        _quickAccessCard(tr('Search Laws'), Icons.search_rounded, AppColors.accent, widget.onOpenExplore),
+                        _quickAccessCard(tr('Ask AI'), Icons.chat_bubble_rounded, const Color(0xFFA78BFA), widget.onOpenAssistant),
+                        _quickAccessCard(tr('Railway\nRules & Fines'), Icons.train_rounded, const Color(0xFF0284C7), () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) => const RailwayRulesScreen()));
+                        }),
+                        _quickAccessCard(tr('Arrest &\nDetention'), Icons.local_police_rounded, const Color(0xFFF59E0B), () {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) => const ArrestDetentionScreen()));
                         }),
-                        _quickAccessCard('Legal\nDocuments', Icons.description_rounded, const Color(0xFF14B8A6), () {
+                        _quickAccessCard(tr('Legal\nDocuments'), Icons.description_rounded, const Color(0xFF14B8A6), () {
                           Navigator.push(
                               context, MaterialPageRoute(builder: (context) => const DocumentsScreen()));
                         }),
-                        _quickAccessCard('Need Legal\nHelp', Icons.support_agent_rounded, const Color(0xFFF43F5E), () {
+                        _quickAccessCard(tr('Need Legal\nHelp'), Icons.support_agent_rounded, const Color(0xFFF43F5E), () {
                           Navigator.push(
                               context, MaterialPageRoute(builder: (context) => const LegalHelpScreen()));
                         }),
                       ],
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 20),
+                    // Railway Rules Banner
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RailwayRulesScreen()),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF0369A1), Color(0xFF0284C7)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF0284C7).withValues(alpha: 0.25),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(Icons.train_rounded, color: Colors.white, size: 28),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    tr('Indian Railway Rules & Fines'),
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    tr('Penalties, ticketless travel, chain pulling & passenger rights'),
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white.withValues(alpha: 0.85),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right_rounded, color: Colors.white),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     if (_neverSynced) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20.0),
@@ -299,8 +383,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             const Icon(Icons.cloud_off_rounded, color: AppColors.textMuted, size: 40),
                             const SizedBox(height: 16),
                             Text(
-                              "You're offline and haven't synced any legal data yet.\n"
-                              'Connect to the internet and pull down to refresh.',
+                              tr("You're offline and haven't synced any legal data yet.\n"
+                                  'Connect to the internet and pull down to refresh.'),
                               textAlign: TextAlign.center,
                               style: GoogleFonts.inter(color: AppColors.textSecondary),
                             ),
@@ -308,7 +392,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ] else ...[
-                      const SectionHeading(title: 'Popular Searches', icon: Icons.trending_up_rounded),
+                      SectionHeading(title: tr('Popular Searches'), icon: Icons.trending_up_rounded),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
@@ -329,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       const SizedBox(height: 28),
-                      const SectionHeading(title: 'Browse Legal Categories', icon: Icons.grid_view_rounded),
+                      SectionHeading(title: tr('Browse Legal Categories'), icon: Icons.grid_view_rounded),
                       const SizedBox(height: 12),
                       SizedBox(
                         height: 122,
@@ -339,11 +423,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(height: 28),
-                      const SectionHeading(title: 'Commonly Referenced Sections', icon: Icons.link_rounded),
+                      SectionHeading(title: tr('Commonly Referenced Sections'), icon: Icons.link_rounded),
                       const SizedBox(height: 12),
                       if (_commonlyReferenced.isEmpty)
                         Text(
-                          'Sections linked from multiple topics will show up here.',
+                          tr('Sections linked from multiple topics will show up here.'),
                           style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
                         )
                       else
@@ -359,11 +443,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             onTap: () => _openSection(section),
                           ),
                       const SizedBox(height: 16),
-                      const SectionHeading(title: 'Frequently Viewed', icon: Icons.history_rounded),
+                      SectionHeading(title: tr('Frequently Viewed'), icon: Icons.history_rounded),
                       const SizedBox(height: 12),
                       if (_frequentSections.isEmpty)
                         Text(
-                          'Sections you open a few times will show up here.',
+                          tr('Sections you open a few times will show up here.'),
                           style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
                         )
                       else

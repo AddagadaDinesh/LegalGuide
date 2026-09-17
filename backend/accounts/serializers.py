@@ -12,6 +12,16 @@ class SignupSerializer(serializers.ModelSerializer):
         model = User
         fields = ["username", "email", "password"]
 
+    def validate_username(self, value):
+        cleaned = value.strip()
+        if len(cleaned) < 3:
+            raise serializers.ValidationError("Username must be at least 3 characters long.")
+        if User.objects.filter(username__iexact=cleaned).exists():
+            raise serializers.ValidationError(
+                "A user with this or a similar username already exists. Please choose a different username."
+            )
+        return cleaned
+
     def validate(self, attrs):
         candidate = User(username=attrs.get("username", ""), email=attrs.get("email", ""))
         validate_password(attrs["password"], user=candidate)
@@ -19,8 +29,8 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return User.objects.create_user(
-            username=validated_data["username"],
-            email=validated_data.get("email", ""),
+            username=validated_data["username"].strip(),
+            email=validated_data.get("email", "").strip().lower(),
             password=validated_data["password"],
         )
 

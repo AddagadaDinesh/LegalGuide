@@ -1,8 +1,12 @@
+import '../services/locale_service.dart';
+
 class LegalMatter {
   final int id;
   final int categoryId;
   final String name;
   final String description;
+  final String nameTe;
+  final String descriptionTe;
   final List<int> relatedSectionIds;
 
   LegalMatter({
@@ -10,10 +14,16 @@ class LegalMatter {
     required this.categoryId,
     required this.name,
     required this.description,
+    this.nameTe = '',
+    this.descriptionTe = '',
     required this.relatedSectionIds,
   });
 
   bool get isAvailable => description.isNotEmpty || relatedSectionIds.isNotEmpty;
+
+  String get displayName => LocaleService.isTelugu && nameTe.isNotEmpty ? nameTe : name;
+  String get displayDescription =>
+      LocaleService.isTelugu && descriptionTe.isNotEmpty ? descriptionTe : description;
 
   factory LegalMatter.fromJson(Map<String, dynamic> json) {
     return LegalMatter(
@@ -23,6 +33,8 @@ class LegalMatter {
           : (json['category']?['id'] ?? 0),
       name: json['name'] ?? '',
       description: json['description'] ?? '',
+      nameTe: json['name_te'] ?? '',
+      descriptionTe: json['description_te'] ?? '',
       relatedSectionIds: (json['related_sections'] as List<dynamic>? ?? [])
           .map((e) => e as int)
           .toList(),
@@ -34,6 +46,8 @@ class LegalMatter {
         'category': categoryId,
         'name': name,
         'description': description,
+        'name_te': nameTe,
+        'description_te': descriptionTe,
         'related_sections': relatedSectionIds,
       };
 }

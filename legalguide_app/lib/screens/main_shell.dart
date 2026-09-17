@@ -9,12 +9,16 @@ import 'explore_laws_screen.dart';
 import 'home_screen.dart';
 import 'legal_help_screen.dart';
 import 'login_screen.dart';
+import 'railway_rules_screen.dart';
 import 'saved_screen.dart';
+import '../localization/app_strings.dart';
 import '../services/auth_service.dart';
 import '../services/bookmark_service.dart';
 import '../services/connectivity_status_service.dart';
+import '../services/locale_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/icon_badge.dart';
+import '../widgets/watermark_background.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -27,7 +31,6 @@ class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
   final ValueNotifier<int> _bookmarkVersion = ValueNotifier<int>(0);
   int _savedCount = 0;
-  String _language = 'English';
 
   @override
   void initState() {
@@ -76,30 +79,37 @@ class _MainShellState extends State<MainShell> {
               const SizedBox(height: 12),
               _moreTile(
                 sheetContext,
+                Icons.train_rounded,
+                const Color(0xFF0284C7),
+                tr('Railway Rules & Fines'),
+                const RailwayRulesScreen(),
+              ),
+              _moreTile(
+                sheetContext,
                 Icons.local_police_rounded,
                 const Color(0xFFF59E0B),
-                'Arrest & Detention',
+                tr('Arrest & Detention'),
                 const ArrestDetentionScreen(),
               ),
               _moreTile(
                 sheetContext,
                 Icons.description_rounded,
                 const Color(0xFF14B8A6),
-                'Documents',
+                tr('Documents'),
                 const DocumentsScreen(),
               ),
               _moreTile(
                 sheetContext,
                 Icons.support_agent_rounded,
                 const Color(0xFFF43F5E),
-                'Legal Help',
+                tr('Legal Help'),
                 const LegalHelpScreen(),
               ),
               _moreTile(
                 sheetContext,
                 Icons.info_rounded,
                 AppColors.accent,
-                'About',
+                tr('About'),
                 const AboutScreen(),
               ),
               const SizedBox(height: 12),
@@ -149,14 +159,14 @@ class _MainShellState extends State<MainShell> {
           return AlertDialog(
             backgroundColor: AppColors.surface,
             title: Text(
-              'Log in',
+              tr('Log in'),
               style: GoogleFonts.inter(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
             content: Text(
-              "An account is only needed for the AI Assistant's online mode. Browsing and searching legal content never requires one.",
+              tr("An account is only needed for the AI Assistant's online mode. Browsing and searching legal content never requires one."),
               style: GoogleFonts.inter(
                 color: AppColors.textSecondary,
                 fontSize: 13,
@@ -166,7 +176,7 @@ class _MainShellState extends State<MainShell> {
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext),
                 child: Text(
-                  'Cancel',
+                  tr('Cancel'),
                   style: GoogleFonts.inter(color: AppColors.textSecondary),
                 ),
               ),
@@ -181,7 +191,7 @@ class _MainShellState extends State<MainShell> {
                   );
                 },
                 child: Text(
-                  'Log in',
+                  tr('Log in'),
                   style: GoogleFonts.inter(
                     color: const Color(0xFF6366F1),
                     fontWeight: FontWeight.w600,
@@ -194,21 +204,21 @@ class _MainShellState extends State<MainShell> {
         return AlertDialog(
           backgroundColor: AppColors.surface,
           title: Text(
-            'Account',
+            tr('Account'),
             style: GoogleFonts.inter(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
           content: Text(
-            'Logged in as $username',
+            '${tr("Logged in as")} $username',
             style: GoogleFonts.inter(color: AppColors.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
               child: Text(
-                'Close',
+                tr('Close'),
                 style: GoogleFonts.inter(color: AppColors.textSecondary),
               ),
             ),
@@ -218,15 +228,15 @@ class _MainShellState extends State<MainShell> {
                 await AuthService.logout();
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text(
-                      'Logged out. You can still browse offline legal content.',
+                      tr('Logged out. You can still browse offline legal content.'),
                     ),
                   ),
                 );
               },
               child: Text(
-                'Log out',
+                tr('Log out'),
                 style: GoogleFonts.inter(
                   color: AppColors.danger,
                   fontWeight: FontWeight.w600,
@@ -246,43 +256,59 @@ class _MainShellState extends State<MainShell> {
         return AlertDialog(
           backgroundColor: AppColors.surface,
           title: Text(
-            'Language',
+            tr('Language'),
             style: GoogleFonts.inter(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.bold,
             ),
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text(
-                  'English',
-                  style: GoogleFonts.inter(color: AppColors.textPrimary),
+          content: ValueListenableBuilder<String>(
+            valueListenable: LocaleService.language,
+            builder: (context, currentLang, _) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  title: Text(
+                    tr('English'),
+                    style: GoogleFonts.inter(color: AppColors.textPrimary),
+                  ),
+                  trailing: currentLang == 'en'
+                      ? const Icon(Icons.check_circle, color: AppColors.accent)
+                      : null,
+                  onTap: () async {
+                    await LocaleService.setLanguage('en');
+                    if (dialogContext.mounted) Navigator.pop(dialogContext);
+                  },
                 ),
-                trailing: _language == 'English'
-                    ? const Icon(Icons.check_circle, color: AppColors.accent)
-                    : null,
-                onTap: () {
-                  setState(() => _language = 'English');
-                  Navigator.pop(dialogContext);
-                },
-              ),
-              ListTile(
-                enabled: false,
-                title: Text(
-                  'Hindi — Coming soon',
-                  style: GoogleFonts.inter(color: AppColors.textMuted),
+                ListTile(
+                  title: Text(
+                    tr('Telugu'),
+                    style: GoogleFonts.inter(color: AppColors.textPrimary),
+                  ),
+                  trailing: currentLang == 'te'
+                      ? const Icon(Icons.check_circle, color: AppColors.accent)
+                      : null,
+                  onTap: () async {
+                    await LocaleService.setLanguage('te');
+                    if (dialogContext.mounted) Navigator.pop(dialogContext);
+                  },
                 ),
-              ),
-              ListTile(
-                enabled: false,
-                title: Text(
-                  'Other languages — Coming soon',
-                  style: GoogleFonts.inter(color: AppColors.textMuted),
+                ListTile(
+                  enabled: false,
+                  title: Text(
+                    tr('Hindi — Coming soon'),
+                    style: GoogleFonts.inter(color: AppColors.textMuted),
+                  ),
                 ),
-              ),
-            ],
+                ListTile(
+                  enabled: false,
+                  title: Text(
+                    tr('Other languages — Coming soon'),
+                    style: GoogleFonts.inter(color: AppColors.textMuted),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -338,8 +364,8 @@ class _MainShellState extends State<MainShell> {
                         Flexible(
                           child: Text(
                             isOnline
-                                ? 'Online'
-                                : 'Offline · Using LegalGuide Knowledge',
+                                ? tr('Online')
+                                : tr('Offline · Using LegalGuide Knowledge'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
@@ -391,11 +417,14 @@ class _MainShellState extends State<MainShell> {
                         size: 16,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        _language,
-                        style: GoogleFonts.inter(
-                          color: AppColors.textSecondary,
-                          fontSize: 12,
+                      ValueListenableBuilder<String>(
+                        valueListenable: LocaleService.language,
+                        builder: (context, lang, _) => Text(
+                          lang == 'te' ? tr('Telugu') : tr('English'),
+                          style: GoogleFonts.inter(
+                            color: AppColors.textSecondary,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ],
@@ -469,17 +498,19 @@ class _MainShellState extends State<MainShell> {
         children: [
           SafeArea(bottom: false, child: _buildStatusStrip()),
           Expanded(
-            child: IndexedStack(
-              index: _currentIndex,
-              children: [
-                HomeScreen(
-                  onOpenExplore: () => _openTab(1),
-                  onOpenAssistant: () => showAssistantPanel(context),
-                  bookmarkVersion: _bookmarkVersion,
-                ),
-                const ExploreLawsScreen(),
-                SavedScreen(bookmarkVersion: _bookmarkVersion),
-              ],
+            child: WatermarkBackground(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: [
+                  HomeScreen(
+                    onOpenExplore: () => _openTab(1),
+                    onOpenAssistant: () => showAssistantPanel(context),
+                    bookmarkVersion: _bookmarkVersion,
+                  ),
+                  const ExploreLawsScreen(),
+                  SavedScreen(bookmarkVersion: _bookmarkVersion),
+                ],
+              ),
             ),
           ),
         ],
@@ -518,19 +549,19 @@ class _MainShellState extends State<MainShell> {
             children: [
               _navItem(
                 icon: Icons.home_rounded,
-                label: 'Home',
+                label: tr('Home'),
                 selected: _currentIndex == 0,
                 onTap: () => _openTab(0),
               ),
               _navItem(
                 icon: Icons.travel_explore_rounded,
-                label: 'Explore',
+                label: tr('Explore'),
                 selected: _currentIndex == 1,
                 onTap: () => _openTab(1),
               ),
               _navItem(
                 icon: Icons.bookmark_rounded,
-                label: 'Saved',
+                label: tr('Saved'),
                 selected: _currentIndex == 2,
                 onTap: () => _openTab(2),
                 badge: Badge(
@@ -548,7 +579,7 @@ class _MainShellState extends State<MainShell> {
               ),
               _navItem(
                 icon: Icons.more_horiz_rounded,
-                label: 'More',
+                label: tr('More'),
                 selected: false,
                 onTap: _showMoreSheet,
               ),

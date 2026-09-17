@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../localization/app_strings.dart';
 import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
 import '../theme/app_theme.dart';
@@ -148,7 +149,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         elevation: 0,
-        title: Text('Legal Documents & Notice Guides',
+        title: Text(tr('Legal Documents & Notice Guides'),
             style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary, fontSize: 16)),
       ),
       body: FutureBuilder<List<LegalSection>>(
@@ -193,23 +194,23 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                             color: AppColors.border,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Text('General guide',
+                          child: Text(tr('General guide'),
                               style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 10)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _label('What it is'),
+                    _label(tr('What it is')),
                     _body(guide.whatItIs),
                     const SizedBox(height: 8),
-                    _label('When it\'s used'),
+                    _label(tr('When it\'s used')),
                     _body(guide.whenUsed),
                     const SizedBox(height: 8),
-                    _label('Key parts'),
+                    _label(tr('Key parts')),
                     _body(guide.keyParts),
                     if (related.isNotEmpty) ...[
                       const SizedBox(height: 10),
-                      _label('Related legal sections'),
+                      _label(tr('Related legal sections')),
                       for (final section in related)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
@@ -221,7 +222,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                               );
                             },
                             child: Text(
-                              '${section.sectionNumber} — ${section.title}',
+                              '${section.sectionNumber} — ${section.displayTitle}',
                               style: GoogleFonts.inter(
                                   color: guide.color, fontSize: 13, fontWeight: FontWeight.w600),
                             ),
