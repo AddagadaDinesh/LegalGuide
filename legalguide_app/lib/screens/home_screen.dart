@@ -417,7 +417,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                       const SizedBox(height: 28),
-                      SectionHeading(title: tr('Browse Legal Categories'), icon: Icons.grid_view_rounded),
+                      SectionHeading(title: tr('Explore Laws'), icon: Icons.grid_view_rounded),
                       const SizedBox(height: 12),
                       SizedBox(
                         height: 122,
