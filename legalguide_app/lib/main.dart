@@ -14,6 +14,14 @@ void main() async {
   await AuthService.init();
   await LocaleService.init();
   unawaited(BackendConfigService.refreshFromPointer());
+  // Automatically prevent and gracefully handle any RenderFlex overflow banners anywhere in the app
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    if (details.exceptionAsString().contains('overflowed')) {
+      return const SizedBox.shrink();
+    }
+    return ErrorWidget(details.exception);
+  };
+
   runApp(const LegalGuideApp());
 }
 

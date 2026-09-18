@@ -273,9 +273,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             const Icon(Icons.search_rounded, color: AppColors.accent),
                             const SizedBox(width: 10),
-                            Text(
-                              tr('Search laws, section numbers, topics...'),
-                              style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
+                            Expanded(
+                              child: Text(
+                                tr('Search laws, section numbers, topics...'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
+                              ),
                             ),
                           ],
                         ),

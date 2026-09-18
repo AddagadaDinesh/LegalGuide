@@ -70,21 +70,25 @@ class LegalSectionCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (lawShortName.isNotEmpty) ...[
-                              _tag(lawShortName, bg: accentColor.withValues(alpha: 0.18), fg: accentColor),
-                              const SizedBox(width: 6),
-                            ],
-                            _tag(section.sectionNumber),
-                            if (section.badge.isNotEmpty) ...[
-                              const SizedBox(width: 6),
-                              _tag(section.badge, bg: const Color(0xFF064E3B), fg: const Color(0xFF6EE7B7)),
-                            ],
-                            if (isFrequentlyViewed) ...[
-                              const SizedBox(width: 6),
-                              _tag(tr('Frequent'), bg: const Color(0xFF854D0E), fg: const Color(0xFFFDE68A)),
-                            ],
-                            const Spacer(),
+                            Expanded(
+                              child: Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  if (lawShortName.isNotEmpty)
+                                    _tag(lawShortName, bg: accentColor.withValues(alpha: 0.18), fg: accentColor),
+                                  _tag(section.sectionNumber),
+                                  if (section.badge.isNotEmpty)
+                                    _tag(section.badge, bg: const Color(0xFF064E3B), fg: const Color(0xFF6EE7B7)),
+                                  if (isFrequentlyViewed)
+                                    _tag(tr('Frequent'), bg: const Color(0xFF854D0E), fg: const Color(0xFFFDE68A)),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 4),
                             IconButton(
                               icon: Icon(
                                 isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,

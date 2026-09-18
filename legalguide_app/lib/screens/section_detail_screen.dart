@@ -99,19 +99,21 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
               children: [
                 Icon(_style.icon, color: _style.color, size: 16),
                 const SizedBox(width: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: _style.color.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    section.sectionNumber.toUpperCase(),
-                    style: GoogleFonts.inter(
-                      color: _style.color,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      letterSpacing: 1.1,
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _style.color.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      section.sectionNumber.toUpperCase(),
+                      style: GoogleFonts.inter(
+                        color: _style.color,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        letterSpacing: 1.1,
+                      ),
                     ),
                   ),
                 ),
@@ -375,12 +377,14 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
             children: [
               Icon(icon, color: AppColors.warning, size: 22),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  color: AppColors.warning,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    color: AppColors.warning,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ],
@@ -419,12 +423,14 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
             children: [
               Icon(icon, color: accentColor, size: 20),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  color: accentColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    color: accentColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ],
@@ -484,12 +490,14 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
             children: [
               Icon(icon, color: accentColor, size: 20),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: GoogleFonts.inter(
-                  color: accentColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    color: accentColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ],
