@@ -201,31 +201,31 @@ class _AssistantPanelState extends State<AssistantPanel> {
   }
 
   Widget _buildWelcome() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
+              width: 58,
+              height: 58,
+              decoration: const BoxDecoration(
                 color: AppColors.surface,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.accent, size: 30),
+              child: const Icon(Icons.chat_bubble_outline_rounded, color: AppColors.accent, size: 28),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             Text(tr('Welcome to LegalGuide!'),
                 style: GoogleFonts.outfit(color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 6),
             Text(
               tr('When you\'re online I can answer anything; offline, I can only use the legal data stored in this app.'),
               textAlign: TextAlign.center,
-              style: GoogleFonts.inter(color: AppColors.textSecondary),
+              style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 18),
             Wrap(
               alignment: WrapAlignment.center,
               spacing: 8,

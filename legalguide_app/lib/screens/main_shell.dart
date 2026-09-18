@@ -64,10 +64,11 @@ class _MainShellState extends State<MainShell> {
       ),
       builder: (sheetContext) {
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 10),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 10),
               Container(
                 width: 40,
                 height: 4,
@@ -115,9 +116,10 @@ class _MainShellState extends State<MainShell> {
               const SizedBox(height: 12),
             ],
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 
   Widget _moreTile(
