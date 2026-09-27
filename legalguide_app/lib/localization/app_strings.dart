@@ -242,6 +242,31 @@ const _te = <String, String>{
       'చట్టం పేరు, సెక్షన్ నంబర్ లేదా అంశం చెప్పండి...',
   'Search fines, rules, chain, ticket...':
       'జరిమానాలు, నిబంధనలు, చైన్, టికెట్ వెతకండి...',
+  'Traffic Rules & Fines': 'ట్రాఫిక్ నిబంధనలు & జరిమానాలు',
+  'Traffic Rules & Driver Rights': 'ట్రాఫిక్ నిబంధనలు & డ్రైవర్ హక్కులు',
+  'MV Act 2019 fines, e-challan disputes & citizen driver protections':
+      'మోటార్ వాహనాల చట్టం జరిమానాలు, ఈ-చలానా మరియు పౌర హక్కులు',
+  'Interactive Document Generator': 'చట్టపరమైన పత్రాల జనరేటర్',
+  'Fill, customize, and export ready-to-use RTI, Police Complaints, & Legal Notices.':
+      'RTI, పోలీస్ ఫిర్యాదులు, నోటీసులను సులభంగా తయారు చేసి కాపీ చేయండి.',
+  'Draft Now': 'డ్రాఫ్ట్ చేయండి',
+  'Legal Document Generator': 'లీగల్ డాక్యుమెంట్ జనరేటర్',
+  'Instant Draft, Copy & Share': 'తక్షణ డ్రాఫ్ట్, కాపీ & షేర్',
+  'Fines & Offenses': 'జరిమానాలు & నేరాలు',
+  'Driver Rights': 'డ్రైవర్ హక్కులు',
+  'E-Challan Guide': 'ఈ-చలానా మార్గదర్శి',
+  "What's New in v1.1.0": 'v1.1.0 లో కొత్త ఫీచర్లు',
+  'Traffic Rules & Fines (MV Act)': 'ట్రాఫిక్ నిబంధనలు & జరిమానాలు',
+  'Full Motor Vehicles Act penalty table, driver rights, and step-by-step e-challan dispute guide.':
+      'పూర్తి మోటార్ వాహనాల చట్టం జరిమానాలు, డ్రైవర్ హక్కులు మరియు ఈ-చలానా గైడ్.',
+  'Draft formal Police Complaints, RTI Applications, and Legal Notices with instant copy & export.':
+      'పోలీస్ ఫిర్యాదులు, RTI దరఖాస్తులు మరియు లీగల్ నోటీసులను తక్షణమే రూపొందించండి.',
+  'Audio Narration (TTS) & Voice Search': 'ఆడియో రీడింగ్ (TTS) & వాయిస్ శోధన',
+  'Listen aloud to legal sections, railway rules, and emergency guides in your preferred language.':
+      'సెక్షన్లు, రైల్వే నిబంధనలు, ఎమర్జెన్సీ గైడ్‌లను మీ భాషలో వినండి.',
+  'Cloud Bookmark Sync': 'క్లౌడ్ బుక్‌మార్క్ సమకాలీకరణ',
+  'Seamlessly sync your saved laws and sections across devices when logged into your account.':
+      'మీ ఖాతాలో లాగిన్ అయినప్పుడు మీ సేవ్ చేసిన సెక్షన్లను క్లౌడ్‌లో సేవ్ చేయండి.',
 };
 
 const _hi = <String, String>{
@@ -546,4 +571,29 @@ const _hi = <String, String>{
       'कानून का नाम, धारा संख्या या विषय बोलें...',
   'Search fines, rules, chain, ticket...':
       'जुर्माना, नियम, चेन, टिकट खोजें...',
+  'Traffic Rules & Fines': 'ट्रैफिक नियम एवं चालान',
+  'Traffic Rules & Driver Rights': 'ट्रैफिक नियम एवं नागरिक अधिकार',
+  'MV Act 2019 fines, e-challan disputes & citizen driver protections':
+      'मोटर वाहन अधिनियम 2019 चालान, ई-चालान और ड्राइवर अधिकार',
+  'Interactive Document Generator': 'इंटरएक्टिव दस्तावेज़ जनरेटर',
+  'Fill, customize, and export ready-to-use RTI, Police Complaints, & Legal Notices.':
+      'RTI, पुलिस शिकायतें और कानूनी नोटिस तुरंत तैयार व कॉपी करें।',
+  'Draft Now': 'तैयार करें',
+  'Legal Document Generator': 'कानूनी दस्तावेज़ जनरेटर',
+  'Instant Draft, Copy & Share': 'तुरंत ड्राफ्ट, कॉपी और साझा करें',
+  'Fines & Offenses': 'जुर्माना और अपराध',
+  'Driver Rights': 'ड्राइवर के अधिकार',
+  'E-Challan Guide': 'ई-चालान गाइड',
+  "What's New in v1.1.0": 'v1.1.0 में क्या नया है',
+  'Traffic Rules & Fines (MV Act)': 'ट्रैफिक नियम एवं चालान (MV Act)',
+  'Full Motor Vehicles Act penalty table, driver rights, and step-by-step e-challan dispute guide.':
+      'मोटर वाहन अधिनियम जुर्माना तालिका, नागरिक अधिकार और ई-चालान विवाद गाइड।',
+  'Draft formal Police Complaints, RTI Applications, and Legal Notices with instant copy & export.':
+      'पुलिस शिकायत, आरटीआई आवेदन और कानूनी नोटिस आसानी से तैयार करें।',
+  'Audio Narration (TTS) & Voice Search': 'ऑडियो वाचन (TTS) और वॉइस सर्च',
+  'Listen aloud to legal sections, railway rules, and emergency guides in your preferred language.':
+      'कानूनी धाराओं और नियमों को अपनी भाषा में सुनें।',
+  'Cloud Bookmark Sync': 'क्लाउड बुकमार्क सिंक',
+  'Seamlessly sync your saved laws and sections across devices when logged into your account.':
+      'लॉगिन करने पर अपने सहेजे गए अनुभागों को सभी डिवाइसों में सिंक करें।',
 };

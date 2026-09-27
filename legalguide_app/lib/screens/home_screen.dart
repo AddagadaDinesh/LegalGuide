@@ -23,6 +23,7 @@ import 'explore_laws_screen.dart';
 import 'legal_help_screen.dart';
 import 'railway_rules_screen.dart';
 import 'section_detail_screen.dart';
+import 'traffic_rules_screen.dart';
 
 const _fallbackSearchSuggestions = ['theft', 'arrest', 'cheating', 'murder', 'article 21'];
 
@@ -460,6 +461,74 @@ class _HomeScreenState extends State<HomeScreen> {
                                     tr('Penalties, ticketless travel, chain pulling & passenger rights'),
                                     style: GoogleFonts.inter(
                                       color: Colors.white.withValues(alpha: 0.85),
+                                      fontSize: 11.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right_rounded, color: Colors.white),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Traffic Rules & Driver Rights Banner
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const TrafficRulesScreen()),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFB45309), Color(0xFFD97706)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFD97706).withValues(alpha: 0.25),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(Icons.traffic_rounded, color: Colors.white, size: 24),
+                            ),
+                            const SizedBox(width: 11),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    tr('Traffic Rules & Driver Rights'),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white,
+                                      fontSize: 14.5,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    tr('MV Act 2019 fines, e-challan disputes & citizen driver protections'),
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white.withValues(alpha: 0.88),
                                       fontSize: 11.5,
                                     ),
                                   ),

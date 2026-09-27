@@ -282,10 +282,89 @@ class _AboutScreenState extends State<AboutScreen> {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  _specRow(Icons.verified_user_rounded, 'Edition', 'Citizen Prototype v1.0.0'),
+                  _specRow(Icons.verified_user_rounded, 'Edition', 'Citizen Prototype v1.1.0'),
                   _specRow(Icons.auto_awesome_rounded, 'AI Engine', 'Dual-Mode (Cloud + Offline Engine)'),
-                  _specRow(Icons.menu_book_rounded, 'Coverage', 'BNS, BNSS, BSA (2024), Railways Act (1989)'),
+                  _specRow(Icons.menu_book_rounded, 'Coverage', 'BNS, BNSS, BSA (2024), Railways Act, MV Act (2019)'),
+                  _specRow(Icons.record_voice_over_rounded, 'Audio', 'Voice Search & TTS Audio Narration'),
+                  _specRow(Icons.cloud_sync_rounded, 'Cloud Sync', 'User Bookmarks & Offline-First Cache'),
+                  _specRow(Icons.translate_rounded, 'Languages', 'English, Telugu (తెలుగు), Hindi (हिन्दी), Tamil (தமிழ்)'),
                   _specRow(Icons.lock_outline_rounded, 'Privacy', 'Zero Search Tracking & Encrypted Auth'),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // What's New in v1.1.0 Section
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(8),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF6366F1).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(Icons.new_releases_rounded, color: Color(0xFF6366F1), size: 22),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        tr("What's New in v1.1.0"),
+                        style: GoogleFonts.outfit(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  _updateItem(
+                    Icons.shield_rounded,
+                    const Color(0xFFDC2626),
+                    tr('Emergency Rights Guide'),
+                    tr('Instant citizen protections for police stops, traffic challans, cyber fraud (1930) and women rights.'),
+                  ),
+                  _updateItem(
+                    Icons.traffic_rounded,
+                    const Color(0xFFD97706),
+                    tr('Traffic Rules & Fines (MV Act)'),
+                    tr('Full Motor Vehicles Act penalty table, driver rights, and step-by-step e-challan dispute guide.'),
+                  ),
+                  _updateItem(
+                    Icons.edit_document,
+                    const Color(0xFF4F46E5),
+                    tr('Interactive Document Generator'),
+                    tr('Draft formal Police Complaints, RTI Applications, and Legal Notices with instant copy & export.'),
+                  ),
+                  _updateItem(
+                    Icons.volume_up_rounded,
+                    const Color(0xFF0284C7),
+                    tr('Audio Narration (TTS) & Voice Search'),
+                    tr('Listen aloud to legal sections, railway rules, and emergency guides in your preferred language.'),
+                  ),
+                  _updateItem(
+                    Icons.cloud_sync_rounded,
+                    const Color(0xFF10B981),
+                    tr('Cloud Bookmark Sync'),
+                    tr('Seamlessly sync your saved laws and sections across devices when logged into your account.'),
+                  ),
                 ],
               ),
             ),
@@ -532,6 +611,50 @@ class _AboutScreenState extends State<AboutScreen> {
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             onPressed: () => _dialNumber(number),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _updateItem(IconData icon, Color color, String title, String desc) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: color.withAlpha(25),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, color: color, size: 16),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  desc,
+                  style: GoogleFonts.inter(
+                    fontSize: 11.5,
+                    color: AppColors.textSecondary,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
