@@ -7,6 +7,7 @@ import '../services/locale_service.dart';
 import '../services/tts_service.dart';
 import '../theme/app_theme.dart';
 import 'explore_laws_screen.dart';
+import 'traffic_rules_screen.dart';
 
 class EmergencyGuideScreen extends StatefulWidget {
   final String? initialScenarioId;
@@ -563,6 +564,35 @@ class _EmergencyGuideScreenState extends State<EmergencyGuideScreen> {
                       ),
                     ),
 
+                    if (scenario.id == 'traffic_police') ...[
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const TrafficRulesScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.traffic_rounded, size: 18),
+                          label: Text(
+                            isTe ? 'అన్ని ట్రాఫిక్ నిబంధనలు, జరిమానాలు & హక్కులు చూడండి' : tr('View All Traffic Fines & Driver Rights (MV Act)'),
+                            style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFF59E0B),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                     if (scenario.directSearchQuery != null) ...[
                       const SizedBox(height: 18),
                       SizedBox(

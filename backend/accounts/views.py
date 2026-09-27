@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
-from .models import AbuseEvent
+from .models import AbuseEvent, UserBookmark
 from .serializers import LoginSerializer, SignupSerializer, UserSerializer
 
 LOCKOUT_THRESHOLD = 5
@@ -144,3 +144,34 @@ class ForgotPasswordView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class BookmarkSyncView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        section_ids = list(
+            UserBookmark.objects.filter(user=request.user).values_list("section_id", flat=True)
+        )
+        return Response({"section_ids": section_ids}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        incoming_ids = request.data.get("section_ids", [])
+        if not isinstance(incoming_ids, list):
+            return Response(
+                {"error": "section_ids must be a list of integers"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        existing_ids = set(
+            UserBookmark.objects.filter(user=request.user).values_list("section_id", flat=True)
+        )
+        incoming_set = {int(x) for x in incoming_ids if str(x).isdigit() or isinstance(x, int)}
+
+        new_ids = incoming_set - existing_ids
+        for sid in new_ids:
+            UserBookmark.objects.create(user=request.user, section_id=sid)
+
+        unified_ids = sorted(list(existing_ids | incoming_set))
+        return Response({"section_ids": unified_ids}, status=status.HTTP_200_OK)
+

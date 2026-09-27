@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import ForgotPasswordView, LoginView, LogoutView, MeView, SignupView
+from .views import BookmarkSyncView, ForgotPasswordView, LoginView, LogoutView, MeView, SignupView
 
 urlpatterns = [
     path("signup/", SignupView.as_view(), name="auth-signup"),
@@ -8,4 +8,5 @@ urlpatterns = [
     path("logout/", LogoutView.as_view(), name="auth-logout"),
     path("me/", MeView.as_view(), name="auth-me"),
     path("forgot-password/", ForgotPasswordView.as_view(), name="auth-forgot-password"),
+    path("bookmarks/sync/", BookmarkSyncView.as_view(), name="auth-bookmarks-sync"),
 ]

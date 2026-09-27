@@ -12,6 +12,7 @@ import 'legal_help_screen.dart';
 import 'login_screen.dart';
 import 'railway_rules_screen.dart';
 import 'saved_screen.dart';
+import 'traffic_rules_screen.dart';
 import '../localization/app_strings.dart';
 import '../services/auth_service.dart';
 import '../services/bookmark_service.dart';
@@ -92,6 +93,13 @@ class _MainShellState extends State<MainShell> {
                 const Color(0xFF0284C7),
                 tr('Railway Rules & Fines'),
                 const RailwayRulesScreen(),
+              ),
+              _moreTile(
+                sheetContext,
+                Icons.traffic_rounded,
+                const Color(0xFFD97706),
+                tr('Traffic Rules & Fines'),
+                const TrafficRulesScreen(),
               ),
               _moreTile(
                 sheetContext,

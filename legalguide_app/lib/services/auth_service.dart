@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
+import 'bookmark_service.dart';
 
 class AuthResult {
   final bool success;
@@ -24,6 +25,9 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString(_tokenKey);
     currentUsername.value = prefs.getString(_usernameKey);
+    if (_token != null) {
+      BookmarkService.syncWithServer();
+    }
   }
 
   static Future<AuthResult> signup(String username, String email, String password) {
@@ -93,6 +97,7 @@ class AuthService {
         await prefs.setString(_tokenKey, _token!);
         await prefs.setString(_usernameKey, username);
         currentUsername.value = username;
+        BookmarkService.syncWithServer();
         return AuthResult(success: true);
       }
       final detail = data['detail'] ?? _firstFieldError(data) ?? 'Something went wrong.';

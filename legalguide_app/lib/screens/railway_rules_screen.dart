@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../data/railway_data.dart';
 import '../localization/app_strings.dart';
 import '../services/locale_service.dart';
+import '../services/tts_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/voice_search_modal.dart';
 import '../widgets/watermark_background.dart';
@@ -34,6 +35,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
 
   @override
   void dispose() {
+    TtsService.instance.stop();
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -242,24 +244,49 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                         ),
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: item.isBailable
-                            ? AppColors.success.withValues(alpha: 0.12)
-                            : AppColors.danger.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        item.isBailable ? 'Bailable' : 'Non-Bailable',
-                        style: GoogleFonts.inter(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: item.isBailable
-                              ? AppColors.success
-                              : AppColors.danger,
+                    Row(
+                      children: [
+                        ValueListenableBuilder<String?>(
+                          valueListenable: TtsService.instance.currentlyPlayingId,
+                          builder: (context, playingId, _) {
+                            final isPlaying = playingId == 'railway_${item.section}';
+                            return IconButton(
+                              icon: Icon(
+                                isPlaying ? Icons.stop_circle_rounded : Icons.volume_up_rounded,
+                                color: isPlaying ? Colors.red : const Color(0xFF0284C7),
+                                size: 20,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                              tooltip: tr(isPlaying ? 'Stop Reading' : 'Listen Aloud'),
+                              onPressed: () {
+                                final text = '${item.displayTitle}. Section ${item.section}. ${item.displayDescription}. Fine: ${item.fineAmount}. Jail: ${item.jailTerm}.';
+                                TtsService.instance.toggle(text: text, id: 'railway_${item.section}');
+                              },
+                            );
+                          },
                         ),
-                      ),
+                        const SizedBox(width: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: item.isBailable
+                                ? AppColors.success.withValues(alpha: 0.12)
+                                : AppColors.danger.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            item.isBailable ? 'Bailable' : 'Non-Bailable',
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: item.isBailable
+                                  ? AppColors.success
+                                  : AppColors.danger,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -440,6 +467,26 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                           ),
                         ],
                       ),
+                    ),
+                    ValueListenableBuilder<String?>(
+                      valueListenable: TtsService.instance.currentlyPlayingId,
+                      builder: (context, playingId, _) {
+                        final isPlaying = playingId == 'railway_right_${rule.title}';
+                        return IconButton(
+                          icon: Icon(
+                            isPlaying ? Icons.stop_circle_rounded : Icons.volume_up_rounded,
+                            color: isPlaying ? Colors.red : const Color(0xFF0284C7),
+                            size: 20,
+                          ),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                          tooltip: tr(isPlaying ? 'Stop Reading' : 'Listen Aloud'),
+                          onPressed: () {
+                            final text = '${rule.displayTitle}. ${rule.displayDetail}. Reference: ${rule.legalRef}.';
+                            TtsService.instance.toggle(text: text, id: 'railway_right_${rule.title}');
+                          },
+                        );
+                      },
                     ),
                   ],
                 ),

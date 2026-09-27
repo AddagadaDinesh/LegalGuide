@@ -28,3 +28,20 @@ class AbuseEvent(models.Model):
 
     def __str__(self):
         return f"{self.category} @ {self.created_at:%Y-%m-%d %H:%M}"
+
+
+class UserBookmark(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="bookmarks",
+    )
+    section_id = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "section_id")
+
+    def __str__(self):
+        return f"{self.user.username} -> Section {self.section_id}"
+
