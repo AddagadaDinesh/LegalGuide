@@ -19,12 +19,14 @@ import '../widgets/legal_section_card.dart';
 import '../widgets/section_heading.dart';
 import '../widgets/voice_search_modal.dart';
 import 'category_overview_screen.dart';
+import 'citizen_rights_travel_screen.dart';
 import 'documents_screen.dart';
 import 'emergency_guide_screen.dart';
 import 'legal_help_screen.dart';
 import 'matter_detail_screen.dart';
 import 'railway_rules_screen.dart';
 import 'section_detail_screen.dart';
+import 'traffic_rules_screen.dart';
 
 class ExploreLawsScreen extends StatefulWidget {
   final int? lockedCategoryId;
@@ -138,6 +140,30 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
     final q = _query.toLowerCase();
     final guides = <Map<String, dynamic>>[];
 
+    // Traffic Rules & Driver Rights
+    if (q.contains('traffic') ||
+        q.contains('challan') ||
+        q.contains('helmet') ||
+        q.contains('license') ||
+        q.contains('licence') ||
+        q.contains('seatbelt') ||
+        q.contains('speed') ||
+        q.contains('motor') ||
+        q.contains('vehicle') ||
+        q.contains('డ్రైవింగ్') ||
+        q.contains('చలానా') ||
+        q.contains('ట్రాఫిక్') ||
+        q.contains('ट्रैफिक') ||
+        q.contains('चालान')) {
+      guides.add({
+        'title': tr('Traffic Rules & Driver Rights'),
+        'subtitle': tr('MV Act 2019 fines, e-challan disputes & citizen driver protections'),
+        'icon': Icons.traffic_rounded,
+        'color': const Color(0xFFD97706),
+        'screen': const TrafficRulesScreen(),
+      });
+    }
+
     // Railway Rules Guide
     if (q.contains('railway') ||
         q.contains('train') ||
@@ -153,7 +179,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
         'subtitle': tr('Penalties, ticketless travel, chain pulling & passenger rights'),
         'icon': Icons.train_rounded,
         'color': const Color(0xFF0284C7),
-        'screen': const RailwayRulesScreen(),
+        'screen': const CitizenRightsTravelScreen(initialTab: 1),
       });
     }
 
@@ -161,8 +187,6 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
     if (q.contains('emergency') ||
         q.contains('right') ||
         q.contains('police') ||
-        q.contains('traffic') ||
-        q.contains('challan') ||
         q.contains('cyber') ||
         q.contains('women') ||
         q.contains('fraud') ||
@@ -181,7 +205,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
         'subtitle': tr('Police stops, traffic challans, cyber fraud & women safety rights'),
         'icon': Icons.shield_rounded,
         'color': const Color(0xFFDC2626),
-        'screen': const EmergencyGuideScreen(),
+        'screen': const CitizenRightsTravelScreen(initialTab: 0),
       });
     }
 

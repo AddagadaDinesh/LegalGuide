@@ -1,0 +1,130 @@
+[
+  {
+    "id": 2,
+    "category_name": "Criminal Law",
+    "name": "Bharatiya Nyaya Sanhita, 2023",
+    "short_name": "BNS 2023",
+    "description": "India's principal criminal code, in force from 1 July 2024, replacing the Indian Penal Code, 1860.",
+    "category": 1
+  },
+  {
+    "id": 3,
+    "category_name": "Constitutional Law",
+    "name": "Constitution of India",
+    "short_name": "COI 1950",
+    "description": "The supreme law of India, laying down the fundamental rights of citizens and the framework of government.",
+    "category": 2
+  },
+  {
+    "id": 4,
+    "category_name": "Arrest & Detention",
+    "name": "Arrest & Detention Rights",
+    "short_name": "Rights",
+    "description": "An app-curated collection of real arrest/detention-rights provisions drawn from the Bharatiya Nagarik Suraksha Sanhita, 2023 and the Constitution of India — each section below cites its true individual source, not this grouping.",
+    "category": 3
+  },
+  {
+    "id": 5,
+    "category_name": "Cyber Law",
+    "name": "Information Technology Act, 2000",
+    "short_name": "IT Act",
+    "description": "India's principal law governing digital commerce, cyber offences, and electronic signatures.",
+    "category": 11
+  },
+  {
+    "id": 6,
+    "category_name": "Motor Vehicle Law",
+    "name": "Motor Vehicles Act, 1988 (as amended 2019)",
+    "short_name": "MV Act",
+    "description": "Governs licensing, vehicle safety, traffic offences, and penalties on Indian roads.",
+    "category": 7
+  },
+  {
+    "id": 7,
+    "category_name": "Consumer Law",
+    "name": "Consumer Protection Act, 2019",
+    "short_name": "CPA",
+    "description": "Establishes consumer commissions and procedures for redressal against defective goods and unfair trade practices.",
+    "category": 6
+  },
+  {
+    "id": 8,
+    "category_name": "Family Law",
+    "name": "Hindu Marriage Act, 1955",
+    "short_name": "HMA 1955",
+    "description": "Governs marriage, divorce, and related matters for Hindus, Buddhists, Jains, and Sikhs in India.",
+    "category": 4
+  },
+  {
+    "id": 9,
+    "category_name": "Family Law",
+    "name": "Protection of Women from Domestic Violence Act, 2005",
+    "short_name": "DV Act 2005",
+    "description": "Provides a fast civil remedy — protection, residence, custody, and monetary relief orders — against domestic violence, independent of criminal prosecution.",
+    "category": 4
+  },
+  {
+    "id": 10,
+    "category_name": "Family Law",
+    "name": "Bharatiya Nagarik Suraksha Sanhita, 2023",
+    "short_name": "BNSS-Maintenance",
+    "description": "The renumbered successor to the Code of Criminal Procedure's maintenance provision (old Section 125), in force from 1 July 2024.",
+    "category": 4
+  },
+  {
+    "id": 11,
+    "category_name": "Property Law",
+    "name": "Transfer of Property Act, 1882",
+    "short_name": "TPA 1882",
+    "description": "Governs how ownership of property is transferred between living persons, including sale, gift, and lease.",
+    "category": 5
+  },
+  {
+    "id": 12,
+    "category_name": "Property Law",
+    "name": "Registration Act, 1908",
+    "short_name": "Registration Act 1908",
+    "description": "Specifies which property-related documents must be registered with the Sub-Registrar to be legally valid.",
+    "category": 5
+  },
+  {
+    "id": 13,
+    "category_name": "Women's Rights",
+    "name": "Sexual Harassment of Women at Workplace (Prevention, Prohibition and Redressal) Act, 2013",
+    "short_name": "POSH Act 2013",
+    "description": "Requires workplaces to have a mechanism for women to report and seek redress for sexual harassment.",
+    "category": 8
+  },
+  {
+    "id": 14,
+    "category_name": "Women's Rights",
+    "name": "Dowry Prohibition Act, 1961",
+    "short_name": "Dowry Act 1961",
+    "description": "Criminalizes the giving, taking, or demanding of dowry.",
+    "category": 8
+  },
+  {
+    "id": 15,
+    "category_name": "Child Protection",
+    "name": "Protection of Children from Sexual Offences Act, 2012",
+    "short_name": "POCSO 2012",
+    "description": "India's special law addressing sexual abuse and exploitation of children, with mandatory reporting obligations.",
+    "category": 9
+  },
+  {
+    "id": 16,
+    "category_name": "Labour & Employment",
+    "name": "Code on Social Security, 2020",
+    "short_name": "CSS 2020",
+    "description": "Consolidates social security laws including maternity benefit, provident fund, and gratuity; in force from 21 November 2025, replacing the Maternity Benefit Act, 1961 among others.",
+    "category": 10
+  },
+  {
+    "id": 17,
+    "category_name": "Labour & Employment",
+    "name": "Industrial Relations Code, 2020",
+    "short_name": "IR Code 2020",
+    "description": "Consolidates laws on trade unions, industrial disputes, and conditions of employment; in force from 21 November 2025, replacing the Industrial Disputes Act, 1947 among others.",
+    "category": 10
+  }
+]

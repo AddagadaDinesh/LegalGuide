@@ -1,0 +1,79 @@
+[
+  {
+    "id": 1,
+    "name": "Criminal Law",
+    "description": "Offences against the person, property, and public order, and their prescribed punishments under Indian criminal law.",
+    "name_te": "క్రిమినల్ చట్టం",
+    "description_te": "వ్యక్తులు, ఆస్తికి వ్యతిరేకంగా జరిగే నేరాలు, ప్రజా భద్రతకు సంబంధించిన నేరాలు మరియు భారత క్రిమినల్ చట్టం ప్రకారం వాటికి నిర్దేశించిన శిక్షలు."
+  },
+  {
+    "id": 2,
+    "name": "Constitutional Law",
+    "description": "Fundamental rights, duties of citizens, and the governance framework laid down by the Constitution of India.",
+    "name_te": "రాజ్యాంగ చట్టం",
+    "description_te": "పౌరుల ప్రాథమిక హక్కులు, విధులు మరియు భారత రాజ్యాంగం నిర్దేశించిన పాలనా చట్రం."
+  },
+  {
+    "id": 3,
+    "name": "Arrest & Detention",
+    "description": "What to know if you or someone you know is stopped, detained, or arrested — your rights during the process, drawn from real statutory provisions.",
+    "name_te": "అరెస్టు & నిర్బంధం",
+    "description_te": "మిమ్మల్ని లేదా మీకు తెలిసిన వారిని ఆపినప్పుడు, నిర్బంధించినప్పుడు లేదా అరెస్టు చేసినప్పుడు తెలుసుకోవలసినవి — ప్రక్రియ సమయంలో మీ హక్కులు, నిజమైన చట్టపరమైన నిబంధనల నుండి తీసుకోబడ్డాయి."
+  },
+  {
+    "id": 4,
+    "name": "Family Law",
+    "description": "Marriage, divorce, maintenance, domestic relations, and child-related family matters under Indian law.",
+    "name_te": "కుటుంబ చట్టం",
+    "description_te": "వివాహం, విడాకులు, భరణం, గృహ సంబంధాలు మరియు భారత చట్టం ప్రకారం పిల్లలకు సంబంధించిన కుటుంబ విషయాలు."
+  },
+  {
+    "id": 5,
+    "name": "Property Law",
+    "description": "Ownership, transfer, registration, and disputes relating to movable and immovable property.",
+    "name_te": "ఆస్తి చట్టం",
+    "description_te": "కదిలే మరియు స్థిరాస్తికి సంబంధించిన యాజమాన్యం, బదిలీ, రిజిస్ట్రేషన్ మరియు వివాదాలు."
+  },
+  {
+    "id": 6,
+    "name": "Consumer Law",
+    "description": "Rights of consumers against unfair trade practices, defective goods, and deficient services.",
+    "name_te": "వినియోగదారుల చట్టం",
+    "description_te": "అన్యాయ వాణిజ్య పద్ధతులు, లోపభూయిష్ట వస్తువులు మరియు లోపభూయిష్ట సేవలకు వ్యతిరేకంగా వినియోగదారుల హక్కులు."
+  },
+  {
+    "id": 7,
+    "name": "Motor Vehicle Law",
+    "description": "Traffic regulation, licensing, registration, and accident claims under motor vehicle legislation.",
+    "name_te": "మోటారు వాహన చట్టం",
+    "description_te": "భారత రహదారులపై ట్రాఫిక్ నియంత్రణ, లైసెన్సింగ్, రిజిస్ట్రేషన్ మరియు ప్రమాద క్లెయిమ్‌లు."
+  },
+  {
+    "id": 8,
+    "name": "Women's Rights",
+    "description": "Legal protections and safeguards specific to women under Indian law.",
+    "name_te": "మహిళల హక్కులు",
+    "description_te": "భారత చట్టం ప్రకారం మహిళలకు ప్రత్యేకమైన చట్టపరమైన రక్షణలు మరియు భద్రతలు."
+  },
+  {
+    "id": 9,
+    "name": "Child Protection",
+    "description": "Legal protections for children, including education, labour, and juvenile justice safeguards.",
+    "name_te": "శిశు సంరక్షణ",
+    "description_te": "విద్య, కార్మిక మరియు జువెనైల్ జస్టిస్ భద్రతలతో సహా పిల్లల కోసం చట్టపరమైన రక్షణలు."
+  },
+  {
+    "id": 10,
+    "name": "Labour & Employment",
+    "description": "Rights and obligations relating to wages, workplace safety, and industrial disputes.",
+    "name_te": "కార్మిక & ఉపాధి",
+    "description_te": "వేతనాలు, కార్యాలయ భద్రత మరియు పారిశ్రామిక వివాదాలకు సంబంధించిన హక్కులు మరియు బాధ్యతలు."
+  },
+  {
+    "id": 11,
+    "name": "Cyber Law",
+    "description": "Digital security, online fraud, data privacy, and cybercrime under Indian law.",
+    "name_te": "సైబర్ చట్టం",
+    "description_te": "డిజిటల్ భద్రత, ఆన్‌లైన్ మోసం, డేటా గోప్యత మరియు భారత చట్టం ప్రకారం సైబర్ నేరాలు."
+  }
+]

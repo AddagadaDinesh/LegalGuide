@@ -1,0 +1,1038 @@
+[
+  {
+    "id": 1,
+    "category_name": "Criminal Law",
+    "name": "Arrest",
+    "description": "What happens when someone is arrested, and the rights that apply during the process.",
+    "name_te": "అరెస్టు",
+    "description_te": "",
+    "category": 1,
+    "related_sections": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      21
+    ]
+  },
+  {
+    "id": 4,
+    "category_name": "Criminal Law",
+    "name": "Murder",
+    "description": "",
+    "name_te": "హత్య",
+    "description_te": "",
+    "category": 1,
+    "related_sections": [
+      2
+    ]
+  },
+  {
+    "id": 5,
+    "category_name": "Criminal Law",
+    "name": "Bail",
+    "description": "",
+    "name_te": "జామీను",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 6,
+    "category_name": "Criminal Law",
+    "name": "FIR",
+    "description": "",
+    "name_te": "FIR (ఎఫ్‌ఐఆర్)",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 7,
+    "category_name": "Criminal Law",
+    "name": "Criminal complaint",
+    "description": "",
+    "name_te": "క్రిమినల్ ఫిర్యాదు",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 8,
+    "category_name": "Criminal Law",
+    "name": "Search and seizure",
+    "description": "",
+    "name_te": "సోదా & స్వాధీనం",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 9,
+    "category_name": "Criminal Law",
+    "name": "Investigation",
+    "description": "",
+    "name_te": "దర్యాప్తు",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 10,
+    "category_name": "Criminal Law",
+    "name": "Evidence",
+    "description": "",
+    "name_te": "సాక్ష్యం",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 11,
+    "category_name": "Criminal Law",
+    "name": "Summons",
+    "description": "",
+    "name_te": "సమన్లు",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 12,
+    "category_name": "Criminal Law",
+    "name": "Warrant",
+    "description": "",
+    "name_te": "వారెంట్",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 13,
+    "category_name": "Criminal Law",
+    "name": "Trial",
+    "description": "",
+    "name_te": "విచారణ",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 14,
+    "category_name": "Constitutional Law",
+    "name": "Right to Life & Liberty",
+    "description": "",
+    "name_te": "జీవించే & స్వేచ్ఛ హక్కు",
+    "description_te": "",
+    "category": 2,
+    "related_sections": [
+      5
+    ]
+  },
+  {
+    "id": 15,
+    "category_name": "Constitutional Law",
+    "name": "Right to Legal Counsel",
+    "description": "",
+    "name_te": "న్యాయవాది హక్కు",
+    "description_te": "",
+    "category": 2,
+    "related_sections": [
+      10
+    ]
+  },
+  {
+    "id": 16,
+    "category_name": "Family Law",
+    "name": "Marriage",
+    "description": "",
+    "name_te": "వివాహం",
+    "description_te": "",
+    "category": 4,
+    "related_sections": []
+  },
+  {
+    "id": 17,
+    "category_name": "Family Law",
+    "name": "Divorce",
+    "description": "",
+    "name_te": "విడాకులు",
+    "description_te": "",
+    "category": 4,
+    "related_sections": [
+      24
+    ]
+  },
+  {
+    "id": 18,
+    "category_name": "Family Law",
+    "name": "Maintenance",
+    "description": "",
+    "name_te": "భరణం",
+    "description_te": "",
+    "category": 4,
+    "related_sections": [
+      26
+    ]
+  },
+  {
+    "id": 19,
+    "category_name": "Family Law",
+    "name": "Domestic violence",
+    "description": "",
+    "name_te": "గృహ హింస",
+    "description_te": "",
+    "category": 4,
+    "related_sections": [
+      25
+    ]
+  },
+  {
+    "id": 20,
+    "category_name": "Family Law",
+    "name": "Child custody",
+    "description": "",
+    "name_te": "పిల్లల సంరక్షణ (కస్టడీ)",
+    "description_te": "",
+    "category": 4,
+    "related_sections": []
+  },
+  {
+    "id": 21,
+    "category_name": "Family Law",
+    "name": "Adoption",
+    "description": "",
+    "name_te": "దత్తత",
+    "description_te": "",
+    "category": 4,
+    "related_sections": []
+  },
+  {
+    "id": 22,
+    "category_name": "Family Law",
+    "name": "Inheritance",
+    "description": "",
+    "name_te": "వారసత్వం",
+    "description_te": "",
+    "category": 4,
+    "related_sections": []
+  },
+  {
+    "id": 23,
+    "category_name": "Property Law",
+    "name": "Property ownership",
+    "description": "",
+    "name_te": "ఆస్తి యాజమాన్యం",
+    "description_te": "",
+    "category": 5,
+    "related_sections": []
+  },
+  {
+    "id": 24,
+    "category_name": "Property Law",
+    "name": "Rent disputes",
+    "description": "",
+    "name_te": "అద్దె వివాదాలు",
+    "description_te": "",
+    "category": 5,
+    "related_sections": []
+  },
+  {
+    "id": 25,
+    "category_name": "Property Law",
+    "name": "Sale of property",
+    "description": "",
+    "name_te": "ఆస్తి అమ్మకం",
+    "description_te": "",
+    "category": 5,
+    "related_sections": [
+      27
+    ]
+  },
+  {
+    "id": 26,
+    "category_name": "Property Law",
+    "name": "Registration",
+    "description": "",
+    "name_te": "రిజిస్ట్రేషన్",
+    "description_te": "",
+    "category": 5,
+    "related_sections": [
+      28
+    ]
+  },
+  {
+    "id": 27,
+    "category_name": "Property Law",
+    "name": "Property documents",
+    "description": "",
+    "name_te": "ఆస్తి పత్రాలు",
+    "description_te": "",
+    "category": 5,
+    "related_sections": []
+  },
+  {
+    "id": 28,
+    "category_name": "Property Law",
+    "name": "Land disputes",
+    "description": "",
+    "name_te": "భూ వివాదాలు",
+    "description_te": "",
+    "category": 5,
+    "related_sections": []
+  },
+  {
+    "id": 29,
+    "category_name": "Consumer Law",
+    "name": "Consumer complaints",
+    "description": "How to file a complaint before the District Consumer Commission.",
+    "name_te": "వినియోగదారుల ఫిర్యాదులు",
+    "description_te": "",
+    "category": 6,
+    "related_sections": [
+      23
+    ]
+  },
+  {
+    "id": 30,
+    "category_name": "Consumer Law",
+    "name": "Defective products",
+    "description": "",
+    "name_te": "లోపభూయిష్ట ఉత్పత్తులు",
+    "description_te": "",
+    "category": 6,
+    "related_sections": []
+  },
+  {
+    "id": 31,
+    "category_name": "Consumer Law",
+    "name": "Deficiency in service",
+    "description": "",
+    "name_te": "సేవా లోపం",
+    "description_te": "",
+    "category": 6,
+    "related_sections": []
+  },
+  {
+    "id": 32,
+    "category_name": "Consumer Law",
+    "name": "Refunds",
+    "description": "",
+    "name_te": "వాపసు (రీఫండ్)",
+    "description_te": "",
+    "category": 6,
+    "related_sections": []
+  },
+  {
+    "id": 33,
+    "category_name": "Consumer Law",
+    "name": "Consumer forums",
+    "description": "",
+    "name_te": "వినియోగదారుల ఫోరమ్‌లు",
+    "description_te": "",
+    "category": 6,
+    "related_sections": []
+  },
+  {
+    "id": 34,
+    "category_name": "Motor Vehicle Law",
+    "name": "Traffic violations",
+    "description": "",
+    "name_te": "ట్రాఫిక్ ఉల్లంఘనలు",
+    "description_te": "",
+    "category": 7,
+    "related_sections": []
+  },
+  {
+    "id": 35,
+    "category_name": "Motor Vehicle Law",
+    "name": "Accident claims",
+    "description": "",
+    "name_te": "ప్రమాద క్లెయిమ్‌లు",
+    "description_te": "",
+    "category": 7,
+    "related_sections": []
+  },
+  {
+    "id": 36,
+    "category_name": "Motor Vehicle Law",
+    "name": "Driving license",
+    "description": "",
+    "name_te": "డ్రైవింగ్ లైసెన్స్",
+    "description_te": "",
+    "category": 7,
+    "related_sections": []
+  },
+  {
+    "id": 37,
+    "category_name": "Motor Vehicle Law",
+    "name": "Vehicle registration",
+    "description": "",
+    "name_te": "వాహన రిజిస్ట్రేషన్",
+    "description_te": "",
+    "category": 7,
+    "related_sections": []
+  },
+  {
+    "id": 38,
+    "category_name": "Women's Rights",
+    "name": "Domestic violence protection",
+    "description": "",
+    "name_te": "గృహ హింస రక్షణ",
+    "description_te": "",
+    "category": 8,
+    "related_sections": [
+      25
+    ]
+  },
+  {
+    "id": 39,
+    "category_name": "Women's Rights",
+    "name": "Workplace harassment",
+    "description": "",
+    "name_te": "కార్యాలయ వేధింపు",
+    "description_te": "",
+    "category": 8,
+    "related_sections": [
+      29
+    ]
+  },
+  {
+    "id": 40,
+    "category_name": "Women's Rights",
+    "name": "Maintenance rights",
+    "description": "",
+    "name_te": "భరణం హక్కులు",
+    "description_te": "",
+    "category": 8,
+    "related_sections": [
+      26
+    ]
+  },
+  {
+    "id": 41,
+    "category_name": "Child Protection",
+    "name": "Child labour protection",
+    "description": "",
+    "name_te": "బాల కార్మిక రక్షణ",
+    "description_te": "",
+    "category": 9,
+    "related_sections": []
+  },
+  {
+    "id": 42,
+    "category_name": "Child Protection",
+    "name": "Juvenile justice",
+    "description": "",
+    "name_te": "జువెనైల్ న్యాయం",
+    "description_te": "",
+    "category": 9,
+    "related_sections": []
+  },
+  {
+    "id": 43,
+    "category_name": "Child Protection",
+    "name": "Right to education",
+    "description": "",
+    "name_te": "విద్యా హక్కు",
+    "description_te": "",
+    "category": 9,
+    "related_sections": []
+  },
+  {
+    "id": 44,
+    "category_name": "Labour & Employment",
+    "name": "Wages",
+    "description": "",
+    "name_te": "వేతనాలు",
+    "description_te": "",
+    "category": 10,
+    "related_sections": []
+  },
+  {
+    "id": 45,
+    "category_name": "Labour & Employment",
+    "name": "Industrial disputes",
+    "description": "",
+    "name_te": "పారిశ్రామిక వివాదాలు",
+    "description_te": "",
+    "category": 10,
+    "related_sections": []
+  },
+  {
+    "id": 46,
+    "category_name": "Labour & Employment",
+    "name": "Workplace safety",
+    "description": "",
+    "name_te": "కార్యాలయ భద్రత",
+    "description_te": "",
+    "category": 10,
+    "related_sections": []
+  },
+  {
+    "id": 47,
+    "category_name": "Labour & Employment",
+    "name": "Termination",
+    "description": "",
+    "name_te": "ఉద్యోగం నుండి తొలగింపు",
+    "description_te": "",
+    "category": 10,
+    "related_sections": [
+      34
+    ]
+  },
+  {
+    "id": 49,
+    "category_name": "Cyber Law",
+    "name": "Cyber harassment",
+    "description": "",
+    "name_te": "సైబర్ వేధింపు",
+    "description_te": "",
+    "category": 11,
+    "related_sections": []
+  },
+  {
+    "id": 50,
+    "category_name": "Cyber Law",
+    "name": "Identity theft",
+    "description": "Someone using your password, digital signature, or other unique identifier without permission.",
+    "name_te": "గుర్తింపు దొంగతనం",
+    "description_te": "",
+    "category": 11,
+    "related_sections": [
+      20
+    ]
+  },
+  {
+    "id": 51,
+    "category_name": "Cyber Law",
+    "name": "Data/privacy issues",
+    "description": "",
+    "name_te": "డేటా/గోప్యతా సమస్యలు",
+    "description_te": "",
+    "category": 11,
+    "related_sections": []
+  },
+  {
+    "id": 52,
+    "category_name": "Cyber Law",
+    "name": "Cyber complaints",
+    "description": "",
+    "name_te": "సైబర్ ఫిర్యాదులు",
+    "description_te": "",
+    "category": 11,
+    "related_sections": []
+  },
+  {
+    "id": 53,
+    "category_name": "Criminal Law",
+    "name": "Theft & Snatching",
+    "description": "Taking someone else's property without consent, whether stealthily or by sudden/forcible grabbing.",
+    "name_te": "దొంగతనం & చోరీ",
+    "description_te": "",
+    "category": 1,
+    "related_sections": [
+      11,
+      12
+    ]
+  },
+  {
+    "id": 54,
+    "category_name": "Criminal Law",
+    "name": "Cheating & Fraud",
+    "description": "Being deceived into handing over money, property, or documents, or entrusted property being misappropriated.",
+    "name_te": "మోసం & వంచన",
+    "description_te": "",
+    "category": 1,
+    "related_sections": [
+      4,
+      14
+    ]
+  },
+  {
+    "id": 55,
+    "category_name": "Criminal Law",
+    "name": "Robbery",
+    "description": "",
+    "name_te": "దోపిడీ",
+    "description_te": "",
+    "category": 1,
+    "related_sections": [
+      13
+    ]
+  },
+  {
+    "id": 56,
+    "category_name": "Criminal Law",
+    "name": "Assault & Hurt",
+    "description": "",
+    "name_te": "దాడి & గాయం",
+    "description_te": "",
+    "category": 1,
+    "related_sections": [
+      16
+    ]
+  },
+  {
+    "id": 57,
+    "category_name": "Criminal Law",
+    "name": "Criminal Intimidation",
+    "description": "",
+    "name_te": "నేర బెదిరింపు",
+    "description_te": "",
+    "category": 1,
+    "related_sections": [
+      15
+    ]
+  },
+  {
+    "id": 58,
+    "category_name": "Criminal Law",
+    "name": "Defamation",
+    "description": "",
+    "name_te": "పరువు నష్టం",
+    "description_te": "",
+    "category": 1,
+    "related_sections": [
+      17
+    ]
+  },
+  {
+    "id": 59,
+    "category_name": "Motor Vehicle Law",
+    "name": "Drunk driving",
+    "description": "",
+    "name_te": "మద్యం సేవించి వాహనం నడపడం",
+    "description_te": "",
+    "category": 7,
+    "related_sections": [
+      22
+    ]
+  },
+  {
+    "id": 60,
+    "category_name": "Women's Rights",
+    "name": "Assault on Modesty / Harassment",
+    "description": "",
+    "name_te": "గౌరవానికి భంగం / వేధింపు",
+    "description_te": "",
+    "category": 8,
+    "related_sections": [
+      18
+    ]
+  },
+  {
+    "id": 61,
+    "category_name": "Cyber Law",
+    "name": "Online financial fraud",
+    "description": "Being tricked online, over the phone, or via a fake profile into transferring money or sharing credentials.",
+    "name_te": "ఆన్‌లైన్ ఆర్థిక మోసం",
+    "description_te": "",
+    "category": 11,
+    "related_sections": [
+      19
+    ]
+  },
+  {
+    "id": 62,
+    "category_name": "Women's Rights",
+    "name": "Dowry harassment",
+    "description": "",
+    "name_te": "వరకట్న వేధింపు",
+    "description_te": "",
+    "category": 8,
+    "related_sections": [
+      30
+    ]
+  },
+  {
+    "id": 63,
+    "category_name": "Child Protection",
+    "name": "Child sexual abuse protection",
+    "description": "",
+    "name_te": "పిల్లల లైంగిక వేధింపుల రక్షణ",
+    "description_te": "",
+    "category": 9,
+    "related_sections": [
+      31,
+      32
+    ]
+  },
+  {
+    "id": 64,
+    "category_name": "Labour & Employment",
+    "name": "Maternity benefits",
+    "description": "",
+    "name_te": "ప్రసూతి ప్రయోజనాలు",
+    "description_te": "",
+    "category": 10,
+    "related_sections": [
+      33
+    ]
+  },
+  {
+    "id": 65,
+    "category_name": "Criminal Law",
+    "name": "Anticipatory bail",
+    "description": "",
+    "name_te": "ముందస్తు జామీను",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 66,
+    "category_name": "Criminal Law",
+    "name": "Bailable vs non-bailable offences",
+    "description": "",
+    "name_te": "జామీను పొందదగిన & జామీను పొందలేని నేరాలు",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 67,
+    "category_name": "Criminal Law",
+    "name": "Cognizable vs non-cognizable offences",
+    "description": "",
+    "name_te": "కాగ్నిజబుల్ & నాన్-కాగ్నిజబుల్ నేరాలు",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 68,
+    "category_name": "Criminal Law",
+    "name": "Appeal against conviction",
+    "description": "",
+    "name_te": "నేరారోపణపై అప్పీలు",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 69,
+    "category_name": "Criminal Law",
+    "name": "Compounding of offences",
+    "description": "",
+    "name_te": "నేరాల రాజీ (కాంపౌండింగ్)",
+    "description_te": "",
+    "category": 1,
+    "related_sections": []
+  },
+  {
+    "id": 70,
+    "category_name": "Constitutional Law",
+    "name": "Right to Equality",
+    "description": "",
+    "name_te": "సమానత్వ హక్కు",
+    "description_te": "",
+    "category": 2,
+    "related_sections": [
+      35
+    ]
+  },
+  {
+    "id": 71,
+    "category_name": "Constitutional Law",
+    "name": "Right to Freedom of Speech & Expression",
+    "description": "",
+    "name_te": "వాక్ & భావ ప్రకటన స్వేచ్ఛ హక్కు",
+    "description_te": "",
+    "category": 2,
+    "related_sections": []
+  },
+  {
+    "id": 72,
+    "category_name": "Constitutional Law",
+    "name": "Right against Exploitation",
+    "description": "",
+    "name_te": "దోపిడీకి వ్యతిరేక హక్కు",
+    "description_te": "",
+    "category": 2,
+    "related_sections": []
+  },
+  {
+    "id": 73,
+    "category_name": "Constitutional Law",
+    "name": "Right to Freedom of Religion",
+    "description": "",
+    "name_te": "మత స్వేచ్ఛ హక్కు",
+    "description_te": "",
+    "category": 2,
+    "related_sections": []
+  },
+  {
+    "id": 74,
+    "category_name": "Constitutional Law",
+    "name": "Right to Constitutional Remedies",
+    "description": "",
+    "name_te": "రాజ్యాంగ పరిష్కారాల హక్కు",
+    "description_te": "",
+    "category": 2,
+    "related_sections": []
+  },
+  {
+    "id": 75,
+    "category_name": "Constitutional Law",
+    "name": "Fundamental Duties",
+    "description": "",
+    "name_te": "ప్రాథమిక విధులు",
+    "description_te": "",
+    "category": 2,
+    "related_sections": []
+  },
+  {
+    "id": 76,
+    "category_name": "Family Law",
+    "name": "Restitution of conjugal rights",
+    "description": "",
+    "name_te": "దాంపత్య హక్కుల పునరుద్ధరణ",
+    "description_te": "",
+    "category": 4,
+    "related_sections": []
+  },
+  {
+    "id": 77,
+    "category_name": "Family Law",
+    "name": "Judicial separation",
+    "description": "",
+    "name_te": "న్యాయపరమైన విడిపోవడం",
+    "description_te": "",
+    "category": 4,
+    "related_sections": []
+  },
+  {
+    "id": 78,
+    "category_name": "Family Law",
+    "name": "Live-in relationships",
+    "description": "",
+    "name_te": "లివ్-ఇన్ సంబంధాలు",
+    "description_te": "",
+    "category": 4,
+    "related_sections": []
+  },
+  {
+    "id": 79,
+    "category_name": "Family Law",
+    "name": "Guardianship",
+    "description": "",
+    "name_te": "సంరక్షకత్వం",
+    "description_te": "",
+    "category": 4,
+    "related_sections": []
+  },
+  {
+    "id": 80,
+    "category_name": "Property Law",
+    "name": "Mortgage",
+    "description": "",
+    "name_te": "తనఖా",
+    "description_te": "",
+    "category": 5,
+    "related_sections": [
+      36
+    ]
+  },
+  {
+    "id": 81,
+    "category_name": "Property Law",
+    "name": "Gift deed",
+    "description": "",
+    "name_te": "దానం దస్తావేజు",
+    "description_te": "",
+    "category": 5,
+    "related_sections": []
+  },
+  {
+    "id": 82,
+    "category_name": "Property Law",
+    "name": "Will & succession",
+    "description": "",
+    "name_te": "వీలునామా & వారసత్వం",
+    "description_te": "",
+    "category": 5,
+    "related_sections": []
+  },
+  {
+    "id": 83,
+    "category_name": "Property Law",
+    "name": "Partition of property",
+    "description": "",
+    "name_te": "ఆస్తి విభజన",
+    "description_te": "",
+    "category": 5,
+    "related_sections": []
+  },
+  {
+    "id": 84,
+    "category_name": "Property Law",
+    "name": "Tenant rights",
+    "description": "",
+    "name_te": "అద్దెదారు హక్కులు",
+    "description_te": "",
+    "category": 5,
+    "related_sections": []
+  },
+  {
+    "id": 85,
+    "category_name": "Consumer Law",
+    "name": "E-commerce disputes",
+    "description": "",
+    "name_te": "ఈ-కామర్స్ వివాదాలు",
+    "description_te": "",
+    "category": 6,
+    "related_sections": []
+  },
+  {
+    "id": 86,
+    "category_name": "Consumer Law",
+    "name": "Unfair trade practices",
+    "description": "",
+    "name_te": "అన్యాయ వాణిజ్య పద్ధతులు",
+    "description_te": "",
+    "category": 6,
+    "related_sections": []
+  },
+  {
+    "id": 87,
+    "category_name": "Consumer Law",
+    "name": "Warranty & guarantee claims",
+    "description": "",
+    "name_te": "వారంటీ & గ్యారంటీ క్లెయిమ్‌లు",
+    "description_te": "",
+    "category": 6,
+    "related_sections": []
+  },
+  {
+    "id": 88,
+    "category_name": "Motor Vehicle Law",
+    "name": "Hit and run cases",
+    "description": "",
+    "name_te": "కొట్టి పారిపోయే కేసులు",
+    "description_te": "",
+    "category": 7,
+    "related_sections": []
+  },
+  {
+    "id": 89,
+    "category_name": "Motor Vehicle Law",
+    "name": "Insurance claims",
+    "description": "",
+    "name_te": "బీమా క్లెయిమ్‌లు",
+    "description_te": "",
+    "category": 7,
+    "related_sections": []
+  },
+  {
+    "id": 90,
+    "category_name": "Motor Vehicle Law",
+    "name": "Vehicle impounding & challans",
+    "description": "",
+    "name_te": "వాహన స్వాధీనం & చలాన్‌లు",
+    "description_te": "",
+    "category": 7,
+    "related_sections": []
+  },
+  {
+    "id": 91,
+    "category_name": "Women's Rights",
+    "name": "Stalking",
+    "description": "",
+    "name_te": "వెంబడించడం (స్టాకింగ్)",
+    "description_te": "",
+    "category": 8,
+    "related_sections": []
+  },
+  {
+    "id": 92,
+    "category_name": "Women's Rights",
+    "name": "Property & inheritance rights",
+    "description": "",
+    "name_te": "ఆస్తి & వారసత్వ హక్కులు",
+    "description_te": "",
+    "category": 8,
+    "related_sections": []
+  },
+  {
+    "id": 93,
+    "category_name": "Child Protection",
+    "name": "Child marriage prevention",
+    "description": "",
+    "name_te": "బాల్య వివాహాల నివారణ",
+    "description_te": "",
+    "category": 9,
+    "related_sections": []
+  },
+  {
+    "id": 94,
+    "category_name": "Child Protection",
+    "name": "Child trafficking",
+    "description": "",
+    "name_te": "పిల్లల అక్రమ రవాణా",
+    "description_te": "",
+    "category": 9,
+    "related_sections": []
+  },
+  {
+    "id": 95,
+    "category_name": "Labour & Employment",
+    "name": "Provident fund",
+    "description": "",
+    "name_te": "ప్రావిడెంట్ ఫండ్",
+    "description_te": "",
+    "category": 10,
+    "related_sections": []
+  },
+  {
+    "id": 96,
+    "category_name": "Labour & Employment",
+    "name": "Gratuity",
+    "description": "",
+    "name_te": "గ్రాట్యుటీ",
+    "description_te": "",
+    "category": 10,
+    "related_sections": []
+  },
+  {
+    "id": 97,
+    "category_name": "Labour & Employment",
+    "name": "Minimum wages",
+    "description": "",
+    "name_te": "కనీస వేతనాలు",
+    "description_te": "",
+    "category": 10,
+    "related_sections": []
+  },
+  {
+    "id": 98,
+    "category_name": "Cyber Law",
+    "name": "Hacking & unauthorized access",
+    "description": "",
+    "name_te": "హ్యాకింగ్ & అనధికార ప్రవేశం",
+    "description_te": "",
+    "category": 11,
+    "related_sections": []
+  },
+  {
+    "id": 99,
+    "category_name": "Cyber Law",
+    "name": "Online defamation",
+    "description": "",
+    "name_te": "ఆన్‌లైన్ పరువు నష్టం",
+    "description_te": "",
+    "category": 11,
+    "related_sections": []
+  },
+  {
+    "id": 100,
+    "category_name": "Cyber Law",
+    "name": "Cyberstalking",
+    "description": "",
+    "name_te": "సైబర్ వెంబడింపు",
+    "description_te": "",
+    "category": 11,
+    "related_sections": []
+  }
+]
