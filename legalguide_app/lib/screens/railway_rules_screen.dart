@@ -10,7 +10,9 @@ import '../widgets/voice_search_modal.dart';
 import '../widgets/watermark_background.dart';
 
 class RailwayRulesScreen extends StatefulWidget {
-  const RailwayRulesScreen({super.key});
+  final bool embedded;
+
+  const RailwayRulesScreen({super.key, this.embedded = false});
 
   @override
   State<RailwayRulesScreen> createState() => _RailwayRulesScreenState();
@@ -58,9 +60,123 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
     }
   }
 
+  Widget _buildSearchAndTabBar(bool isTe) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Search Input
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Container(
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.bg,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: isTe
+                    ? 'జరిమానాలు లేదా నిబంధనలను వెతకండి...'
+                    : tr('Search fines, chain, ticket, rules...'),
+                hintStyle: GoogleFonts.inter(
+                  color: AppColors.textMuted,
+                  fontSize: 13,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search_rounded,
+                  color: AppColors.textMuted,
+                  size: 20,
+                ),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_searchQuery.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        onPressed: () => _searchController.clear(),
+                      ),
+                    IconButton(
+                      icon: const Icon(Icons.mic_rounded, size: 20, color: Color(0xFF0284C7)),
+                      tooltip: tr('Speak to search'),
+                      onPressed: _openVoiceSearch,
+                    ),
+                    const SizedBox(width: 4),
+                  ],
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              ),
+            ),
+          ),
+        ),
+        // TabBar
+        TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          indicatorColor: const Color(0xFF0284C7), // Railway Blue
+          indicatorWeight: 3,
+          labelColor: const Color(0xFF0284C7),
+          unselectedLabelColor: AppColors.textSecondary,
+          labelStyle: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+          tabs: [
+            Tab(
+              icon: const Icon(Icons.money_off_csred_rounded, size: 18),
+              text: isTe ? 'జరిమానాలు' : tr('Fines & Penalties'),
+            ),
+            Tab(
+              icon: const Icon(Icons.fact_check_rounded, size: 18),
+              text: isTe ? 'నిబంధనలు' : tr("Do's & Don'ts"),
+            ),
+            Tab(
+              icon: const Icon(Icons.gavel_rounded, size: 18),
+              text: isTe ? 'సెక్షన్లు' : tr('Bare Act Sections'),
+            ),
+            Tab(
+              icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
+              text: isTe ? 'సహాయవాణి' : tr('Helplines & Rights'),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isTe = LocaleService.isTelugu;
+    final searchAndTabBar = _buildSearchAndTabBar(isTe);
+    final tabBarView = WatermarkBackground(
+      child: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildFinesTab(isTe),
+          _buildRulesTab(isTe),
+          _buildSectionsTab(isTe),
+          _buildHelplinesTab(isTe),
+        ],
+      ),
+    );
+
+    if (widget.embedded) {
+      return Scaffold(
+        backgroundColor: AppColors.bg,
+        body: Column(
+          children: [
+            Container(
+              color: AppColors.surface,
+              padding: const EdgeInsets.only(top: 6),
+              child: searchAndTabBar,
+            ),
+            Expanded(child: tabBarView),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.bg,
@@ -77,101 +193,10 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(104),
-          child: Column(
-            children: [
-              // Search Input
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Container(
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: AppColors.bg,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: isTe
-                          ? 'జరిమానాలు లేదా నిబంధనలను వెతకండి...'
-                          : tr('Search fines, chain, ticket, rules...'),
-                      hintStyle: GoogleFonts.inter(
-                        color: AppColors.textMuted,
-                        fontSize: 13,
-                      ),
-                      prefixIcon: const Icon(
-                        Icons.search_rounded,
-                        color: AppColors.textMuted,
-                        size: 20,
-                      ),
-                      suffixIcon: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (_searchQuery.isNotEmpty)
-                            IconButton(
-                              icon: const Icon(Icons.clear_rounded, size: 18),
-                              onPressed: () => _searchController.clear(),
-                            ),
-                          IconButton(
-                            icon: const Icon(Icons.mic_rounded, size: 20, color: Color(0xFF0284C7)),
-                            tooltip: tr('Speak to search'),
-                            onPressed: _openVoiceSearch,
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                  ),
-                ),
-              ),
-              // TabBar
-              TabBar(
-                controller: _tabController,
-                isScrollable: true,
-                indicatorColor: const Color(0xFF0284C7), // Railway Blue
-                indicatorWeight: 3,
-                labelColor: const Color(0xFF0284C7),
-                unselectedLabelColor: AppColors.textSecondary,
-                labelStyle: GoogleFonts.inter(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-                tabs: [
-                  Tab(
-                    icon: const Icon(Icons.money_off_csred_rounded, size: 18),
-                    text: isTe ? 'జరిమానాలు' : tr('Fines & Penalties'),
-                  ),
-                  Tab(
-                    icon: const Icon(Icons.fact_check_rounded, size: 18),
-                    text: isTe ? 'నిబంధనలు' : tr("Do's & Don'ts"),
-                  ),
-                  Tab(
-                    icon: const Icon(Icons.gavel_rounded, size: 18),
-                    text: isTe ? 'సెక్షన్లు' : tr('Bare Act Sections'),
-                  ),
-                  Tab(
-                    icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
-                    text: isTe ? 'సహాయవాణి' : tr('Helplines & Rights'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          child: searchAndTabBar,
         ),
       ),
-      body: WatermarkBackground(
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildFinesTab(isTe),
-            _buildRulesTab(isTe),
-            _buildSectionsTab(isTe),
-            _buildHelplinesTab(isTe),
-          ],
-        ),
-      ),
+      body: tabBarView,
     );
   }
 

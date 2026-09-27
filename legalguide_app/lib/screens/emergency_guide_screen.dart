@@ -11,8 +11,13 @@ import 'traffic_rules_screen.dart';
 
 class EmergencyGuideScreen extends StatefulWidget {
   final String? initialScenarioId;
+  final bool embedded;
 
-  const EmergencyGuideScreen({super.key, this.initialScenarioId});
+  const EmergencyGuideScreen({
+    super.key,
+    this.initialScenarioId,
+    this.embedded = false,
+  });
 
   @override
   State<EmergencyGuideScreen> createState() => _EmergencyGuideScreenState();
@@ -94,35 +99,37 @@ class _EmergencyGuideScreenState extends State<EmergencyGuideScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              tr('Emergency Rights Guide'),
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: AppColors.textPrimary,
+      appBar: widget.embedded
+          ? null
+          : AppBar(
+              backgroundColor: AppColors.surface,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    tr('Emergency Rights Guide'),
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    tr('I Need Help Right Now'),
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: const Color(0xFFE53935),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
-            Text(
-              tr('I Need Help Right Now'),
-              style: GoogleFonts.inter(
-                fontSize: 12,
-                color: const Color(0xFFE53935),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 32),
         child: Column(

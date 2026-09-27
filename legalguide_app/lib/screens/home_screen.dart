@@ -17,11 +17,10 @@ import '../widgets/legal_section_card.dart';
 import '../widgets/section_heading.dart';
 import 'arrest_detention_screen.dart';
 import 'category_overview_screen.dart';
+import 'citizen_rights_travel_screen.dart';
 import 'documents_screen.dart';
-import 'emergency_guide_screen.dart';
 import 'explore_laws_screen.dart';
 import 'legal_help_screen.dart';
-import 'railway_rules_screen.dart';
 import 'section_detail_screen.dart';
 import 'traffic_rules_screen.dart';
 
@@ -315,12 +314,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    // Emergency Rights Quick-Guide Banner
+                    // Citizen Rights & Travel Guide Banner (Emergency Rights & Railway Rules)
                     InkWell(
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const EmergencyGuideScreen()),
+                          MaterialPageRoute(
+                            builder: (context) => const CitizenRightsTravelScreen(),
+                          ),
                         );
                       },
                       borderRadius: BorderRadius.circular(18),
@@ -328,14 +329,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFF991B1B), Color(0xFFDC2626)],
+                            colors: [Color(0xFF881337), Color(0xFF1E3A8A)],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFDC2626).withValues(alpha: 0.28),
+                              color: const Color(0xFF1E3A8A).withValues(alpha: 0.28),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -346,10 +347,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
+                                color: Colors.white.withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(14),
                               ),
-                              child: const Icon(Icons.shield_rounded, color: Colors.white, size: 24),
+                              child: const Icon(Icons.security_rounded, color: Colors.white, size: 24),
                             ),
                             const SizedBox(width: 11),
                             Expanded(
@@ -360,7 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     children: [
                                       Flexible(
                                         child: Text(
-                                          tr('Emergency Rights Guide'),
+                                          tr('Citizen Rights & Travel Guide'),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: GoogleFonts.inter(
@@ -374,11 +375,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withValues(alpha: 0.25),
+                                          color: Colors.white.withValues(alpha: 0.22),
                                           borderRadius: BorderRadius.circular(4),
                                         ),
                                         child: Text(
-                                          tr('HELP NOW'),
+                                          tr('SAFETY & TRANSIT'),
                                           style: GoogleFonts.inter(
                                             color: Colors.white,
                                             fontSize: 9.5,
@@ -390,77 +391,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   const SizedBox(height: 3),
                                   Text(
-                                    tr('Police stops, traffic challans, cyber fraud & women safety rights'),
+                                    tr('Emergency legal protection, police stops & Indian Railway rules'),
                                     style: GoogleFonts.inter(
                                       color: Colors.white.withValues(alpha: 0.88),
-                                      fontSize: 11.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right_rounded, color: Colors.white),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // Railway Rules Banner
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const RailwayRulesScreen()),
-                        );
-                      },
-                      borderRadius: BorderRadius.circular(18),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF0369A1), Color(0xFF0284C7)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF0284C7).withValues(alpha: 0.25),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: const Icon(Icons.train_rounded, color: Colors.white, size: 24),
-                            ),
-                            const SizedBox(width: 11),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    tr('Indian Railway Rules & Fines'),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white,
-                                      fontSize: 14.5,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    tr('Penalties, ticketless travel, chain pulling & passenger rights'),
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white.withValues(alpha: 0.85),
                                       fontSize: 11.5,
                                     ),
                                   ),

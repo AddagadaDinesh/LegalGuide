@@ -267,6 +267,20 @@ const _te = <String, String>{
   'Cloud Bookmark Sync': 'క్లౌడ్ బుక్‌మార్క్ సమకాలీకరణ',
   'Seamlessly sync your saved laws and sections across devices when logged into your account.':
       'మీ ఖాతాలో లాగిన్ అయినప్పుడు మీ సేవ్ చేసిన సెక్షన్లను క్లౌడ్‌లో సేవ్ చేయండి.',
+  'Citizen Rights & Travel': 'పౌర హక్కులు & ప్రయాణం',
+  'Citizen Rights & Travel Guide': 'పౌర హక్కులు & ప్రయాణ మార్గదర్శి',
+  'Emergency legal protection, police stops & Indian Railway rules':
+      'అత్యవసర చట్టపరమైన రక్షణ, పోలీస్ విచారణ & రైల్వే నిబంధనలు',
+  'Emergency Rights': 'అత్యవసర హక్కులు',
+  'Railway Rules': 'రైల్వే నిబంధనలు',
+  'SAFETY & TRANSIT': 'భద్రత & ప్రయాణం',
+  'Emergency Helplines': 'అత్యవసర హెల్ప్‌లైన్లు',
+  'National Emergency Number': 'జాతీయ అత్యవసర నంబర్',
+  'Indian Railways (RailMadad)': 'భారతీయ రైల్వే (రైల్ మదద్)',
+  'Cyber Financial Fraud': 'సైబర్ ఆర్థిక మోసాలు',
+  'Women Helpline': 'మహిళా హెల్ప్‌లైన్',
+  'Child Helpline': 'చైల్డ్ హెల్ప్‌లైన్',
+  'National Highways Emergency': 'జాతీయ రహదారుల అత్యవసర నంబర్',
 };
 
 const _hi = <String, String>{
@@ -596,4 +610,18 @@ const _hi = <String, String>{
   'Cloud Bookmark Sync': 'क्लाउड बुकमार्क सिंक',
   'Seamlessly sync your saved laws and sections across devices when logged into your account.':
       'लॉगिन करने पर अपने सहेजे गए अनुभागों को सभी डिवाइसों में सिंक करें।',
+  'Citizen Rights & Travel': 'नागरिक अधिकार और यात्रा',
+  'Citizen Rights & Travel Guide': 'नागरिक अधिकार और यात्रा गाइड',
+  'Emergency legal protection, police stops & Indian Railway rules':
+      'आपातकालीन कानूनी सुरक्षा, पुलिस पूछताछ और रेलवे नियम',
+  'Emergency Rights': 'आपातकालीन अधिकार',
+  'Railway Rules': 'रेलवे नियम',
+  'SAFETY & TRANSIT': 'सुरक्षा और यात्रा',
+  'Emergency Helplines': 'आपातकालीन हेल्पलाइन',
+  'National Emergency Number': 'राष्ट्रीय आपातकालीन नंबर',
+  'Indian Railways (RailMadad)': 'भारतीय रेलवे (रेल मदद)',
+  'Cyber Financial Fraud': 'साइबर वित्तीय धोखाधड़ी',
+  'Women Helpline': 'महिला हेल्पलाइन',
+  'Child Helpline': 'चाइल्ड हेल्पलाइन',
+  'National Highways Emergency': 'राष्ट्रीय राजमार्ग आपातकालीन नंबर',
 };

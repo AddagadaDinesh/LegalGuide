@@ -4,13 +4,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'about_screen.dart';
 import 'arrest_detention_screen.dart';
 import 'assistant_chat_screen.dart';
+import 'citizen_rights_travel_screen.dart';
 import 'documents_screen.dart';
-import 'emergency_guide_screen.dart';
 import 'explore_laws_screen.dart';
 import 'home_screen.dart';
 import 'legal_help_screen.dart';
 import 'login_screen.dart';
-import 'railway_rules_screen.dart';
 import 'saved_screen.dart';
 import 'traffic_rules_screen.dart';
 import '../localization/app_strings.dart';
@@ -82,17 +81,10 @@ class _MainShellState extends State<MainShell> {
               const SizedBox(height: 12),
               _moreTile(
                 sheetContext,
-                Icons.shield_rounded,
+                Icons.security_rounded,
                 const Color(0xFFDC2626),
-                tr('Emergency Rights Guide'),
-                const EmergencyGuideScreen(),
-              ),
-              _moreTile(
-                sheetContext,
-                Icons.train_rounded,
-                const Color(0xFF0284C7),
-                tr('Railway Rules & Fines'),
-                const RailwayRulesScreen(),
+                tr('Citizen Rights & Travel'),
+                const CitizenRightsTravelScreen(),
               ),
               _moreTile(
                 sheetContext,
