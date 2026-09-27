@@ -1,3 +1,4 @@
+import '../localization/app_strings.dart';
 import '../services/locale_service.dart';
 
 class Category {
@@ -15,9 +16,17 @@ class Category {
     this.descriptionTe = '',
   });
 
-  String get displayName => LocaleService.isTelugu && nameTe.isNotEmpty ? nameTe : name;
-  String get displayDescription =>
-      LocaleService.isTelugu && descriptionTe.isNotEmpty ? descriptionTe : description;
+  String get displayName {
+    if (LocaleService.isTelugu && nameTe.isNotEmpty) return nameTe;
+    if (LocaleService.isHindi) return tr(name);
+    return name;
+  }
+
+  String get displayDescription {
+    if (LocaleService.isTelugu && descriptionTe.isNotEmpty) return descriptionTe;
+    if (LocaleService.isHindi) return tr(description);
+    return description;
+  }
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(

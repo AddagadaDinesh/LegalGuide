@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../repositories/legal_data_repository.dart';
 import 'api_service.dart';
 import 'auth_service.dart';
+import 'locale_service.dart';
 import 'offline_qa_service.dart';
 
 class AssistantAnswer {
@@ -21,6 +22,14 @@ class AssistantService {
     }
 
     try {
+      final lang = LocaleService.language.value;
+      final langName = LocaleService.isTelugu
+          ? 'Telugu'
+          : (LocaleService.isHindi ? 'Hindi' : 'English');
+
+      final contextualMessage =
+          '[Instruction: You are the LegalGuide assistant for Indian laws and citizen rights. Understand the language or transliterated dialect the user is asking in (e.g. Telugu, Hindi, Tamil, Kannada, Marathi, English, or transliterated Telugish/Hinglish like "em app idhii" or "yeh kya app hai"). You MUST reply in the EXACT SAME LANGUAGE that the user used. If asked what this app is, warmly explain that LegalGuide is an Indian law guide for citizen rights and legal sections in simple words. User locale is: $langName]\n\nUser Question: $message';
+
       final response = await http
           .post(
             Uri.parse('${ApiService.baseUrl}/assistant/chat/'),
@@ -28,7 +37,10 @@ class AssistantService {
               'Content-Type': 'application/json',
               'Authorization': 'Token $token',
             },
-            body: jsonEncode({'message': message}),
+            body: jsonEncode({
+              'message': contextualMessage,
+              'language': lang,
+            }),
           )
           .timeout(const Duration(seconds: 50));
 

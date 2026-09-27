@@ -30,17 +30,23 @@ class LegalGuideApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'LegalGuide',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: AppColors.bg,
-        primaryColor: AppColors.accent,
-        textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
-        useMaterial3: true,
-      ),
-      home: const SplashScreen(),
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, lang, _) {
+        return MaterialApp(
+          key: ValueKey('legalguide_root_$lang'),
+          title: 'LegalGuide',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            brightness: Brightness.light,
+            scaffoldBackgroundColor: AppColors.bg,
+            primaryColor: AppColors.accent,
+            textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
+            useMaterial3: true,
+          ),
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }

@@ -18,6 +18,7 @@ import '../widgets/section_heading.dart';
 import 'arrest_detention_screen.dart';
 import 'category_overview_screen.dart';
 import 'documents_screen.dart';
+import 'emergency_guide_screen.dart';
 import 'explore_laws_screen.dart';
 import 'legal_help_screen.dart';
 import 'railway_rules_screen.dart';
@@ -95,12 +96,16 @@ class _HomeScreenState extends State<HomeScreen> {
       ..sort((a, b) => (referenceCounts[b.id] ?? 0).compareTo(referenceCounts[a.id] ?? 0));
 
     if (!mounted) return;
+    final topCommon = commonlyReferenced.take(3).toList();
+    final commonIds = topCommon.map((s) => s.id).toSet();
+    final topFrequent = frequent.where((s) => !commonIds.contains(s.id)).take(3).toList();
+
     setState(() {
       _neverSynced = !synced && !hasSyncedBefore;
       _categories = categories;
-      _frequentSections = frequent.take(3).toList();
-      _commonlyReferenced = commonlyReferenced.take(3).toList();
-      _popularSearches = topSearches.isNotEmpty ? topSearches : _fallbackSearchSuggestions;
+      _frequentSections = topFrequent;
+      _commonlyReferenced = topCommon;
+      _popularSearches = topSearches.isNotEmpty ? topSearches.toSet().toList() : _fallbackSearchSuggestions;
       _bookmarkedIds = bookmarks;
       _lookup = SectionLookup(laws, categories);
       _loading = false;
@@ -294,10 +299,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         _quickAccessCard(tr('Search Laws'), Icons.search_rounded, AppColors.accent, widget.onOpenExplore),
                         _quickAccessCard(tr('Ask AI'), Icons.chat_bubble_rounded, const Color(0xFFA78BFA), widget.onOpenAssistant),
-                        _quickAccessCard(tr('Railway\nRules & Fines'), Icons.train_rounded, const Color(0xFF0284C7), () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => const RailwayRulesScreen()));
-                        }),
                         _quickAccessCard(tr('Arrest &\nDetention'), Icons.local_police_rounded, const Color(0xFFF59E0B), () {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (context) => const ArrestDetentionScreen()));
@@ -313,6 +314,96 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     const SizedBox(height: 20),
+                    // Emergency Rights Quick-Guide Banner
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const EmergencyGuideScreen()),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF991B1B), Color(0xFFDC2626)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFDC2626).withValues(alpha: 0.28),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(Icons.shield_rounded, color: Colors.white, size: 24),
+                            ),
+                            const SizedBox(width: 11),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          tr('Emergency Rights Guide'),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: GoogleFonts.inter(
+                                            color: Colors.white,
+                                            fontSize: 14.5,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(alpha: 0.25),
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          tr('HELP NOW'),
+                                          style: GoogleFonts.inter(
+                                            color: Colors.white,
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    tr('Police stops, traffic challans, cyber fraud & women safety rights'),
+                                    style: GoogleFonts.inter(
+                                      color: Colors.white.withValues(alpha: 0.88),
+                                      fontSize: 11.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right_rounded, color: Colors.white),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     // Railway Rules Banner
                     InkWell(
                       onTap: () {
@@ -323,7 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       borderRadius: BorderRadius.circular(18),
                       child: Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             colors: [Color(0xFF0369A1), Color(0xFF0284C7)],
@@ -342,23 +433,25 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: Colors.white.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(14),
                               ),
-                              child: const Icon(Icons.train_rounded, color: Colors.white, size: 28),
+                              child: const Icon(Icons.train_rounded, color: Colors.white, size: 24),
                             ),
-                            const SizedBox(width: 14),
+                            const SizedBox(width: 11),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     tr('Indian Railway Rules & Fines'),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.inter(
                                       color: Colors.white,
-                                      fontSize: 15,
+                                      fontSize: 14.5,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -367,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     tr('Penalties, ticketless travel, chain pulling & passenger rights'),
                                     style: GoogleFonts.inter(
                                       color: Colors.white.withValues(alpha: 0.85),
-                                      fontSize: 12,
+                                      fontSize: 11.5,
                                     ),
                                   ),
                                 ],

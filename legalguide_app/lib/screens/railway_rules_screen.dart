@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../data/railway_data.dart';
+import '../localization/app_strings.dart';
 import '../services/locale_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/voice_search_modal.dart';
 import '../widgets/watermark_background.dart';
 
 class RailwayRulesScreen extends StatefulWidget {
@@ -44,6 +46,16 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
     }
   }
 
+  Future<void> _openVoiceSearch() async {
+    final spoken = await showVoiceSearchModal(
+      context: context,
+      hintText: tr('Search fines, rules, chain, ticket...'),
+    );
+    if (spoken != null && spoken.isNotEmpty) {
+      _searchController.text = spoken;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isTe = LocaleService.isTelugu;
@@ -54,7 +66,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
         backgroundColor: AppColors.surface,
         elevation: 0,
         title: Text(
-          isTe ? 'రైల్వే చట్టం & నిబంధనలు' : 'Railway Rules & Fines',
+          isTe ? 'రైల్వే చట్టం & నిబంధనలు' : tr('Railway Rules & Fines'),
           style: GoogleFonts.outfit(
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
@@ -80,7 +92,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                     decoration: InputDecoration(
                       hintText: isTe
                           ? 'జరిమానాలు లేదా నిబంధనలను వెతకండి...'
-                          : 'Search fines, chain, ticket, rules...',
+                          : tr('Search fines, chain, ticket, rules...'),
                       hintStyle: GoogleFonts.inter(
                         color: AppColors.textMuted,
                         fontSize: 13,
@@ -90,12 +102,22 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                         color: AppColors.textMuted,
                         size: 20,
                       ),
-                      suffixIcon: _searchQuery.isNotEmpty
-                          ? IconButton(
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_searchQuery.isNotEmpty)
+                            IconButton(
                               icon: const Icon(Icons.clear_rounded, size: 18),
                               onPressed: () => _searchController.clear(),
-                            )
-                          : null,
+                            ),
+                          IconButton(
+                            icon: const Icon(Icons.mic_rounded, size: 20, color: Color(0xFF0284C7)),
+                            tooltip: tr('Speak to search'),
+                            onPressed: _openVoiceSearch,
+                          ),
+                          const SizedBox(width: 4),
+                        ],
+                      ),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(vertical: 10),
                     ),
@@ -117,19 +139,19 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                 tabs: [
                   Tab(
                     icon: const Icon(Icons.money_off_csred_rounded, size: 18),
-                    text: isTe ? 'జరిమానాలు' : 'Fines & Penalties',
+                    text: isTe ? 'జరిమానాలు' : tr('Fines & Penalties'),
                   ),
                   Tab(
                     icon: const Icon(Icons.fact_check_rounded, size: 18),
-                    text: isTe ? 'నిబంధనలు' : "Do's & Don'ts",
+                    text: isTe ? 'నిబంధనలు' : tr("Do's & Don'ts"),
                   ),
                   Tab(
                     icon: const Icon(Icons.gavel_rounded, size: 18),
-                    text: isTe ? 'సెక్షన్లు' : 'Bare Act Sections',
+                    text: isTe ? 'సెక్షన్లు' : tr('Bare Act Sections'),
                   ),
                   Tab(
                     icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
-                    text: isTe ? 'సహాయవాణి' : 'Helplines & Rights',
+                    text: isTe ? 'సహాయవాణి' : tr('Helplines & Rights'),
                   ),
                 ],
               ),
@@ -165,7 +187,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
     if (filteredFines.isEmpty) {
       return Center(
         child: Text(
-          isTe ? 'ఫలితాలు కనుగొనబడలేదు' : 'No matching penalties found',
+          isTe ? 'ఫలితాలు కనుగొనబడలేదు' : tr('No matching penalties found'),
           style: GoogleFonts.inter(color: AppColors.textMuted),
         ),
       );
@@ -244,7 +266,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                 const SizedBox(height: 10),
                 // Offense Title
                 Text(
-                  isTe ? item.titleTe : item.title,
+                  item.displayTitle,
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -254,7 +276,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                 const SizedBox(height: 6),
                 // Description
                 Text(
-                  isTe ? item.descriptionTe : item.description,
+                  item.displayDescription,
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     color: AppColors.textSecondary,
@@ -398,8 +420,8 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                         children: [
                           Text(
                             isAllowed
-                                ? (isTe ? 'అనుమతించబడినది' : 'ALLOWED / RULE')
-                                : (isTe ? 'నిషేధించబడినది' : 'STRICTLY PROHIBITED'),
+                                ? (isTe ? 'అనుమతించబడినది' : tr('ALLOWED / RULE'))
+                                : (isTe ? 'నిషేధించబడినది' : tr('STRICTLY PROHIBITED')),
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -409,7 +431,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                             ),
                           ),
                           Text(
-                            isTe ? rule.titleTe : rule.title,
+                            rule.displayTitle,
                             style: GoogleFonts.inter(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
@@ -423,7 +445,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  isTe ? rule.detailTe : rule.detail,
+                  rule.displayDetail,
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     color: AppColors.textSecondary,

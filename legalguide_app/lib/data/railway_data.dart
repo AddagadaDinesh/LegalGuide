@@ -1,3 +1,6 @@
+import '../localization/app_strings.dart';
+import '../services/locale_service.dart';
+
 class RailwayFineItem {
   final String title;
   final String titleTe;
@@ -22,6 +25,18 @@ class RailwayFineItem {
     required this.isBailable,
     required this.isCognizable,
   });
+
+  String get displayTitle {
+    if (LocaleService.isTelugu && titleTe.isNotEmpty) return titleTe;
+    if (LocaleService.isHindi) return tr(title);
+    return title;
+  }
+
+  String get displayDescription {
+    if (LocaleService.isTelugu && descriptionTe.isNotEmpty) return descriptionTe;
+    if (LocaleService.isHindi) return tr(description);
+    return description;
+  }
 }
 
 class RailwayRuleItem {
@@ -42,6 +57,18 @@ class RailwayRuleItem {
     required this.detailTe,
     required this.legalRef,
   });
+
+  String get displayTitle {
+    if (LocaleService.isTelugu && titleTe.isNotEmpty) return titleTe;
+    if (LocaleService.isHindi) return tr(title);
+    return title;
+  }
+
+  String get displayDetail {
+    if (LocaleService.isTelugu && detailTe.isNotEmpty) return detailTe;
+    if (LocaleService.isHindi) return tr(detail);
+    return detail;
+  }
 }
 
 class RailwaySectionData {

@@ -1,3 +1,4 @@
+import '../localization/app_strings.dart';
 import '../services/locale_service.dart';
 
 class LegalSection {
@@ -17,6 +18,9 @@ class LegalSection {
   final String source;
   final String? lastVerified;
   final List<int> relatedSectionIds;
+  final String? directActionUrl;
+  final String? directActionLabel;
+  final String? directActionType;
 
   final String titleTe;
   final String simpleExplanationTe;
@@ -43,6 +47,9 @@ class LegalSection {
     required this.source,
     this.lastVerified,
     this.relatedSectionIds = const [],
+    this.directActionUrl,
+    this.directActionLabel,
+    this.directActionType,
     this.titleTe = '',
     this.simpleExplanationTe = '',
     this.purposeTe = '',
@@ -54,23 +61,57 @@ class LegalSection {
 
   bool get hasTeluguTranslation => titleTe.isNotEmpty;
 
-  String get displayTitle => LocaleService.isTelugu && titleTe.isNotEmpty ? titleTe : title;
-  String get displaySimpleExplanation =>
-      LocaleService.isTelugu && simpleExplanationTe.isNotEmpty ? simpleExplanationTe : simpleExplanation;
-  String get displayPurpose =>
-      LocaleService.isTelugu && purposeTe.isNotEmpty ? purposeTe : purpose;
-  String get displayPunishment =>
-      LocaleService.isTelugu && punishmentTe.isNotEmpty ? punishmentTe : punishment;
-  String get displayRelevantDocuments =>
-      LocaleService.isTelugu && relevantDocumentsTe.isNotEmpty ? relevantDocumentsTe : relevantDocuments;
+  String get displayTitle {
+    if (LocaleService.isTelugu && titleTe.isNotEmpty) return titleTe;
+    if (LocaleService.isHindi) return tr(title);
+    return title;
+  }
 
-  List<String> get keyElementsList => _lines(
-      LocaleService.isTelugu && keyElementsTe.isNotEmpty ? keyElementsTe : keyElements);
+  String get displaySimpleExplanation {
+    if (LocaleService.isTelugu && simpleExplanationTe.isNotEmpty) return simpleExplanationTe;
+    if (LocaleService.isHindi) return tr(simpleExplanation);
+    return simpleExplanation;
+  }
 
-  List<String> get relevantInformationList => _lines(
-      LocaleService.isTelugu && relevantInformationTe.isNotEmpty
-          ? relevantInformationTe
-          : relevantInformation);
+  String get displayPurpose {
+    if (LocaleService.isTelugu && purposeTe.isNotEmpty) return purposeTe;
+    if (LocaleService.isHindi) return tr(purpose);
+    return purpose;
+  }
+
+  String get displayPunishment {
+    if (LocaleService.isTelugu && punishmentTe.isNotEmpty) return punishmentTe;
+    if (LocaleService.isHindi) return tr(punishment);
+    return punishment;
+  }
+
+  String get displayRelevantDocuments {
+    if (LocaleService.isTelugu && relevantDocumentsTe.isNotEmpty) return relevantDocumentsTe;
+    if (LocaleService.isHindi) return tr(relevantDocuments);
+    return relevantDocuments;
+  }
+
+  List<String> get keyElementsList {
+    if (LocaleService.isTelugu && keyElementsTe.isNotEmpty) {
+      return _lines(keyElementsTe);
+    }
+    final rawList = _lines(keyElements);
+    if (LocaleService.isHindi) {
+      return rawList.map((e) => tr(e)).toList();
+    }
+    return rawList;
+  }
+
+  List<String> get relevantInformationList {
+    if (LocaleService.isTelugu && relevantInformationTe.isNotEmpty) {
+      return _lines(relevantInformationTe);
+    }
+    final rawList = _lines(relevantInformation);
+    if (LocaleService.isHindi) {
+      return rawList.map((e) => tr(e)).toList();
+    }
+    return rawList;
+  }
 
   static List<String> _lines(String text) => text
       .split('\n')

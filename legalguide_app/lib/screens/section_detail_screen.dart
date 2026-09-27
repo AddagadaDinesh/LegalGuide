@@ -5,6 +5,7 @@ import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
 import '../services/bookmark_service.dart';
 import '../services/locale_service.dart';
+import '../services/tts_service.dart';
 import '../services/view_count_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/section_lookup.dart';
@@ -46,6 +47,12 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    TtsService.instance.stop();
+    super.dispose();
+  }
+
   Future<void> _loadCategoryStyle() async {
     final categories = await LegalDataRepository.loadCategories();
     final laws = await LegalDataRepository.loadLaws();
@@ -79,6 +86,27 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
+          ValueListenableBuilder<String?>(
+            valueListenable: TtsService.instance.currentlyPlayingId,
+            builder: (context, playingId, _) {
+              final isPlaying = playingId == 'section_${section.id}';
+              return IconButton(
+                icon: Icon(
+                  isPlaying ? Icons.stop_circle_rounded : Icons.volume_up_rounded,
+                  color: isPlaying ? Colors.red : AppColors.accent,
+                ),
+                tooltip: tr(isPlaying ? 'Stop Reading' : 'Listen to Section'),
+                onPressed: () {
+                  final textToSpeak =
+                      '${section.sectionNumber}. ${section.displayTitle}. ${section.displaySimpleExplanation}';
+                  TtsService.instance.toggle(
+                    text: textToSpeak,
+                    id: 'section_${section.id}',
+                  );
+                },
+              );
+            },
+          ),
           IconButton(
             icon: Icon(
               _isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
@@ -386,6 +414,53 @@ class _SectionDetailScreenState extends State<SectionDetailScreen> {
                     fontSize: 14,
                   ),
                 ),
+              ),
+              const SizedBox(width: 8),
+              ValueListenableBuilder<String?>(
+                valueListenable: TtsService.instance.currentlyPlayingId,
+                builder: (context, playingId, _) {
+                  final isPlaying = playingId == 'section_${section.id}';
+                  return InkWell(
+                    onTap: () {
+                      final textToSpeak =
+                          '${section.sectionNumber}. ${section.displayTitle}. ${section.displaySimpleExplanation}';
+                      TtsService.instance.toggle(
+                        text: textToSpeak,
+                        id: 'section_${section.id}',
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: (isPlaying ? Colors.red : AppColors.warning).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: (isPlaying ? Colors.red : AppColors.warning).withValues(alpha: 0.5),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            isPlaying ? Icons.stop_rounded : Icons.volume_up_rounded,
+                            size: 15,
+                            color: isPlaying ? Colors.red : AppColors.warning,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            tr(isPlaying ? 'Stop' : 'Listen'),
+                            style: GoogleFonts.inter(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: isPlaying ? Colors.red : AppColors.warning,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),

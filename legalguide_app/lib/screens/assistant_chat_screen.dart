@@ -5,6 +5,7 @@ import '../models/chat_message.dart';
 import '../services/assistant_service.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/voice_search_modal.dart';
 import 'login_screen.dart';
 
 Future<void> showAssistantPanel(BuildContext context) {
@@ -74,6 +75,18 @@ class _AssistantPanelState extends State<AssistantPanel> {
       _isSending = false;
     });
     _scrollToBottom();
+  }
+
+  Future<void> _openVoiceInput() async {
+    final spoken = await showVoiceSearchModal(
+      context: context,
+      hintText: tr('Ask any legal question in Telugu, Hindi, or English...'),
+    );
+    if (spoken != null && spoken.isNotEmpty) {
+      setState(() {
+        _controller.text = spoken;
+      });
+    }
   }
 
   void _scrollToBottom() {
@@ -356,6 +369,11 @@ class _AssistantPanelState extends State<AssistantPanel> {
                 hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
                 filled: true,
                 fillColor: AppColors.surface,
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.mic_rounded, color: AppColors.accent),
+                  tooltip: tr('Speak your question'),
+                  onPressed: _openVoiceInput,
+                ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),

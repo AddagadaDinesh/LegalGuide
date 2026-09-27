@@ -6,6 +6,7 @@ class LocaleService {
   static final ValueNotifier<String> language = ValueNotifier<String>('en');
 
   static bool get isTelugu => language.value == 'te';
+  static bool get isHindi => language.value == 'hi';
 
   static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();

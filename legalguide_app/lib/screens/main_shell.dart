@@ -5,6 +5,7 @@ import 'about_screen.dart';
 import 'arrest_detention_screen.dart';
 import 'assistant_chat_screen.dart';
 import 'documents_screen.dart';
+import 'emergency_guide_screen.dart';
 import 'explore_laws_screen.dart';
 import 'home_screen.dart';
 import 'legal_help_screen.dart';
@@ -78,6 +79,13 @@ class _MainShellState extends State<MainShell> {
                 ),
               ),
               const SizedBox(height: 12),
+              _moreTile(
+                sheetContext,
+                Icons.shield_rounded,
+                const Color(0xFFDC2626),
+                tr('Emergency Rights Guide'),
+                const EmergencyGuideScreen(),
+              ),
               _moreTile(
                 sheetContext,
                 Icons.train_rounded,
@@ -296,11 +304,17 @@ class _MainShellState extends State<MainShell> {
                   },
                 ),
                 ListTile(
-                  enabled: false,
                   title: Text(
-                    tr('Hindi — Coming soon'),
-                    style: GoogleFonts.inter(color: AppColors.textMuted),
+                    'हिन्दी (Hindi)',
+                    style: GoogleFonts.inter(color: AppColors.textPrimary),
                   ),
+                  trailing: currentLang == 'hi'
+                      ? const Icon(Icons.check_circle, color: AppColors.accent)
+                      : null,
+                  onTap: () async {
+                    await LocaleService.setLanguage('hi');
+                    if (dialogContext.mounted) Navigator.pop(dialogContext);
+                  },
                 ),
                 ListTile(
                   enabled: false,
@@ -422,7 +436,9 @@ class _MainShellState extends State<MainShell> {
                       ValueListenableBuilder<String>(
                         valueListenable: LocaleService.language,
                         builder: (context, lang, _) => Text(
-                          lang == 'te' ? tr('Telugu') : tr('English'),
+                          lang == 'te'
+                              ? 'తెలుగు'
+                              : (lang == 'hi' ? 'हिन्दी' : 'English'),
                           style: GoogleFonts.inter(
                             color: AppColors.textSecondary,
                             fontSize: 12,

@@ -15,6 +15,7 @@ class ChatRequestSerializer(serializers.Serializer):
         max_length=4000,
     )
     history = ChatMessageSerializer(many=True, required=False, default=list)
+    language = serializers.CharField(required=False, allow_blank=True, default="auto")
 
     def validate_history(self, value):
         return value[-MAX_HISTORY_MESSAGES:]
