@@ -3,7 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../localization/app_strings.dart';
 import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
+import '../services/analytics_service.dart';
 import '../services/bookmark_service.dart';
+import '../services/locale_service.dart';
 import '../services/view_count_service.dart';
 import '../theme/app_theme.dart';
 import '../utils/section_lookup.dart';
@@ -28,6 +30,7 @@ class _SavedScreenState extends State<SavedScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.trackFeature('saved_laws');
     widget.bookmarkVersion.addListener(_loadData);
     _loadData();
   }
@@ -60,17 +63,20 @@ class _SavedScreenState extends State<SavedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final lookup = _lookup;
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: SafeArea(
-        child: _loading || lookup == null
-            ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
-            : CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, lang, _) {
+        final lookup = _lookup;
+        return Scaffold(
+          backgroundColor: AppColors.bg,
+          body: SafeArea(
+            child: _loading || lookup == null
+                ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
+                : CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
                       child: Row(
                         children: [
                           const Icon(Icons.bookmark_rounded, color: AppColors.accent, size: 22),
@@ -151,7 +157,9 @@ class _SavedScreenState extends State<SavedScreen> {
                   const SliverToBoxAdapter(child: SizedBox(height: 20)),
                 ],
               ),
-      ),
-    );
+            ),
+          );
+        },
+      );
   }
 }

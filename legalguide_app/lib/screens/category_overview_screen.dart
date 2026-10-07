@@ -4,6 +4,7 @@ import '../localization/app_strings.dart';
 import '../models/category.dart';
 import '../models/legal_matter.dart';
 import '../repositories/legal_data_repository.dart';
+import '../services/locale_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/icon_badge.dart';
 import 'law_list_screen.dart';
@@ -52,76 +53,81 @@ class _CategoryOverviewScreenState extends State<CategoryOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final style = categoryStyleFor(widget.category.name);
-    final populated = _matters.where((m) => m.isAvailable).length;
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, lang, _) {
+        final style = categoryStyleFor(widget.category.name);
+        final populated = _matters.where((m) => m.isAvailable).length;
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: AppColors.bg,
-        appBar: AppBar(
-          backgroundColor: AppColors.surface,
-          elevation: 0,
-          title: Text(widget.category.displayName,
-              style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-          bottom: TabBar(
-            indicatorColor: style.color,
-            indicatorWeight: 3,
-            labelColor: AppColors.textPrimary,
-            unselectedLabelColor: AppColors.textSecondary,
-            labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13),
-            tabs: [
-              Tab(text: tr('Topics')),
-              Tab(text: tr('Laws & Sections')),
-            ],
-          ),
-        ),
-        body: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              color: AppColors.surface,
-              child: Row(
-                children: [
-                  IconBadge(icon: style.icon, color: style.color, size: 48, iconSize: 24),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.category.displayDescription.isNotEmpty
-                              ? widget.category.displayDescription
-                              : widget.category.displayName,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12.5, height: 1.4),
+        return DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            backgroundColor: AppColors.bg,
+            appBar: AppBar(
+              backgroundColor: AppColors.surface,
+              elevation: 0,
+              title: Text(widget.category.displayName,
+                  style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+              bottom: TabBar(
+                indicatorColor: style.color,
+                indicatorWeight: 3,
+                labelColor: AppColors.textPrimary,
+                unselectedLabelColor: AppColors.textSecondary,
+                labelStyle: GoogleFonts.inter(fontWeight: FontWeight.w600, fontSize: 13),
+                tabs: [
+                  Tab(text: tr('Topics')),
+                  Tab(text: tr('Laws & Sections')),
+                ],
+              ),
+            ),
+            body: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                  color: AppColors.surface,
+                  child: Row(
+                    children: [
+                      IconBadge(icon: style.icon, color: style.color, size: 48, iconSize: 24),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.category.displayDescription.isNotEmpty
+                                  ? widget.category.displayDescription
+                                  : widget.category.displayName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12.5, height: 1.4),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              '${_matters.length} ${tr("topics")} · $populated ${tr("with legal sections")}',
+                              style: GoogleFonts.inter(color: style.color, fontSize: 11.5, fontWeight: FontWeight.w600),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${_matters.length} ${tr("topics")} · $populated ${tr("with legal sections")}',
-                          style: GoogleFonts.inter(color: style.color, fontSize: 11.5, fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      _loading
+                          ? Center(child: CircularProgressIndicator(color: style.color))
+                          : _buildTopics(style),
+                      LawListScreen(category: widget.category, embedded: true),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _loading
-                      ? Center(child: CircularProgressIndicator(color: style.color))
-                      : _buildTopics(style),
-                  LawListScreen(category: widget.category, embedded: true),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

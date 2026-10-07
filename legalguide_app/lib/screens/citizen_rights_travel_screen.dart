@@ -235,9 +235,10 @@ class _CitizenRightsTravelScreenState extends State<CitizenRightsTravelScreen>
           children: [
             Text(
               tr('Citizen Rights & Travel'),
+              softWrap: true,
               style: GoogleFonts.outfit(
                 fontWeight: FontWeight.bold,
-                fontSize: 18.5,
+                fontSize: 18,
                 color: AppColors.textPrimary,
               ),
             ),
@@ -245,7 +246,8 @@ class _CitizenRightsTravelScreenState extends State<CitizenRightsTravelScreen>
               isTe
                   ? 'అత్యవసర చట్టపరమైన రక్షణ & రైల్వే ప్రయాణ మార్గదర్శి'
                   : tr('Emergency legal protection & Indian Railway rules'),
-              maxLines: 1,
+              maxLines: 2,
+              softWrap: true,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.inter(
                 fontSize: 11.5,

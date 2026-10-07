@@ -2,3 +2,51 @@
 Thumbs.db
 *.log
 .claude/
+# Secrets
+.env
+*.env
+**/.env
+**/*.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# Databases
+*.sqlite3
+*.db
+
+# Node.js
+node_modules/
+
+# Flutter / Dart
+.dart_tool/
+build/
+**/build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+coverage/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Antigravity / Claude
+.claude/
+
+# Temporary development / diagnostic files
+scratch/
+scratch_check_*.py
+window_dump.xml
+
+scratch_search_users.py

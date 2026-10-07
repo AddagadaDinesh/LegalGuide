@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../data/traffic_data.dart';
 import '../localization/app_strings.dart';
+import '../services/analytics_service.dart';
 import '../services/locale_service.dart';
 import '../services/tts_service.dart';
 import '../theme/app_theme.dart';
@@ -28,6 +29,8 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
   @override
   void initState() {
     super.initState();
+    AnalyticsService.trackFeature('traffic_rules');
+    AnalyticsService.trackFeature('legal_awareness');
     _tabController = TabController(
       length: 3,
       vsync: this,
@@ -67,68 +70,78 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isTe = LocaleService.isTelugu;
-    final isHi = LocaleService.isHindi;
-
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              isTe ? 'ట్రాఫిక్ నిబంధనలు & జరిమానాలు' : (isHi ? 'ट्रैफिक नियम एवं चालान' : tr('Traffic Rules & Fines')),
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
-                color: AppColors.textPrimary,
-              ),
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, lang, _) {
+        return Scaffold(
+          backgroundColor: AppColors.bg,
+          appBar: AppBar(
+            backgroundColor: AppColors.surface,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            Text(
-              'Motor Vehicles Amendment Act',
-              style: GoogleFonts.inter(
-                fontSize: 11,
-                color: const Color(0xFFF59E0B),
-                fontWeight: FontWeight.w600,
-              ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  tr('Traffic Rules & Driver Rights'),
+                  softWrap: true,
+                  maxLines: 2,
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  tr('Motor Vehicles Amendment Act'),
+                  softWrap: true,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: const Color(0xFFF59E0B),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.accent,
-          unselectedLabelColor: AppColors.textSecondary,
-          indicatorColor: AppColors.accent,
-          indicatorWeight: 3,
-          labelStyle: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
-          tabs: [
-            Tab(text: isTe ? 'జరిమానాలు' : tr('Fines & Offenses')),
-            Tab(text: isTe ? 'డ్రైవర్ హక్కులు' : tr('Driver Rights')),
-            Tab(text: isTe ? 'ఈ-చలానా చెకింగ్' : tr('E-Challan Guide')),
-          ],
-        ),
-      ),
-      body: WatermarkBackground(
-        child: TabBarView(
-          controller: _tabController,
-          children: [
-            _buildFinesTab(isTe),
-            _buildRightsTab(isTe),
-            _buildEChallanTab(isTe),
-          ],
-        ),
-      ),
+            bottom: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              labelColor: AppColors.accent,
+              unselectedLabelColor: AppColors.textSecondary,
+              indicatorColor: AppColors.accent,
+              indicatorWeight: 3,
+              labelStyle: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
+              tabs: [
+                Tab(text: tr('Fines & Offenses')),
+                Tab(text: tr('Driver Rights')),
+                Tab(text: tr('E-Challan Guide')),
+              ],
+            ),
+          ),
+          body: WatermarkBackground(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildFinesTab(),
+                _buildRightsTab(),
+                _buildEChallanTab(),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   // 1. Fines & Penalties Tab
-  Widget _buildFinesTab(bool isTe) {
+  Widget _buildFinesTab() {
     final categories = ['All', 'High Severity', 'Safety', 'Documents', 'Signals'];
 
     final filteredFines = TrafficData.fines.where((f) {
@@ -164,8 +177,9 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                   child: TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: isTe ? 'హెల్మెట్, లైసెన్స్, స్పీడ్, జరిమానా శోధించండి...' : tr('Search helmet, speed, drunk driving, license...'),
-                      hintStyle: GoogleFonts.inter(fontSize: 13, color: AppColors.textSecondary),
+                      hintText: tr('Search helmet, speed, drunk driving, license...'),
+                      hintStyle: GoogleFonts.inter(fontSize: 12.5, color: AppColors.textSecondary),
+                      isDense: true,
                       prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.textSecondary),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
@@ -174,7 +188,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                             )
                           : null,
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
                     ),
                     style: GoogleFonts.inter(fontSize: 13, color: AppColors.textPrimary),
                   ),
@@ -218,12 +232,12 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                     cat == 'All'
                         ? tr('All Fines')
                         : cat == 'High Severity'
-                            ? (isTe ? 'భారీ జరిమానాలు' : 'High Severity')
+                            ? tr('High Severity')
                             : cat == 'Safety'
-                                ? (isTe ? 'భద్రత' : 'Safety')
+                                ? tr('Safety')
                                 : cat == 'Documents'
-                                    ? (isTe ? 'పత్రాలు' : 'Documents')
-                                    : (isTe ? 'సిగ్నల్స్' : 'Signals'),
+                                    ? tr('Documents')
+                                    : tr('Signals'),
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
@@ -259,7 +273,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                   itemCount: filteredFines.length,
                   itemBuilder: (context, index) {
                     final item = filteredFines[index];
-                    return _buildFineCard(item, isTe);
+                    return _buildFineCard(item);
                   },
                 ),
         ),
@@ -267,7 +281,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
     );
   }
 
-  Widget _buildFineCard(TrafficFineItem item, bool isTe) {
+  Widget _buildFineCard(TrafficFineItem item) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
@@ -342,7 +356,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          isTe ? 'తీవ్రమైన నేరం' : 'HEAVY PENALTY',
+                          tr('HEAVY PENALTY'),
                           style: GoogleFonts.inter(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
@@ -410,7 +424,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isTe ? 'జరిమానా' : tr('FINE AMOUNT'),
+                          tr('FINE AMOUNT'),
                           style: GoogleFonts.inter(
                             fontSize: 10.5,
                             color: AppColors.danger,
@@ -443,7 +457,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            isTe ? 'జైలు శిక్ష' : tr('IMPRISONMENT'),
+                            tr('IMPRISONMENT'),
                             style: GoogleFonts.inter(
                               fontSize: 10.5,
                               color: Colors.orange.shade800,
@@ -473,7 +487,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
   }
 
   // 2. Driver Rights Tab
-  Widget _buildRightsTab(bool isTe) {
+  Widget _buildRightsTab() {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: TrafficData.driverRights.length,
@@ -515,7 +529,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            isTe ? 'పౌర డ్రైవర్ హక్కు' : tr('CITIZEN DRIVER RIGHT'),
+                            tr('CITIZEN DRIVER RIGHT'),
                             style: GoogleFonts.inter(
                               fontSize: 10.5,
                               fontWeight: FontWeight.w700,
@@ -601,7 +615,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
   }
 
   // 3. E-Challan & Dispute Guide
-  Widget _buildEChallanTab(bool isTe) {
+  Widget _buildEChallanTab() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -641,7 +655,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isTe ? 'అధికారిక ఈ-చలానా పోర్టల్' : tr('Official E-Challan Portal'),
+                        tr('Official E-Challan Portal'),
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontSize: 16,
@@ -650,7 +664,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        isTe ? 'మీ వాహన నంబర్ తో చలానాలను చెక్ చేసి ఆన్‌లైన్‌లో చెల్లించండి.' : tr('Check pending traffic challans & pay securely via Parivahan.'),
+                        tr('Check pending traffic challans & pay securely via Parivahan.'),
                         style: GoogleFonts.inter(
                           color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 12,
@@ -672,7 +686,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                   onPressed: () => _openUrl('https://echallan.parivahan.gov.in/'),
                   icon: const Icon(Icons.open_in_new_rounded, size: 16),
                   label: Text(
-                    isTe ? 'పరివాహన్ ఈ-చలానా' : 'Parivahan Portal',
+                    tr('Parivahan Portal'),
                     style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -689,7 +703,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
                   onPressed: () => _openUrl('https://vcourts.gov.in/'),
                   icon: const Icon(Icons.balance_rounded, size: 16),
                   label: Text(
-                    isTe ? 'వర్చువల్ కోర్టు' : 'Virtual Courts',
+                    tr('Virtual Courts'),
                     style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
                   ),
                   style: OutlinedButton.styleFrom(
@@ -705,7 +719,7 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
           const SizedBox(height: 24),
 
           Text(
-            isTe ? 'తప్పుడు చలానా వస్తే ఏం చేయాలి?' : tr('How to Dispute a False / Wrong Challan?'),
+            tr('How to Dispute a False / Wrong Challan?'),
             style: GoogleFonts.inter(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -716,31 +730,23 @@ class _TrafficRulesScreenState extends State<TrafficRulesScreen>
 
           _buildStepCard(
             stepNum: '1',
-            title: isTe ? 'ఈ-చలానా ఫోటోను పరిశీలించండి' : tr('Inspect the Violation Photo Proof'),
-            detail: isTe
-                ? 'పరివాహన్ వెబ్‌సైట్‌లో లాగిన్ అయి సిగ్నల్ లేదా కెమెరా తీసిన ఫోటోను చూడండి. నంబర్ ప్లేట్ లేదా వాహనం మీది కాకపోతే వెంటనే స్క్రీన్‌షాట్ తీయండి.'
-                : 'Log in to echallan.parivahan.gov.in and click "Detail" to examine the camera capture. Verify whether the license plate or vehicle actually matches yours.',
+            title: tr('Inspect the Violation Photo Proof'),
+            detail: tr('Log in to echallan.parivahan.gov.in and click "Detail" to examine the camera capture. Verify whether the license plate or vehicle actually matches yours.'),
           ),
           _buildStepCard(
             stepNum: '2',
-            title: isTe ? 'ఆన్‌లైన్ ఫిర్యాదును నమోదు చేయండి' : tr('File Online Grievance on Portal'),
-            detail: isTe
-                ? 'వెబ్‌సైట్‌లోని "Complaint / Grievance" ట్యాబ్‌పై క్లిక్ చేసి, తప్పుడు రీడింగ్ లేదా వేరే వాహనం అని పేర్కొంటూ ఫోటోలతో కంప్లైంట్ సబ్మిట్ చేయండి.'
-                : 'Click the "Grievance" tab on the official portal. Upload proof (e.g. your vehicle photo showing differences or toll receipts proving your vehicle was elsewhere).',
+            title: tr('File Online Grievance on Portal'),
+            detail: tr('Click the "Grievance" tab on the official portal. Upload proof (e.g. your vehicle photo showing differences or toll receipts proving your vehicle was elsewhere).'),
           ),
           _buildStepCard(
             stepNum: '3',
-            title: isTe ? 'వర్చువల్ కోర్టులో అప్పీల్ చేయండి' : tr('Contest via Virtual Court (vcourts.gov.in)'),
-            detail: isTe
-                ? 'చలానా వర్చువల్ కోర్టుకు వెళ్లినప్పుడు, "Contest Case" ఎంపికను ఎంచుకోవచ్చు. మేజిస్ట్రేట్ మీ అభ్యంతరాలను సమీక్షిస్తారు.'
-                : 'If the challan is transferred to Virtual Court, you have the legal right to click "Contest Challan" instead of paying. A judicial magistrate will examine the case.',
+            title: tr('Contest via Virtual Court (vcourts.gov.in)'),
+            detail: tr('If the challan is transferred to Virtual Court, you have the legal right to click "Contest Challan" instead of paying. A judicial magistrate will examine the case.'),
           ),
           _buildStepCard(
             stepNum: '4',
-            title: isTe ? 'లోక్ అదాలత్ (Lok Adalat) పరిష్కారం' : tr('Lok Adalat Discount / Settlement'),
-            detail: isTe
-                ? 'ఏటా జరిగే జాతీయ లోక్ అదాలత్‌లో ట్రాఫిక్ చలానాలపై భారీ రాయితీలు లేదా తప్పుడు చలానాలను పూర్తిగా రద్దు చేసుకునే అవకాశం ఉంటుంది.'
-                : 'During quarterly National Lok Adalats, courts allow amicable settlement of pending traffic challans with substantial waivers or dismissal of contested fines.',
+            title: tr('Lok Adalat Discount / Settlement'),
+            detail: tr('During quarterly National Lok Adalats, courts allow amicable settlement of pending traffic challans with substantial waivers or dismissal of contested fines.'),
           ),
         ],
       ),

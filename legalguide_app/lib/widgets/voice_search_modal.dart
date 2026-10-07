@@ -72,7 +72,7 @@ class _VoiceSearchModalState extends State<VoiceSearchModal>
     } else if (appLang == 'hi') {
       _selectedLocale = 'hi_IN';
     } else {
-      _selectedLocale = 'auto';
+      _selectedLocale = 'en_IN';
     }
 
     _startListeningFlow();

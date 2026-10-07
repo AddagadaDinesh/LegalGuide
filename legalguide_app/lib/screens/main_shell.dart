@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'about_screen.dart';
+import 'admin_dashboard_screen.dart';
 import 'arrest_detention_screen.dart';
 import 'assistant_chat_screen.dart';
-import 'citizen_rights_travel_screen.dart';
 import 'documents_screen.dart';
 import 'explore_laws_screen.dart';
 import 'home_screen.dart';
@@ -13,6 +13,7 @@ import 'login_screen.dart';
 import 'saved_screen.dart';
 import 'traffic_rules_screen.dart';
 import '../localization/app_strings.dart';
+import '../services/analytics_service.dart';
 import '../services/auth_service.dart';
 import '../services/bookmark_service.dart';
 import '../services/connectivity_status_service.dart';
@@ -36,13 +37,21 @@ class _MainShellState extends State<MainShell> {
   @override
   void initState() {
     super.initState();
+    BookmarkService.bookmarkVersion.addListener(_onGlobalBookmarkChanged);
     _bookmarkVersion.addListener(_refreshSavedCount);
     _refreshSavedCount();
     ConnectivityStatusService.start();
+    AnalyticsService.init();
+  }
+
+  void _onGlobalBookmarkChanged() {
+    _bookmarkVersion.value++;
+    _refreshSavedCount();
   }
 
   @override
   void dispose() {
+    BookmarkService.bookmarkVersion.removeListener(_onGlobalBookmarkChanged);
     _bookmarkVersion.removeListener(_refreshSavedCount);
     _bookmarkVersion.dispose();
     ConnectivityStatusService.stop();
@@ -81,13 +90,6 @@ class _MainShellState extends State<MainShell> {
               const SizedBox(height: 12),
               _moreTile(
                 sheetContext,
-                Icons.security_rounded,
-                const Color(0xFFDC2626),
-                tr('Citizen Rights & Travel'),
-                const CitizenRightsTravelScreen(),
-              ),
-              _moreTile(
-                sheetContext,
                 Icons.traffic_rounded,
                 const Color(0xFFD97706),
                 tr('Traffic Rules & Fines'),
@@ -121,6 +123,14 @@ class _MainShellState extends State<MainShell> {
                 tr('About'),
                 const AboutScreen(),
               ),
+              if (AuthService.isAdmin)
+                _moreTile(
+                  sheetContext,
+                  Icons.admin_panel_settings_rounded,
+                  const Color(0xFF6366F1),
+                  tr('Admin Analytics Dashboard'),
+                  const AdminDashboardScreen(),
+                ),
               const SizedBox(height: 12),
             ],
           ),
@@ -211,18 +221,96 @@ class _MainShellState extends State<MainShell> {
             ],
           );
         }
+        final isAdmin = AuthService.isAdmin;
         return AlertDialog(
           backgroundColor: AppColors.surface,
-          title: Text(
-            tr('Account'),
-            style: GoogleFonts.inter(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
-            ),
+          title: Row(
+            children: [
+              Text(
+                tr('Account'),
+                style: GoogleFonts.inter(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (isAdmin) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6366F1).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: const Color(0xFF6366F1)),
+                  ),
+                  child: Text(
+                    'ADMIN',
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFF6366F1),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
-          content: Text(
-            '${tr("Logged in as")} $username',
-            style: GoogleFonts.inter(color: AppColors.textSecondary),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${tr("Logged in as")} $username',
+                style: GoogleFonts.inter(color: AppColors.textSecondary),
+              ),
+              if (isAdmin) ...[
+                const SizedBox(height: 14),
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(dialogContext);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminDashboardScreen(),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF6366F1).withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.admin_panel_settings_rounded,
+                          color: Color(0xFF6366F1),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            tr('Admin Analytics Dashboard'),
+                            style: GoogleFonts.inter(
+                              color: AppColors.textPrimary,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          color: Color(0xFF6366F1),
+                          size: 18,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
           actions: [
             TextButton(
@@ -279,8 +367,11 @@ class _MainShellState extends State<MainShell> {
               children: [
                 ListTile(
                   title: Text(
-                    tr('English'),
-                    style: GoogleFonts.inter(color: AppColors.textPrimary),
+                    'English',
+                    style: GoogleFonts.inter(
+                      color: AppColors.textPrimary,
+                      fontWeight: currentLang == 'en' ? FontWeight.bold : FontWeight.normal,
+                    ),
                   ),
                   trailing: currentLang == 'en'
                       ? const Icon(Icons.check_circle, color: AppColors.accent)
@@ -292,8 +383,11 @@ class _MainShellState extends State<MainShell> {
                 ),
                 ListTile(
                   title: Text(
-                    tr('Telugu'),
-                    style: GoogleFonts.inter(color: AppColors.textPrimary),
+                    'తెలుగు (Telugu)',
+                    style: GoogleFonts.inter(
+                      color: AppColors.textPrimary,
+                      fontWeight: currentLang == 'te' ? FontWeight.bold : FontWeight.normal,
+                    ),
                   ),
                   trailing: currentLang == 'te'
                       ? const Icon(Icons.check_circle, color: AppColors.accent)
@@ -306,7 +400,10 @@ class _MainShellState extends State<MainShell> {
                 ListTile(
                   title: Text(
                     'हिन्दी (Hindi)',
-                    style: GoogleFonts.inter(color: AppColors.textPrimary),
+                    style: GoogleFonts.inter(
+                      color: AppColors.textPrimary,
+                      fontWeight: currentLang == 'hi' ? FontWeight.bold : FontWeight.normal,
+                    ),
                   ),
                   trailing: currentLang == 'hi'
                       ? const Icon(Icons.check_circle, color: AppColors.accent)
@@ -342,19 +439,38 @@ class _MainShellState extends State<MainShell> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            child: ValueListenableBuilder<bool>(
-              valueListenable: ConnectivityStatusService.isOnline,
-              builder: (context, isOnline, _) {
-                final color = isOnline ? AppColors.success : AppColors.warning;
+            child: ValueListenableBuilder<NetworkStatus>(
+              valueListenable: ConnectivityStatusService.status,
+              builder: (context, status, _) {
+                final Color color;
+                final String text;
+
+                switch (status) {
+                  case NetworkStatus.online:
+                    color = AppColors.success;
+                    text = tr('Online');
+                    break;
+                  case NetworkStatus.serverOnlineDatabaseUnavailable:
+                    color = const Color(0xFFE67E22);
+                    text = tr('Server Online · Database Unavailable');
+                    break;
+                  case NetworkStatus.internetAvailableBackendUnavailable:
+                    color = const Color(0xFFE67E22);
+                    text = tr('Internet connected · Server unavailable');
+                    break;
+                  case NetworkStatus.offline:
+                    color = AppColors.warning;
+                    text = tr('Offline · Using LegalGuide Knowledge');
+                    break;
+                }
+
                 return InkWell(
-                  onTap: isOnline
-                      ? null
-                      : () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AboutScreen(),
-                          ),
-                        ),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AboutScreen(),
+                    ),
+                  ),
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
@@ -379,9 +495,7 @@ class _MainShellState extends State<MainShell> {
                         const SizedBox(width: 6),
                         Flexible(
                           child: Text(
-                            isOnline
-                                ? tr('Online')
-                                : tr('Offline · Using LegalGuide Knowledge'),
+                            text,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
@@ -400,6 +514,58 @@ class _MainShellState extends State<MainShell> {
           ),
           Row(
             children: [
+              ValueListenableBuilder<String?>(
+                valueListenable: AuthService.currentUsername,
+                builder: (context, username, _) {
+                  return ValueListenableBuilder<String?>(
+                    valueListenable: AuthService.currentRole,
+                    builder: (context, role, _) {
+                      if (!AuthService.isAdmin) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 6),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AdminDashboardScreen(),
+                              ),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF6366F1).withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(AppRadius.pill),
+                              border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.45)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.admin_panel_settings_rounded,
+                                  color: Color(0xFF6366F1),
+                                  size: 13,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Admin',
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xFF6366F1),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
               InkWell(
                 onTap: _showAccountSheet,
                 borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -510,101 +676,106 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: Column(
-        children: [
-          SafeArea(bottom: false, child: _buildStatusStrip()),
-          Expanded(
-            child: WatermarkBackground(
-              child: IndexedStack(
-                index: _currentIndex,
-                children: [
-                  HomeScreen(
-                    onOpenExplore: () => _openTab(1),
-                    onOpenAssistant: () => showAssistantPanel(context),
-                    bookmarkVersion: _bookmarkVersion,
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, currentLanguage, _) {
+        return Scaffold(
+          backgroundColor: AppColors.bg,
+          body: Column(
+            children: [
+              SafeArea(bottom: false, child: _buildStatusStrip()),
+              Expanded(
+                child: WatermarkBackground(
+                  child: IndexedStack(
+                    index: _currentIndex,
+                    children: [
+                      HomeScreen(
+                        onOpenExplore: () => _openTab(1),
+                        onOpenAssistant: () => showAssistantPanel(context),
+                        bookmarkVersion: _bookmarkVersion,
+                      ),
+                      const ExploreLawsScreen(),
+                      SavedScreen(bookmarkVersion: _bookmarkVersion),
+                    ],
                   ),
-                  const ExploreLawsScreen(),
-                  SavedScreen(bookmarkVersion: _bookmarkVersion),
+                ),
+              ),
+            ],
+          ),
+          floatingActionButton: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              gradient: AppColors.accentGradient,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.accent.withValues(alpha: 0.4),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: FloatingActionButton(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              onPressed: () => showAssistantPanel(context),
+              child: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+            ),
+          ),
+          bottomNavigationBar: SafeArea(
+            top: false,
+            child: Container(
+              height: 70,
+              decoration: const BoxDecoration(
+                color: AppColors.surface,
+                border: Border(top: BorderSide(color: AppColors.border)),
+              ),
+              child: Row(
+                children: [
+                  _navItem(
+                    icon: Icons.home_rounded,
+                    label: tr('Home'),
+                    selected: _currentIndex == 0,
+                    onTap: () => _openTab(0),
+                  ),
+                  _navItem(
+                    icon: Icons.travel_explore_rounded,
+                    label: tr('Explore'),
+                    selected: _currentIndex == 1,
+                    onTap: () => _openTab(1),
+                  ),
+                  _navItem(
+                    icon: Icons.bookmark_rounded,
+                    label: tr('Saved'),
+                    selected: _currentIndex == 2,
+                    onTap: () => _openTab(2),
+                    badge: Badge(
+                      label: Text('$_savedCount'),
+                      isLabelVisible: _savedCount > 0,
+                      backgroundColor: AppColors.danger,
+                      child: Icon(
+                        Icons.bookmark_rounded,
+                        color: _currentIndex == 2
+                            ? AppColors.accent
+                            : AppColors.textMuted,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                  _navItem(
+                    icon: Icons.more_horiz_rounded,
+                    label: tr('More'),
+                    selected: false,
+                    onTap: _showMoreSheet,
+                  ),
                 ],
               ),
             ),
           ),
-        ],
-      ),
-      floatingActionButton: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: AppColors.accentGradient,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.accent.withValues(alpha: 0.4),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: FloatingActionButton(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          onPressed: () => showAssistantPanel(context),
-          child: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
-        ),
-      ),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Container(
-          height: 70,
-          decoration: const BoxDecoration(
-            color: AppColors.surface,
-            border: Border(top: BorderSide(color: AppColors.border)),
-          ),
-          child: Row(
-            children: [
-              _navItem(
-                icon: Icons.home_rounded,
-                label: tr('Home'),
-                selected: _currentIndex == 0,
-                onTap: () => _openTab(0),
-              ),
-              _navItem(
-                icon: Icons.travel_explore_rounded,
-                label: tr('Explore'),
-                selected: _currentIndex == 1,
-                onTap: () => _openTab(1),
-              ),
-              _navItem(
-                icon: Icons.bookmark_rounded,
-                label: tr('Saved'),
-                selected: _currentIndex == 2,
-                onTap: () => _openTab(2),
-                badge: Badge(
-                  label: Text('$_savedCount'),
-                  isLabelVisible: _savedCount > 0,
-                  backgroundColor: AppColors.danger,
-                  child: Icon(
-                    Icons.bookmark_rounded,
-                    color: _currentIndex == 2
-                        ? AppColors.accent
-                        : AppColors.textMuted,
-                    size: 22,
-                  ),
-                ),
-              ),
-              _navItem(
-                icon: Icons.more_horiz_rounded,
-                label: tr('More'),
-                selected: false,
-                onTap: _showMoreSheet,
-              ),
-            ],
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

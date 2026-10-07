@@ -8,6 +8,7 @@ import '../models/category.dart';
 import '../models/legal_matter.dart';
 import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
+import '../services/analytics_service.dart';
 import '../services/bookmark_service.dart';
 import '../services/locale_service.dart';
 import '../services/search_history_service.dart';
@@ -19,7 +20,6 @@ import '../widgets/legal_section_card.dart';
 import '../widgets/section_heading.dart';
 import '../widgets/voice_search_modal.dart';
 import 'category_overview_screen.dart';
-import 'citizen_rights_travel_screen.dart';
 import 'documents_screen.dart';
 import 'emergency_guide_screen.dart';
 import 'legal_help_screen.dart';
@@ -74,7 +74,9 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
   Future<void> _loadData() async {
     final categories = await LegalDataRepository.loadCategories();
     final laws = await LegalDataRepository.loadLaws();
-    final sections = await LegalDataRepository.loadSections();
+    final rawSections = await LegalDataRepository.loadSections();
+    final seen = <String>{};
+    final sections = rawSections.where((s) => seen.add(s.provisionKey)).toList();
     final matters = await LegalDataRepository.loadMatters();
     final bookmarks = await BookmarkService.getBookmarkedIds();
     final counts = await ViewCountService.getAllCounts();
@@ -94,6 +96,10 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
     _searchRecordDebounce?.cancel();
     _searchRecordDebounce = Timer(const Duration(milliseconds: 900), () {
       SearchHistoryService.recordQuery(value);
+      if (value.trim().isNotEmpty) {
+        AnalyticsService.trackSearch(value);
+        AnalyticsService.trackFeature('law_search');
+      }
     });
   }
 
@@ -179,7 +185,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
         'subtitle': tr('Penalties, ticketless travel, chain pulling & passenger rights'),
         'icon': Icons.train_rounded,
         'color': const Color(0xFF0284C7),
-        'screen': const CitizenRightsTravelScreen(initialTab: 1),
+        'screen': const RailwayRulesScreen(),
       });
     }
 
@@ -205,7 +211,7 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
         'subtitle': tr('Police stops, traffic challans, cyber fraud & women safety rights'),
         'icon': Icons.shield_rounded,
         'color': const Color(0xFFDC2626),
-        'screen': const CitizenRightsTravelScreen(initialTab: 0),
+        'screen': const EmergencyGuideScreen(),
       });
     }
 
@@ -431,7 +437,9 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
   List<LegalSection> get _filtered {
     final lookup = _lookup;
     if (lookup == null) return [];
+    final seen = <String>{};
     return _sections.where((section) {
+      if (!seen.add(section.provisionKey)) return false;
       if (_selectedCategoryId != null) {
         final category = lookup.categoryFor(section);
         if (category?.id != _selectedCategoryId) return false;
@@ -441,9 +449,11 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
       return section.sectionNumber.toLowerCase().contains(q) ||
           section.title.toLowerCase().contains(q) ||
           section.titleTe.toLowerCase().contains(q) ||
+          section.titleHi.toLowerCase().contains(q) ||
           section.displayTitle.toLowerCase().contains(q) ||
           section.simpleExplanation.toLowerCase().contains(q) ||
           section.simpleExplanationTe.toLowerCase().contains(q) ||
+          section.simpleExplanationHi.toLowerCase().contains(q) ||
           section.displaySimpleExplanation.toLowerCase().contains(q) ||
           section.displayPurpose.toLowerCase().contains(q) ||
           section.displayPunishment.toLowerCase().contains(q) ||
@@ -786,11 +796,18 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
         borderRadius: BorderRadius.circular(14),
         child: ListTile(
           leading: IconBadge(icon: icon, color: color, size: 40, iconSize: 20),
-          title: Text(title, style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14)),
-          subtitle: Text(subtitle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12)),
+          title: Text(
+            title,
+            softWrap: true,
+            style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14),
+          ),
+          subtitle: Text(
+            subtitle,
+            maxLines: 2,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12),
+          ),
           trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
           onTap: onTap,
         ),
@@ -981,21 +998,26 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Row(
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 4,
                   children: [
-                    const Icon(Icons.monetization_on_outlined, size: 14, color: AppColors.warning),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        fine.fineAmount,
-                        style: GoogleFonts.inter(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.monetization_on_outlined, size: 14, color: AppColors.warning),
+                        const SizedBox(width: 4),
+                        Text(
+                          fine.fineAmount,
+                          style: GoogleFonts.inter(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                      ],
                     ),
                     Text(
                       isTe ? 'రైల్వే నిబంధనలలో చూడండి →' : (isHi ? 'नियम देखें →' : 'View in Rules →'),
@@ -1017,24 +1039,29 @@ class _ExploreLawsScreenState extends State<ExploreLawsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.showAppBar) {
-      return Scaffold(
-        backgroundColor: AppColors.bg,
-        appBar: AppBar(
-          backgroundColor: AppColors.surface,
-          elevation: 0,
-          title: Text(
-            tr(widget.title),
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-          ),
-        ),
-        body: SafeArea(child: _buildContent()),
-      );
-    }
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, lang, _) {
+        if (widget.showAppBar) {
+          return Scaffold(
+            backgroundColor: AppColors.bg,
+            appBar: AppBar(
+              backgroundColor: AppColors.surface,
+              elevation: 0,
+              title: Text(
+                tr(widget.title),
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+            ),
+            body: SafeArea(child: _buildContent()),
+          );
+        }
 
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: SafeArea(child: _buildContent()),
+        return Scaffold(
+          backgroundColor: AppColors.bg,
+          body: SafeArea(child: _buildContent()),
+        );
+      },
     );
   }
 }

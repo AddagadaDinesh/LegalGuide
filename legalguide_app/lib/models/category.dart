@@ -7,6 +7,8 @@ class Category {
   final String description;
   final String nameTe;
   final String descriptionTe;
+  final String nameHi;
+  final String descriptionHi;
 
   Category({
     required this.id,
@@ -14,17 +16,31 @@ class Category {
     required this.description,
     this.nameTe = '',
     this.descriptionTe = '',
+    this.nameHi = '',
+    this.descriptionHi = '',
   });
 
   String get displayName {
-    if (LocaleService.isTelugu && nameTe.isNotEmpty) return nameTe;
-    if (LocaleService.isHindi) return tr(name);
+    if (LocaleService.isTelugu) {
+      if (nameTe.isNotEmpty) return nameTe;
+      return tr(name);
+    }
+    if (LocaleService.isHindi) {
+      if (nameHi.isNotEmpty) return nameHi;
+      return tr(name);
+    }
     return name;
   }
 
   String get displayDescription {
-    if (LocaleService.isTelugu && descriptionTe.isNotEmpty) return descriptionTe;
-    if (LocaleService.isHindi) return tr(description);
+    if (LocaleService.isTelugu) {
+      if (descriptionTe.isNotEmpty) return descriptionTe;
+      return tr(description);
+    }
+    if (LocaleService.isHindi) {
+      if (descriptionHi.isNotEmpty) return descriptionHi;
+      return tr(description);
+    }
     return description;
   }
 
@@ -35,6 +51,8 @@ class Category {
       description: json['description'] ?? '',
       nameTe: json['name_te'] ?? '',
       descriptionTe: json['description_te'] ?? '',
+      nameHi: json['name_hi'] ?? '',
+      descriptionHi: json['description_hi'] ?? '',
     );
   }
 
@@ -44,5 +62,7 @@ class Category {
         'description': description,
         'name_te': nameTe,
         'description_te': descriptionTe,
+        'name_hi': nameHi,
+        'description_hi': descriptionHi,
       };
 }

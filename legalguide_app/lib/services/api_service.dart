@@ -14,7 +14,8 @@ class ApiException implements Exception {
 }
 
 class ApiService {
-  static String baseUrl = 'http://127.0.0.1:8000/api';
+  static const String defaultBaseUrl = 'https://dinesh03.pythonanywhere.com/api';
+  static String baseUrl = defaultBaseUrl;
 
   static Future<List<Category>> fetchCategories() async {
     final response = await http
@@ -73,4 +74,54 @@ class ApiService {
     }
     return matters;
   }
+
+  /// Incremental delta sync from backend
+  static Future<Map<String, dynamic>> fetchDeltaSync({String? sinceTimestamp}) async {
+    String url = '$baseUrl/laws/sync/';
+    if (sinceTimestamp != null && sinceTimestamp.isNotEmpty) {
+      url += '?since=${Uri.encodeComponent(sinceTimestamp)}';
+    }
+    final response = await http
+        .get(Uri.parse(url))
+        .timeout(const Duration(seconds: 6));
+    if (response.statusCode != 200) {
+      throw ApiException('Failed to fetch delta update (${response.statusCode})');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  /// Fetch sync status and verification summary
+  static Future<Map<String, dynamic>> fetchSyncStatus() async {
+    final response = await http
+        .get(Uri.parse('$baseUrl/laws/sync/status/'))
+        .timeout(const Duration(seconds: 5));
+    if (response.statusCode != 200) {
+      throw ApiException('Failed to fetch sync status (${response.statusCode})');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  /// App binary version check for Google Play / APK updates
+  static Future<Map<String, dynamic>> checkAppVersion() async {
+    final response = await http
+        .get(Uri.parse('$baseUrl/app/version/'))
+        .timeout(const Duration(seconds: 4));
+    if (response.statusCode != 200) {
+      throw ApiException('Failed to check app version (${response.statusCode})');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  /// Remote feature configuration & dynamic toggles
+  static Future<Map<String, dynamic>> fetchFeatureConfig() async {
+    final response = await http
+        .get(Uri.parse('$baseUrl/app/features/'))
+        .timeout(const Duration(seconds: 4));
+    if (response.statusCode != 200) {
+      throw ApiException('Failed to fetch feature config (${response.statusCode})');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
 }
+
+

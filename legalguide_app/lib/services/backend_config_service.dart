@@ -17,6 +17,8 @@ class BackendConfigService {
     final saved = prefs.getString(_key);
     if (saved != null && saved.isNotEmpty) {
       ApiService.baseUrl = saved;
+    } else {
+      ApiService.baseUrl = defaultBaseUrl;
     }
   }
 

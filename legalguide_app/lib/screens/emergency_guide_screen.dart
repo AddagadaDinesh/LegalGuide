@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../data/emergency_data.dart';
 import '../localization/app_strings.dart';
+import '../services/analytics_service.dart';
 import '../services/locale_service.dart';
 import '../services/tts_service.dart';
 import '../theme/app_theme.dart';
@@ -30,6 +31,8 @@ class _EmergencyGuideScreenState extends State<EmergencyGuideScreen> {
   void initState() {
     super.initState();
     _selectedId = widget.initialScenarioId ?? emergencyScenarios.first.id;
+    AnalyticsService.trackFeature('emergency_rights');
+    AnalyticsService.trackFeature('legal_awareness');
   }
 
   @override
@@ -94,11 +97,13 @@ class _EmergencyGuideScreenState extends State<EmergencyGuideScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isTe = LocaleService.isTelugu;
-    final scenario = _currentScenario;
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, currentLanguage, _) {
+        final scenario = _currentScenario;
 
-    return Scaffold(
-      backgroundColor: AppColors.bg,
+        return Scaffold(
+          backgroundColor: AppColors.bg,
       appBar: widget.embedded
           ? null
           : AppBar(
@@ -110,17 +115,23 @@ class _EmergencyGuideScreenState extends State<EmergencyGuideScreen> {
               ),
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     tr('Emergency Rights Guide'),
+                    softWrap: true,
+                    maxLines: 2,
                     style: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 17,
                       color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
                     tr('I Need Help Right Now'),
+                    softWrap: true,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       color: const Color(0xFFE53935),
@@ -586,7 +597,7 @@ class _EmergencyGuideScreenState extends State<EmergencyGuideScreen> {
                           },
                           icon: const Icon(Icons.traffic_rounded, size: 18),
                           label: Text(
-                            isTe ? 'అన్ని ట్రాఫిక్ నిబంధనలు, జరిమానాలు & హక్కులు చూడండి' : tr('View All Traffic Fines & Driver Rights (MV Act)'),
+                            tr('View All Traffic Fines & Driver Rights (MV Act)'),
                             style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 13),
                           ),
                           style: ElevatedButton.styleFrom(
@@ -618,7 +629,7 @@ class _EmergencyGuideScreenState extends State<EmergencyGuideScreen> {
                           },
                           icon: const Icon(Icons.search, size: 16),
                           label: Text(
-                            '${tr("Browse Laws Related to")} ${isTe ? scenario.titleTe : scenario.title}',
+                            '${tr("Browse Laws Related to")} ${scenario.displayTitle}',
                             style: GoogleFonts.inter(fontSize: 12.5),
                           ),
                           style: OutlinedButton.styleFrom(
@@ -638,6 +649,8 @@ class _EmergencyGuideScreenState extends State<EmergencyGuideScreen> {
           ],
         ),
       ),
+    );
+      },
     );
   }
 }

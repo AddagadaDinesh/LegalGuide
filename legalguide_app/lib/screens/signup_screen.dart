@@ -20,12 +20,22 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isSubmitting = false;
   String? _error;
 
+  static final _emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+
   Future<void> _submit() async {
     final username = _usernameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     if (username.isEmpty || password.isEmpty) {
       setState(() => _error = tr('Enter a username and password.'));
+      return;
+    }
+    if (email.isEmpty) {
+      setState(() => _error = tr('Email is required'));
+      return;
+    }
+    if (!_emailRegex.hasMatch(email)) {
+      setState(() => _error = tr('Enter a valid email address'));
       return;
     }
     setState(() {
@@ -39,19 +49,32 @@ class _SignupScreenState extends State<SignupScreen> {
       // Trigger Google Password Manager / Android Autofill to save credentials to Google/Email
       TextInput.finishAutofillContext(shouldSave: true);
 
+      final String emailMsg;
+      if (result.emailSent == true) {
+        emailMsg = email.isNotEmpty
+            ? '${tr("A welcome email has been sent to")} $email.'
+            : tr("A welcome email has been sent to your email address.");
+      } else if (result.emailSent == false) {
+        emailMsg = tr(
+          "However, we couldn't send the welcome email. You can continue using your account.",
+        );
+      } else {
+        emailMsg = tr("Welcome to LegalGuide! You can now start exploring.");
+      }
+
       await showDialog(
         context: context,
         builder: (dialogContext) => AlertDialog(
           backgroundColor: AppColors.surface,
           title: Text(
-            tr('Account created'),
+            tr('Account created successfully! 🎉'),
             style: GoogleFonts.inter(
               color: AppColors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
           content: Text(
-            '${tr("Welcome,")} ${AuthService.currentUsername.value}!',
+            emailMsg,
             style: GoogleFonts.inter(color: AppColors.textSecondary),
           ),
           actions: [
@@ -126,7 +149,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 14),
                 _field(
-                  tr('Email (optional)'),
+                  tr('Email *'),
                   _emailController,
                   autofillHints: const [AutofillHints.email],
                   keyboardType: TextInputType.emailAddress,

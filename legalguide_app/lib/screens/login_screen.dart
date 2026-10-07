@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../localization/app_strings.dart';
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
+import 'admin_dashboard_screen.dart';
 import 'forgot_password_screen.dart';
 import 'signup_screen.dart';
 
@@ -50,10 +51,31 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           content: Text(
-            '${tr("Welcome back,")} ${AuthService.currentUsername.value}!',
+            AuthService.isAdmin
+                ? '${tr("Welcome back,")} ${AuthService.currentUsername.value}! (${tr("Administrator")})'
+                : '${tr("Welcome back,")} ${AuthService.currentUsername.value}!',
             style: GoogleFonts.inter(color: AppColors.textSecondary),
           ),
           actions: [
+            if (AuthService.isAdmin)
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminDashboardScreen(),
+                    ),
+                  );
+                },
+                child: Text(
+                  tr('Admin Dashboard'),
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFF6366F1),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
               child: Text(

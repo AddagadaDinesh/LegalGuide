@@ -244,110 +244,111 @@ class _DocumentGeneratorScreenState extends State<DocumentGeneratorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isTe = LocaleService.isTelugu;
-
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              isTe ? 'చట్టపరమైన పత్రాల జనరేటర్' : tr('Legal Document Generator'),
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
-                color: AppColors.textPrimary,
-              ),
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, lang, _) {
+        return Scaffold(
+          backgroundColor: AppColors.bg,
+          appBar: AppBar(
+            backgroundColor: AppColors.surface,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            Text(
-              isTe ? 'పూర్తి టెంప్లేట్ ఫిల్ చేయండి & కాపీ చేయండి' : tr('Instant Draft, Copy & Share'),
-              style: GoogleFonts.inter(fontSize: 11, color: AppColors.accent, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(_previewMode ? Icons.edit_note_rounded : Icons.visibility_rounded, color: AppColors.accent),
-            tooltip: _previewMode ? tr('Edit Fields') : tr('Preview Document'),
-            onPressed: () {
-              _generateDocument();
-              setState(() => _previewMode = !_previewMode);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.copy_rounded, color: AppColors.accent),
-            tooltip: tr('Copy Draft'),
-            onPressed: _copyToClipboard,
-          ),
-        ],
-      ),
-      body: WatermarkBackground(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Template Selector Bar
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tr('Legal Document Generator'),
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                    color: AppColors.textPrimary,
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isTe ? 'టెంప్లేట్ ఎంచుకోండి' : tr('SELECT DOCUMENT TEMPLATE'),
-                      style: GoogleFonts.inter(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textSecondary,
-                        letterSpacing: 0.5,
-                      ),
+                Text(
+                  tr('Instant Draft, Copy & Share'),
+                  style: GoogleFonts.inter(fontSize: 11, color: AppColors.accent, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(_previewMode ? Icons.edit_note_rounded : Icons.visibility_rounded, color: AppColors.accent),
+                tooltip: _previewMode ? tr('Edit Fields') : tr('Preview Document'),
+                onPressed: () {
+                  _generateDocument();
+                  setState(() => _previewMode = !_previewMode);
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.copy_rounded, color: AppColors.accent),
+                tooltip: tr('Copy Draft'),
+                onPressed: _copyToClipboard,
+              ),
+            ],
+          ),
+          body: WatermarkBackground(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Template Selector Bar
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border),
                     ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _templateChip(
-                          DocumentTemplateType.policeComplaint,
-                          isTe ? 'పోలీస్ ఫిర్యాదు / FIR' : 'Police Complaint',
-                          Icons.local_police_rounded,
-                          const Color(0xFFF43F5E),
+                        Text(
+                          tr('SELECT DOCUMENT TEMPLATE'),
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                        _templateChip(
-                          DocumentTemplateType.rtiApplication,
-                          isTe ? 'RTI దరఖాస్తు (సమాచార హక్కు)' : 'RTI Application',
-                          Icons.description_rounded,
-                          const Color(0xFF10B981),
-                        ),
-                        _templateChip(
-                          DocumentTemplateType.consumerNotice,
-                          isTe ? 'వినియోగదారు నోటీసు' : 'Consumer Notice',
-                          Icons.shopping_cart_rounded,
-                          const Color(0xFFF59E0B),
-                        ),
-                        _templateChip(
-                          DocumentTemplateType.unpaidDuesNotice,
-                          isTe ? 'చెల్లింపు బకాయిల నోటీసు' : 'Unpaid Dues Notice',
-                          Icons.mail_rounded,
-                          const Color(0xFF8B5CF6),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _templateChip(
+                              DocumentTemplateType.policeComplaint,
+                              tr('Police Complaint / FIR'),
+                              Icons.local_police_rounded,
+                              const Color(0xFFF43F5E),
+                            ),
+                            _templateChip(
+                              DocumentTemplateType.rtiApplication,
+                              tr('RTI Application'),
+                              Icons.description_rounded,
+                              const Color(0xFF10B981),
+                            ),
+                            _templateChip(
+                              DocumentTemplateType.consumerNotice,
+                              tr('Consumer Notice'),
+                              Icons.shopping_cart_rounded,
+                              const Color(0xFFF59E0B),
+                            ),
+                            _templateChip(
+                              DocumentTemplateType.unpaidDuesNotice,
+                              tr('Unpaid Dues Notice'),
+                              Icons.mail_rounded,
+                              const Color(0xFF8B5CF6),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
               const SizedBox(height: 14),
 
               // Auto-fill & Action bar
@@ -356,7 +357,7 @@ class _DocumentGeneratorScreenState extends State<DocumentGeneratorScreen> {
                   OutlinedButton.icon(
                     onPressed: _fillSampleData,
                     icon: const Icon(Icons.auto_fix_high_rounded, size: 16),
-                    label: Text(isTe ? 'నమూనా డేటా నింపండి' : tr('Fill Sample Data')),
+                    label: Text(tr('Fill Sample Data')),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.accent,
                       side: const BorderSide(color: AppColors.accent),
@@ -418,7 +419,7 @@ class _DocumentGeneratorScreenState extends State<DocumentGeneratorScreen> {
                   onPressed: _copyToClipboard,
                   icon: const Icon(Icons.copy_rounded, size: 18),
                   label: Text(
-                    isTe ? 'పూర్తి నోటీసు కాపీ చేయండి' : tr('Copy Generated Document to Clipboard'),
+                    tr('Copy Generated Document to Clipboard'),
                     style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -450,7 +451,7 @@ class _DocumentGeneratorScreenState extends State<DocumentGeneratorScreen> {
                   },
                   icon: const Icon(Icons.description_rounded),
                   label: Text(
-                    isTe ? 'పత్రాన్ని సిద్ధం చేయండి (Preview & Export)' : tr('Generate Document Preview'),
+                    tr('Generate Document Preview'),
                     style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -465,6 +466,8 @@ class _DocumentGeneratorScreenState extends State<DocumentGeneratorScreen> {
           ),
         ),
       ),
+    );
+      },
     );
   }
 
@@ -503,7 +506,7 @@ class _DocumentGeneratorScreenState extends State<DocumentGeneratorScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label,
+            tr(label),
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w600,

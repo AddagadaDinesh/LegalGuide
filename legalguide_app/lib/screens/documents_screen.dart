@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../localization/app_strings.dart';
 import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
+import '../services/analytics_service.dart';
+import '../services/locale_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/icon_badge.dart';
 import 'document_generator_screen.dart';
@@ -140,161 +142,165 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.trackFeature('legal_documents');
     _sectionsFuture = LegalDataRepository.loadSections();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        title: Text(tr('Legal Documents & Notice Guides'),
-            style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary, fontSize: 16)),
-      ),
-      body: FutureBuilder<List<LegalSection>>(
-        future: _sectionsFuture,
-        builder: (context, snapshot) {
-          final sections = snapshot.data ?? [];
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, lang, _) {
+        return Scaffold(
+          backgroundColor: AppColors.bg,
+          appBar: AppBar(
+            backgroundColor: AppColors.surface,
+            elevation: 0,
+            title: Text(tr('Legal Documents & Notice Guides'),
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: AppColors.textPrimary, fontSize: 16)),
+          ),
+          body: FutureBuilder<List<LegalSection>>(
+            future: _sectionsFuture,
+            builder: (context, snapshot) {
+              final sections = snapshot.data ?? [];
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: _docGuides.length + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF4338CA), Color(0xFF6366F1)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(AppRadius.card),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF6366F1).withValues(alpha: 0.28),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _docGuides.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF4338CA), Color(0xFF6366F1)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                        child: const Icon(Icons.edit_document, color: Colors.white, size: 26),
+                        borderRadius: BorderRadius.circular(AppRadius.card),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF6366F1).withValues(alpha: 0.28),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              tr('Interactive Document Generator'),
-                              style: GoogleFonts.inter(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14.5,
-                              ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            const SizedBox(height: 3),
-                            Text(
-                              tr('Fill, customize, and export ready-to-use RTI, Police Complaints, & Legal Notices.'),
-                              style: GoogleFonts.inter(
-                                color: Colors.white.withValues(alpha: 0.9),
-                                fontSize: 11.5,
+                            child: const Icon(Icons.edit_document, color: Colors.white, size: 26),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tr('Interactive Document Generator'),
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  tr('Fill, customize, and export ready-to-use RTI, Police Complaints, & Legal Notices.'),
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 11.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const DocumentGeneratorScreen()),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: const Color(0xFF4338CA),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              textStyle: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                            child: Text(tr('Draft Now')),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final guide = _docGuides[index - 1];
+                  final related = sections
+                      .where((s) => guide.relatedSectionKeywords.any(
+                            (kw) => s.title.toLowerCase().contains(kw),
+                          ))
+                      .toList();
+
+                  DocumentTemplateType? templateType;
+                  if (guide.title.contains('Police') || guide.title.contains('FIR')) {
+                    templateType = DocumentTemplateType.policeComplaint;
+                  } else if (guide.title.contains('RTI')) {
+                    templateType = DocumentTemplateType.rtiApplication;
+                  } else if (guide.title.contains('Cheque')) {
+                    templateType = DocumentTemplateType.unpaidDuesNotice;
+                  } else if (guide.title.contains('Legal Notice')) {
+                    templateType = DocumentTemplateType.consumerNotice;
+                  }
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.card),
+                      border: Border.all(color: guide.color.withValues(alpha: 0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            IconBadge(icon: guide.icon, color: guide.color, size: 38, iconSize: 18),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(tr(guide.title),
+                                  style: GoogleFonts.outfit(
+                                      color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 15.5)),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppColors.border,
+                                borderRadius: BorderRadius.circular(8),
                               ),
+                              child: Text(tr('General guide'),
+                                  style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 10)),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const DocumentGeneratorScreen()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: const Color(0xFF4338CA),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          textStyle: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12),
-                        ),
-                        child: Text(tr('Draft Now')),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final guide = _docGuides[index - 1];
-              final related = sections
-                  .where((s) => guide.relatedSectionKeywords.any(
-                        (kw) => s.title.toLowerCase().contains(kw),
-                      ))
-                  .toList();
-
-              DocumentTemplateType? templateType;
-              if (guide.title.contains('Police') || guide.title.contains('FIR')) {
-                templateType = DocumentTemplateType.policeComplaint;
-              } else if (guide.title.contains('RTI')) {
-                templateType = DocumentTemplateType.rtiApplication;
-              } else if (guide.title.contains('Cheque')) {
-                templateType = DocumentTemplateType.unpaidDuesNotice;
-              } else if (guide.title.contains('Legal Notice')) {
-                templateType = DocumentTemplateType.consumerNotice;
-              }
-
-              return Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppRadius.card),
-                  border: Border.all(color: guide.color.withValues(alpha: 0.3)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        IconBadge(icon: guide.icon, color: guide.color, size: 38, iconSize: 18),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(guide.title,
-                              style: GoogleFonts.outfit(
-                                  color: AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 15.5)),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColors.border,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(tr('General guide'),
-                              style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 10)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _label(tr('What it is')),
-                    _body(guide.whatItIs),
-                    const SizedBox(height: 8),
-                    _label(tr('When it\'s used')),
-                    _body(guide.whenUsed),
-                    const SizedBox(height: 8),
-                    _label(tr('Key parts')),
-                    _body(guide.keyParts),
+                        const SizedBox(height: 12),
+                        _label(tr('What it is')),
+                        _body(tr(guide.whatItIs)),
+                        const SizedBox(height: 8),
+                        _label(tr('When it\'s used')),
+                        _body(tr(guide.whenUsed)),
+                        const SizedBox(height: 8),
+                        _label(tr('Key parts')),
+                        _body(tr(guide.keyParts)),
                     if (related.isNotEmpty) ...[
                       const SizedBox(height: 10),
                       _label(tr('Related legal sections')),
@@ -350,6 +356,8 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
           );
         },
       ),
+    );
+      },
     );
   }
 

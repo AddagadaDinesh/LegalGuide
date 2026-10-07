@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../data/railway_data.dart';
 import '../localization/app_strings.dart';
+import '../services/analytics_service.dart';
 import '../services/locale_service.dart';
 import '../services/tts_service.dart';
 import '../theme/app_theme.dart';
@@ -27,6 +28,8 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
   @override
   void initState() {
     super.initState();
+    AnalyticsService.trackFeature('railway_rules');
+    AnalyticsService.trackFeature('legal_awareness');
     _tabController = TabController(length: 4, vsync: this);
     _searchController.addListener(() {
       setState(() {
@@ -77,9 +80,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: isTe
-                    ? 'జరిమానాలు లేదా నిబంధనలను వెతకండి...'
-                    : tr('Search fines, chain, ticket, rules...'),
+                hintText: tr('Search fines, chain, ticket, rules...'),
                 hintStyle: GoogleFonts.inter(
                   color: AppColors.textMuted,
                   fontSize: 13,
@@ -126,19 +127,19 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
           tabs: [
             Tab(
               icon: const Icon(Icons.money_off_csred_rounded, size: 18),
-              text: isTe ? 'జరిమానాలు' : tr('Fines & Penalties'),
+              text: tr('Fines & Penalties'),
             ),
             Tab(
               icon: const Icon(Icons.fact_check_rounded, size: 18),
-              text: isTe ? 'నిబంధనలు' : tr("Do's & Don'ts"),
+              text: tr("Do's & Don'ts"),
             ),
             Tab(
               icon: const Icon(Icons.gavel_rounded, size: 18),
-              text: isTe ? 'సెక్షన్లు' : tr('Bare Act Sections'),
+              text: tr('Bare Act Sections'),
             ),
             Tab(
               icon: const Icon(Icons.phone_in_talk_rounded, size: 18),
-              text: isTe ? 'సహాయవాణి' : tr('Helplines & Rights'),
+              text: tr('Helplines & Rights'),
             ),
           ],
         ),
@@ -148,55 +149,60 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isTe = LocaleService.isTelugu;
-    final searchAndTabBar = _buildSearchAndTabBar(isTe);
-    final tabBarView = WatermarkBackground(
-      child: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildFinesTab(isTe),
-          _buildRulesTab(isTe),
-          _buildSectionsTab(isTe),
-          _buildHelplinesTab(isTe),
-        ],
-      ),
-    );
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, currentLanguage, _) {
+        final isTe = LocaleService.isTelugu;
+        final searchAndTabBar = _buildSearchAndTabBar(isTe);
+        final tabBarView = WatermarkBackground(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildFinesTab(isTe),
+              _buildRulesTab(isTe),
+              _buildSectionsTab(isTe),
+              _buildHelplinesTab(isTe),
+            ],
+          ),
+        );
 
-    if (widget.embedded) {
-      return Scaffold(
-        backgroundColor: AppColors.bg,
-        body: Column(
-          children: [
-            Container(
-              color: AppColors.surface,
-              padding: const EdgeInsets.only(top: 6),
+        if (widget.embedded) {
+          return Scaffold(
+            backgroundColor: AppColors.bg,
+            body: Column(
+              children: [
+                Container(
+                  color: AppColors.surface,
+                  padding: const EdgeInsets.only(top: 6),
+                  child: searchAndTabBar,
+                ),
+                Expanded(child: tabBarView),
+              ],
+            ),
+          );
+        }
+
+        return Scaffold(
+          backgroundColor: AppColors.bg,
+          appBar: AppBar(
+            backgroundColor: AppColors.surface,
+            elevation: 0,
+            title: Text(
+              tr('Railway Rules & Fines'),
+              style: GoogleFonts.outfit(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+                fontSize: 20,
+              ),
+            ),
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(104),
               child: searchAndTabBar,
             ),
-            Expanded(child: tabBarView),
-          ],
-        ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        title: Text(
-          isTe ? 'రైల్వే చట్టం & నిబంధనలు' : tr('Railway Rules & Fines'),
-          style: GoogleFonts.outfit(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-            fontSize: 20,
           ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(104),
-          child: searchAndTabBar,
-        ),
-      ),
-      body: tabBarView,
+          body: tabBarView,
+        );
+      },
     );
   }
 
@@ -301,7 +307,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            item.isBailable ? 'Bailable' : 'Non-Bailable',
+                            item.isBailable ? tr('Bailable') : tr('Non-Bailable'),
                             style: GoogleFonts.inter(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
@@ -352,7 +358,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isTe ? 'జరిమానా మొత్తం' : 'Fine Amount',
+                              tr('FINE AMOUNT'),
                               style: GoogleFonts.inter(
                                 fontSize: 11,
                                 color: AppColors.danger,
@@ -384,7 +390,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isTe ? 'జైలు శిక్ష' : 'Imprisonment',
+                              tr('IMPRISONMENT'),
                               style: GoogleFonts.inter(
                                 fontSize: 11,
                                 color: Colors.orange.shade800,
@@ -472,8 +478,8 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                         children: [
                           Text(
                             isAllowed
-                                ? (isTe ? 'అనుమతించబడినది' : tr('ALLOWED / RULE'))
-                                : (isTe ? 'నిషేధించబడినది' : tr('STRICTLY PROHIBITED')),
+                                ? tr('ALLOWED / RULE')
+                                : tr('STRICTLY PROHIBITED'),
                             style: GoogleFonts.inter(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -532,7 +538,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    'Reference: ${rule.legalRef}',
+                    '${tr("Reference")}: ${rule.legalRef}',
                     style: GoogleFonts.inter(
                       fontSize: 11,
                       color: AppColors.textMuted,
@@ -594,7 +600,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
               ),
             ),
             subtitle: Text(
-              sec.title,
+              tr(sec.title),
               style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -605,28 +611,28 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
             children: [
               // Simple Explanation
               _sectionBlock(
-                title: 'Simple Explanation',
-                content: sec.simpleExplanation,
+                title: tr('Simple Explanation'),
+                content: tr(sec.simpleExplanation),
                 color: Colors.blue.shade700,
               ),
               const SizedBox(height: 12),
               // Punishment
               _sectionBlock(
-                title: 'Punishment & Penalty',
-                content: sec.punishment,
+                title: tr('Punishment & Penalties'),
+                content: tr(sec.punishment),
                 color: AppColors.danger,
               ),
               const SizedBox(height: 12),
               // Practical Example
               _sectionBlock(
-                title: 'Practical Scenario',
-                content: sec.practicalExample,
+                title: tr('Practical Scenario'),
+                content: tr(sec.practicalExample),
                 color: AppColors.success,
               ),
               const SizedBox(height: 12),
               // Legal Text
               _sectionBlock(
-                title: 'Official Legal Text',
+                title: tr('Official Statutory Legal Text'),
                 content: sec.legalText,
                 color: AppColors.textMuted,
               ),
@@ -711,7 +717,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
-                      'ALL-IN-ONE HELPLINE',
+                      tr('ALL-IN-ONE HELPLINE'),
                       style: GoogleFonts.inter(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
@@ -733,9 +739,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
               ),
               const SizedBox(height: 6),
               Text(
-                isTe
-                    ? 'రైలులో భద్రత, వైద్య అత్యవసర పరిస్థితి, పారిశుద్ధ్యం, ఆహార సమస్యలు మరియు విచారణల కోసం ఒకే నంబర్.'
-                    : '24x7 integrated railway helpline for security, medical emergencies, catering, cleanliness, and passenger grievances.',
+                tr('24x7 integrated railway helpline for security, medical emergencies, catering, cleanliness, and passenger grievances.'),
                 style: GoogleFonts.inter(
                   fontSize: 13,
                   color: Colors.white.withValues(alpha: 0.9),
@@ -747,7 +751,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
                 onPressed: () => _makeCall('139'),
                 icon: const Icon(Icons.phone_rounded, color: Color(0xFF0369A1)),
                 label: Text(
-                  isTe ? '139 కి కాల్ చేయండి' : 'Call 139 Now',
+                  tr('Call 139 Now'),
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF0369A1),
@@ -767,7 +771,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
         const SizedBox(height: 20),
         // Direct Contact Tiles
         Text(
-          isTe ? 'అత్యవసర సంప్రదింపులు' : 'Emergency Contacts',
+          tr('Emergency Contacts'),
           style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -799,7 +803,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
         const SizedBox(height: 20),
         // Key Rights
         Text(
-          isTe ? 'ప్రయాణికుల హక్కులు' : 'Key Passenger Rights',
+          tr('Key Passenger Rights'),
           style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -848,7 +852,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
           child: Icon(icon, color: color, size: 22),
         ),
         title: Text(
-          title,
+          tr(title),
           style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             fontSize: 14,
@@ -860,12 +864,12 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
           children: [
             const SizedBox(height: 2),
             Text(
-              desc,
+              tr(desc),
               style: GoogleFonts.inter(fontSize: 12, color: AppColors.textSecondary),
             ),
             const SizedBox(height: 4),
             Text(
-              'Dial $number',
+              '${tr("Dial")} $number',
               style: GoogleFonts.inter(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
@@ -900,7 +904,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  title,
+                  tr(title),
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
@@ -912,7 +916,7 @@ class _RailwayRulesScreenState extends State<RailwayRulesScreen>
           ),
           const SizedBox(height: 6),
           Text(
-            detail,
+            tr(detail),
             style: GoogleFonts.inter(
               fontSize: 12,
               color: AppColors.textSecondary,

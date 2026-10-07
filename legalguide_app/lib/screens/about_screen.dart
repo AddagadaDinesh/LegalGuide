@@ -6,7 +6,9 @@ import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/backend_config_service.dart';
 import '../services/connectivity_status_service.dart';
+import '../services/locale_service.dart';
 import '../theme/app_theme.dart';
+import 'admin_dashboard_screen.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -22,6 +24,7 @@ class _AboutScreenState extends State<AboutScreen> {
   bool _developerMode = false;
 
   bool get _isAdminUser {
+    if (AuthService.isAdmin) return true;
     final user = AuthService.currentUsername.value?.toLowerCase().trim();
     return user == 'dinesh' ||
         user == 'dinesh03' ||
@@ -33,6 +36,16 @@ class _AboutScreenState extends State<AboutScreen> {
   void initState() {
     super.initState();
     _urlController = TextEditingController(text: ApiService.baseUrl);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ConnectivityStatusService.checkNow(force: true);
+    });
+  }
+
+  String _formatTime(DateTime dt) {
+    final hour = dt.hour == 0 ? 12 : (dt.hour > 12 ? dt.hour - 12 : dt.hour);
+    final minute = dt.minute.toString().padLeft(2, '0');
+    final period = dt.hour >= 12 ? 'PM' : 'AM';
+    return '$hour:$minute $period';
   }
 
   @override
@@ -68,24 +81,122 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        title: Text(
-          tr('About'),
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, lang, _) {
+        return Scaffold(
+          backgroundColor: AppColors.bg,
+          appBar: AppBar(
+            backgroundColor: AppColors.surface,
+            elevation: 0,
+            title: Text(
+              tr('About'),
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ),
-        ),
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_isAdminUser) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF312E81), Color(0xFF1E1B4B)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.6), width: 1.2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF6366F1).withValues(alpha: 0.25),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6366F1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.admin_panel_settings_rounded, color: Colors.white, size: 26),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                tr('Admin Dashboard'),
+                                style: GoogleFonts.outfit(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.shade700,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'ADMIN',
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            tr('App usage, active users & feature analytics'),
+                            style: GoogleFonts.inter(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6366F1),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        elevation: 0,
+                      ),
+                      child: Text(tr('Open'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             GestureDetector(
               onTap: () {
                 if (!_isAdminUser) return;
@@ -233,62 +344,118 @@ class _AboutScreenState extends State<AboutScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'System & Security Status',
-                        style: GoogleFonts.outfit(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                        ),
-                      ),
-                      ValueListenableBuilder<bool>(
-                        valueListenable: ConnectivityStatusService.isOnline,
-                        builder: (context, isOnline, _) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tr('System & Security Status'),
+                            style: GoogleFonts.outfit(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
                             ),
-                            decoration: BoxDecoration(
-                              color: (isOnline ? AppColors.success : AppColors.warning)
-                                  .withAlpha(30),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: BoxDecoration(
-                                    color: isOnline ? AppColors.success : AppColors.warning,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  isOnline ? 'Cloud Active' : 'Offline Mode',
+                          ),
+                          ValueListenableBuilder<DateTime?>(
+                            valueListenable: ConnectivityStatusService.lastChecked,
+                            builder: (context, lastTime, _) {
+                              if (lastTime == null) return const SizedBox.shrink();
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  '${tr('Last checked:')} ${_formatTime(lastTime)}',
                                   style: GoogleFonts.inter(
-                                    color: isOnline ? AppColors.success : AppColors.warning,
+                                    color: AppColors.textSecondary,
                                     fontSize: 11,
-                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              ],
-                            ),
-                          );
-                        },
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ValueListenableBuilder<NetworkStatus>(
+                            valueListenable: ConnectivityStatusService.status,
+                            builder: (context, status, _) {
+                              final Color color;
+                              final String label;
+
+                              switch (status) {
+                                case NetworkStatus.online:
+                                  color = AppColors.success;
+                                  label = tr('Server Online');
+                                  break;
+                                case NetworkStatus.serverOnlineDatabaseUnavailable:
+                                  color = const Color(0xFFE67E22);
+                                  label = tr('Server Online (DB Unavailable)');
+                                  break;
+                                case NetworkStatus.internetAvailableBackendUnavailable:
+                                  color = const Color(0xFFE67E22);
+                                  label = tr('Server Unavailable');
+                                  break;
+                                case NetworkStatus.offline:
+                                  color = AppColors.warning;
+                                  label = tr('Offline');
+                                  break;
+                              }
+
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: color.withAlpha(30),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: color,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      label,
+                                      style: GoogleFonts.inter(
+                                        color: color,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 4),
+                          IconButton(
+                            icon: const Icon(Icons.refresh_rounded, size: 18),
+                            color: AppColors.textSecondary,
+                            tooltip: tr('Check status now'),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                            onPressed: () => ConnectivityStatusService.checkNow(force: true),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                   const SizedBox(height: 14),
-                  _specRow(Icons.verified_user_rounded, 'Edition', 'Citizen Prototype v1.1.0'),
-                  _specRow(Icons.auto_awesome_rounded, 'AI Engine', 'Dual-Mode (Cloud + Offline Engine)'),
-                  _specRow(Icons.menu_book_rounded, 'Coverage', 'BNS, BNSS, BSA (2024), Railways Act, MV Act (2019)'),
-                  _specRow(Icons.record_voice_over_rounded, 'Audio', 'Voice Search & TTS Audio Narration'),
-                  _specRow(Icons.cloud_sync_rounded, 'Cloud Sync', 'User Bookmarks & Offline-First Cache'),
-                  _specRow(Icons.translate_rounded, 'Languages', 'English, Telugu (తెలుగు), Hindi (हिन्दी), Tamil (தமிழ்)'),
-                  _specRow(Icons.lock_outline_rounded, 'Privacy', 'Zero Search Tracking & Encrypted Auth'),
+                  _specRow(Icons.verified_user_rounded, tr('Edition'), 'Citizen Prototype v1.1.0'),
+                  _specRow(Icons.auto_awesome_rounded, tr('AI Engine'), tr('Dual-Mode (Cloud + Offline Engine)')),
+                  _specRow(Icons.menu_book_rounded, tr('Coverage'), 'BNS, BNSS, BSA (2024), Railways Act, MV Act (2019)'),
+                  _specRow(Icons.record_voice_over_rounded, tr('Audio'), tr('Voice Search & TTS Audio Narration')),
+                  _specRow(Icons.cloud_sync_rounded, tr('Cloud Sync'), tr('User Bookmarks & Offline-First Cache')),
+                  _specRow(Icons.translate_rounded, tr('Languages'), 'English, Telugu (తెలుగు), Hindi (हिन्दी)'),
+                  _specRow(Icons.lock_outline_rounded, tr('Privacy'), tr('Zero Search Tracking & Encrypted Auth')),
                 ],
               ),
             ),
@@ -373,7 +540,7 @@ class _AboutScreenState extends State<AboutScreen> {
 
             // Emergency / Citizen Helplines Section
             Text(
-              '24/7 Citizen Helplines',
+              tr('24/7 Citizen Helplines'),
               style: GoogleFonts.outfit(
                 color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -382,18 +549,18 @@ class _AboutScreenState extends State<AboutScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Official government emergency and grievance helplines in India:',
+              tr('Official government emergency and grievance helplines in India:'),
               style: GoogleFonts.inter(
                 color: AppColors.textSecondary,
                 fontSize: 12,
               ),
             ),
             const SizedBox(height: 12),
-            _helplineTile('112', 'National Emergency (Police, Fire, Medical)', const Color(0xFFDC2626)),
-            _helplineTile('139', 'RailMadad (Indian Railways Grievance & Security)', const Color(0xFF0284C7)),
-            _helplineTile('1930', 'National Cyber Crime Financial Helpline', const Color(0xFF7C3AED)),
-            _helplineTile('1091', 'Women Safety & Emergency Helpline', const Color(0xFFDB2777)),
-            _helplineTile('1915', 'National Consumer Grievance Helpline', const Color(0xFFEA580C)),
+            _helplineTile('112', tr('National Emergency (Police, Fire, Medical)'), const Color(0xFFDC2626)),
+            _helplineTile('139', tr('RailMadad (Indian Railways Grievance & Security)'), const Color(0xFF0284C7)),
+            _helplineTile('1930', tr('National Cyber Crime Financial Helpline'), const Color(0xFF7C3AED)),
+            _helplineTile('1091', tr('Women Safety & Emergency Helpline'), const Color(0xFFDB2777)),
+            _helplineTile('1915', tr('National Consumer Grievance Helpline'), const Color(0xFFEA580C)),
 
             // Server Connection - Visible only if Admin is authenticated and unlocked
             if (_isAdminUser && _developerMode) ...[
@@ -530,6 +697,8 @@ class _AboutScreenState extends State<AboutScreen> {
           ],
         ),
       ),
+    );
+      },
     );
   }
 

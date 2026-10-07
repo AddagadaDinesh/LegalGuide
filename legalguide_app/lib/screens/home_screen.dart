@@ -7,7 +7,12 @@ import '../models/legal_matter.dart';
 import '../models/legal_section.dart';
 import '../repositories/legal_data_repository.dart';
 import '../services/auth_service.dart';
+import '../services/analytics_service.dart';
 import '../services/bookmark_service.dart';
+import '../services/connectivity_status_service.dart';
+import '../services/legal_content_localization_service.dart';
+import '../services/legal_update_service.dart';
+import '../services/locale_service.dart';
 import '../services/search_history_service.dart';
 import '../services/view_count_service.dart';
 import '../theme/app_theme.dart';
@@ -17,14 +22,13 @@ import '../widgets/legal_section_card.dart';
 import '../widgets/section_heading.dart';
 import 'arrest_detention_screen.dart';
 import 'category_overview_screen.dart';
-import 'citizen_rights_travel_screen.dart';
 import 'documents_screen.dart';
 import 'explore_laws_screen.dart';
+import 'legal_awareness_screen.dart';
 import 'legal_help_screen.dart';
+import 'legal_updates_screen.dart';
 import 'section_detail_screen.dart';
-import 'traffic_rules_screen.dart';
-
-const _fallbackSearchSuggestions = ['theft', 'arrest', 'cheating', 'murder', 'article 21'];
+import 'admin_dashboard_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onOpenExplore;
@@ -51,11 +55,14 @@ class _HomeScreenState extends State<HomeScreen> {
   SectionLookup? _lookup;
   bool _loading = true;
   bool _neverSynced = false;
+  DateTime? _lastSyncTime;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    // Start update check in background (non-blocking)
+    LegalUpdateService.loadUpdates();
   }
 
   Future<void> _loadData() async {
@@ -69,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
       BookmarkService.getBookmarkedIds(),
       ViewCountService.getAllCounts(),
       SearchHistoryService.getTopQueries(),
+      LegalDataRepository.lastSyncTime(),
     ]);
     final hasSyncedBefore = results[0] as bool;
     final categories = results[1] as List<Category>;
@@ -78,6 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final bookmarks = results[5] as Set<int>;
     final counts = results[6] as Map<int, int>;
     final topSearches = results[7] as List<String>;
+    final lastSyncTime = results[8] as DateTime?;
 
     final frequent = sections
         .where((s) => (counts[s.id] ?? 0) >= ViewCountService.frequentThreshold)
@@ -105,9 +114,12 @@ class _HomeScreenState extends State<HomeScreen> {
       _categories = categories;
       _frequentSections = topFrequent;
       _commonlyReferenced = topCommon;
-      _popularSearches = topSearches.isNotEmpty ? topSearches.toSet().toList() : _fallbackSearchSuggestions;
+      _popularSearches = topSearches.isNotEmpty
+          ? topSearches.toSet().toList()
+          : LegalContentLocalizationService.popularSearches.map((e) => e.id).toList();
       _bookmarkedIds = bookmarks;
       _lookup = SectionLookup(laws, categories);
+      _lastSyncTime = lastSyncTime;
       _loading = false;
     });
   }
@@ -128,6 +140,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openSearchSuggestion(String query) {
+    AnalyticsService.trackSearch(query);
+    AnalyticsService.trackFeature('law_search');
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -136,30 +150,270 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _quickAccessCard(String label, IconData icon, Color color, VoidCallback onTap) {
-    return SizedBox(
-      width: 102,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.card),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconBadge(icon: icon, color: color),
-              const SizedBox(height: 10),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w600, height: 1.25),
+  String _formatDate(DateTime? dt) {
+    if (dt == null) return '01/07/2024';
+    final day = dt.day.toString().padLeft(2, '0');
+    final month = dt.month.toString().padLeft(2, '0');
+    final year = dt.year.toString();
+    return '$day/$month/$year';
+  }
+
+  /// User-friendly Legal Updates card (shown to ALL users, including admin).
+  /// Admin-specific "Verified Legal Database" management is in Admin Dashboard only.
+
+  Widget _buildLegalUpdatesBanner() {
+    return ValueListenableBuilder<int>(
+      valueListenable: LegalUpdateService.unreadCount,
+      builder: (context, unreadCount, _) {
+        return ValueListenableBuilder<NetworkStatus>(
+          valueListenable: ConnectivityStatusService.status,
+          builder: (context, networkStatus, _) {
+            final syncDateStr = _formatDate(_lastSyncTime);
+            final bool isOffline = networkStatus == NetworkStatus.offline;
+            final bool hasUpdates = unreadCount > 0;
+
+            final Color bgColor;
+            final Color borderColor;
+            final Color accentColor;
+            final IconData iconData;
+            final String titleText;
+            final String subtitleText;
+
+            if (isOffline) {
+              bgColor = AppColors.warning.withValues(alpha: 0.10);
+              borderColor = AppColors.warning.withValues(alpha: 0.4);
+              accentColor = AppColors.warning;
+              iconData = Icons.cloud_off_rounded;
+              titleText = tr('Offline · Using LegalGuide Knowledge');
+              subtitleText = '${tr("Last synchronized")}: $syncDateStr';
+            } else if (hasUpdates) {
+              bgColor = AppColors.accent.withValues(alpha: 0.08);
+              borderColor = AppColors.accent.withValues(alpha: 0.35);
+              accentColor = AppColors.accent;
+              iconData = Icons.campaign_rounded;
+              titleText = tr('Legal Information Updated');
+              subtitleText = '$unreadCount ${tr("new verified updates available")}';
+            } else {
+              bgColor = AppColors.success.withValues(alpha: 0.07);
+              borderColor = AppColors.success.withValues(alpha: 0.3);
+              accentColor = AppColors.success;
+              iconData = Icons.check_circle_rounded;
+              titleText = tr('Legal Information Up to Date');
+              subtitleText = '${tr("Last synchronized")}: $syncDateStr';
+            }
+
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LegalUpdatesScreen()),
+                ).then((_) => setState(() {}));
+              },
+              borderRadius: BorderRadius.circular(AppRadius.card),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(AppRadius.card),
+                  border: Border.all(color: borderColor),
+                ),
+                child: Row(
+                  children: [
+                    Icon(iconData, color: accentColor, size: 18),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            titleText,
+                            style: GoogleFonts.inter(
+                              color: AppColors.textPrimary,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            subtitleText,
+                            style: GoogleFonts.inter(
+                              color: AppColors.textSecondary,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (hasUpdates && !isOffline)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          unreadCount.toString(),
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: accentColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          tr('View Updates'),
+                          style: GoogleFonts.inter(
+                            color: accentColor,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _quickAccessCard(String label, IconData icon, Color color, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.card),
+      child: Container(
+        height: 98,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconBadge(icon: icon, color: color, size: 36, iconSize: 18),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(
+                color: AppColors.textPrimary,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                height: 1.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _legalAwarenessParentCard() {
+    return Semantics(
+      label: '${tr("Legal Awareness")}, ${tr("Rights, rules & citizen protections")}',
+      button: true,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0F172A).withValues(alpha: 0.035),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LegalAwarenessScreen()),
+                );
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6366F1).withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: const Color(0xFF6366F1).withValues(alpha: 0.18),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.campaign_rounded, color: Color(0xFF6366F1), size: 24),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            tr('Legal Awareness'),
+                            maxLines: 2,
+                            softWrap: true,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFF0F172A),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            tr('Rights, rules & citizen protections'),
+                            maxLines: 2,
+                            softWrap: true,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFF64748B),
+                              fontSize: 13,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      color: Color(0xFF94A3B8),
+                      size: 24,
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -192,6 +446,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               category.displayName,
               maxLines: 2,
+              softWrap: true,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.inter(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 12.5, height: 1.3),
             ),
@@ -204,15 +459,18 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final lookup = _lookup;
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _loadData,
-          color: AppColors.accent,
-          backgroundColor: AppColors.surface,
-          child: (_loading || lookup == null)
-              ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, currentLang, _) {
+        return Scaffold(
+          backgroundColor: AppColors.bg,
+          body: SafeArea(
+            child: RefreshIndicator(
+              onRefresh: _loadData,
+              color: AppColors.accent,
+              backgroundColor: AppColors.surface,
+              child: (_loading || lookup == null)
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
               : ListView(
                   padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                   children: [
@@ -260,10 +518,59 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
+                          ValueListenableBuilder<String?>(
+                            valueListenable: AuthService.currentUsername,
+                            builder: (context, username, _) {
+                              return ValueListenableBuilder<String?>(
+                                valueListenable: AuthService.currentRole,
+                                builder: (context, role, _) {
+                                  if (!AuthService.isAdmin) return const SizedBox.shrink();
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: InkWell(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const AdminDashboardScreen(),
+                                          ),
+                                        );
+                                      },
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(alpha: 0.22),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.2),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.insights_rounded, color: Colors.white, size: 15),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              'Admin',
+                                              style: GoogleFonts.inter(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 11.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 16),
+                    _buildLegalUpdatesBanner(),
                     InkWell(
                       onTap: widget.onOpenExplore,
                       borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -293,187 +600,85 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 26),
                     SectionHeading(title: tr('Quick Actions'), icon: Icons.bolt_rounded),
                     const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      children: [
-                        _quickAccessCard(tr('Search Laws'), Icons.search_rounded, AppColors.accent, widget.onOpenExplore),
-                        _quickAccessCard(tr('Ask AI'), Icons.chat_bubble_rounded, const Color(0xFFA78BFA), widget.onOpenAssistant),
-                        _quickAccessCard(tr('Arrest &\nDetention'), Icons.local_police_rounded, const Color(0xFFF59E0B), () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) => const ArrestDetentionScreen()));
-                        }),
-                        _quickAccessCard(tr('Legal\nDocuments'), Icons.description_rounded, const Color(0xFF14B8A6), () {
-                          Navigator.push(
-                              context, MaterialPageRoute(builder: (context) => const DocumentsScreen()));
-                        }),
-                        _quickAccessCard(tr('Need Legal\nHelp'), Icons.support_agent_rounded, const Color(0xFFF43F5E), () {
-                          Navigator.push(
-                              context, MaterialPageRoute(builder: (context) => const LegalHelpScreen()));
-                        }),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    // Citizen Rights & Travel Guide Banner (Emergency Rights & Railway Rules)
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CitizenRightsTravelScreen(),
-                          ),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isTablet = constraints.maxWidth >= 580;
+                        if (isTablet) {
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: _quickAccessCard(tr('Search Laws'), Icons.search_rounded, AppColors.accent, widget.onOpenExplore),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _quickAccessCard(tr('Ask AI'), Icons.chat_bubble_rounded, const Color(0xFFA78BFA), widget.onOpenAssistant),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _quickAccessCard(tr('Arrest &\nDetention'), Icons.local_police_rounded, const Color(0xFFF59E0B), () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const ArrestDetentionScreen()));
+                                }),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _quickAccessCard(tr('Legal\nDocuments'), Icons.description_rounded, const Color(0xFF14B8A6), () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const DocumentsScreen()));
+                                }),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _quickAccessCard(tr('Need Legal\nHelp'), Icons.support_agent_rounded, const Color(0xFFF43F5E), () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const LegalHelpScreen()));
+                                }),
+                              ),
+                            ],
+                          );
+                        }
+
+                        return Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _quickAccessCard(tr('Search Laws'), Icons.search_rounded, AppColors.accent, widget.onOpenExplore),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _quickAccessCard(tr('Ask AI'), Icons.chat_bubble_rounded, const Color(0xFFA78BFA), widget.onOpenAssistant),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _quickAccessCard(tr('Arrest &\nDetention'), Icons.local_police_rounded, const Color(0xFFF59E0B), () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ArrestDetentionScreen()));
+                                  }),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _quickAccessCard(tr('Legal\nDocuments'), Icons.description_rounded, const Color(0xFF14B8A6), () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const DocumentsScreen()));
+                                  }),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _quickAccessCard(tr('Need Legal\nHelp'), Icons.support_agent_rounded, const Color(0xFFF43F5E), () {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const LegalHelpScreen()));
+                                  }),
+                                ),
+                              ],
+                            ),
+                          ],
                         );
                       },
-                      borderRadius: BorderRadius.circular(18),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF881337), Color(0xFF1E3A8A)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF1E3A8A).withValues(alpha: 0.28),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.18),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: const Icon(Icons.security_rounded, color: Colors.white, size: 24),
-                            ),
-                            const SizedBox(width: 11),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          tr('Citizen Rights & Travel Guide'),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.inter(
-                                            color: Colors.white,
-                                            fontSize: 14.5,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withValues(alpha: 0.22),
-                                          borderRadius: BorderRadius.circular(4),
-                                        ),
-                                        child: Text(
-                                          tr('SAFETY & TRANSIT'),
-                                          style: GoogleFonts.inter(
-                                            color: Colors.white,
-                                            fontSize: 9.5,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    tr('Emergency legal protection, police stops & Indian Railway rules'),
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white.withValues(alpha: 0.88),
-                                      fontSize: 11.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right_rounded, color: Colors.white),
-                          ],
-                        ),
-                      ),
                     ),
+                    const SizedBox(height: 26),
+                    SectionHeading(title: tr('Legal Awareness'), icon: Icons.campaign_rounded),
                     const SizedBox(height: 12),
-                    // Traffic Rules & Driver Rights Banner
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const TrafficRulesScreen()),
-                        );
-                      },
-                      borderRadius: BorderRadius.circular(18),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFB45309), Color(0xFFD97706)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(18),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFD97706).withValues(alpha: 0.25),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: const Icon(Icons.traffic_rounded, color: Colors.white, size: 24),
-                            ),
-                            const SizedBox(width: 11),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    tr('Traffic Rules & Driver Rights'),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white,
-                                      fontSize: 14.5,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 3),
-                                  Text(
-                                    tr('MV Act 2019 fines, e-challan disputes & citizen driver protections'),
-                                    style: GoogleFonts.inter(
-                                      color: Colors.white.withValues(alpha: 0.88),
-                                      fontSize: 11.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Icon(Icons.chevron_right_rounded, color: Colors.white),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
+                    _legalAwarenessParentCard(),
+                    const SizedBox(height: 16),
                     if (_neverSynced) ...[
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20.0),
@@ -497,18 +702,26 @@ class _HomeScreenState extends State<HomeScreen> {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          for (final query in _popularSearches)
-                            ActionChip(
-                              avatar: const Icon(Icons.search_rounded, size: 14, color: AppColors.accent),
-                              label: Text(query),
-                              backgroundColor: AppColors.surface,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(AppRadius.pill),
-                                side: const BorderSide(color: AppColors.border),
-                              ),
-                              labelStyle: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12),
-                              onPressed: () => _openSearchSuggestion(query),
+                          for (final query in _popularSearches) ...[
+                            Builder(
+                              builder: (context) {
+                                final item = LegalContentLocalizationService.getLocalizedSearchTerm(query);
+                                final label = item != null ? item.displayLabel : tr(query);
+                                final sq = item != null ? item.searchQuery : query;
+                                return ActionChip(
+                                  avatar: const Icon(Icons.search_rounded, size: 14, color: AppColors.accent),
+                                  label: Text(label),
+                                  backgroundColor: AppColors.surface,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                                    side: const BorderSide(color: AppColors.border),
+                                  ),
+                                  labelStyle: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12),
+                                  onPressed: () => _openSearchSuggestion(sq),
+                                );
+                              },
                             ),
+                          ],
                         ],
                       ),
                       const SizedBox(height: 28),
@@ -566,6 +779,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
         ),
       ),
+    );
+      },
     );
   }
 }

@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../localization/app_strings.dart';
 import '../models/chat_message.dart';
+import '../models/conversation.dart';
+import '../services/analytics_service.dart';
 import '../services/assistant_service.dart';
 import '../services/auth_service.dart';
+import '../services/chat_history_service.dart';
+import '../services/locale_service.dart';
+import '../services/tts_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/ai_response_card.dart';
 import '../widgets/voice_search_modal.dart';
 import 'login_screen.dart';
 
@@ -41,10 +47,225 @@ const _quickQuestions = {
 };
 
 class _AssistantPanelState extends State<AssistantPanel> {
+  Conversation? _currentConversation;
   final List<ChatMessage> _messages = [];
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isSending = false;
+  bool _isLoadingHistory = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadChatHistory();
+  }
+
+  Future<void> _loadChatHistory() async {
+    try {
+      final conv = await ChatHistoryService.instance.getOrCreateActiveConversation();
+      final msgs = await ChatHistoryService.instance.loadMessages(conv.id);
+      if (mounted) {
+        setState(() {
+          _currentConversation = conv;
+          _messages.clear();
+          _messages.addAll(msgs);
+          _isLoadingHistory = false;
+        });
+        _scrollToBottom();
+      }
+    } catch (e) {
+      debugPrint('Error loading chat history: $e');
+      if (mounted) {
+        setState(() => _isLoadingHistory = false);
+      }
+    }
+  }
+
+  Future<void> _startNewChat() async {
+    await TtsService.instance.stop();
+    try {
+      final newConv = await ChatHistoryService.instance.startNewConversation();
+      if (mounted) {
+        setState(() {
+          _currentConversation = newConv;
+          _messages.clear();
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(tr('Started a new conversation')),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error starting new chat: $e');
+    }
+  }
+
+  Future<void> _showHistorySheet() async {
+    final recent = await ChatHistoryService.instance.getRecentConversations(limit: 40);
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          return Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(ctx).size.height * 0.70,
+            ),
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 16, 14),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF4338CA),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.history_rounded, color: Colors.white, size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          tr('Recent Conversations'),
+                          style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: recent.isEmpty
+                      ? Center(
+                          child: Text(
+                            tr('No previous conversations yet'),
+                            style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 13),
+                          ),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          itemCount: recent.length,
+                          separatorBuilder: (context, index) => const Divider(height: 1, color: AppColors.border),
+                          itemBuilder: (ctx, index) {
+                            final conv = recent[index];
+                            final isCurrent = conv.id == _currentConversation?.id;
+
+                            return ListTile(
+                              leading: Container(
+                                width: 38,
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: isCurrent
+                                      ? const Color(0xFFEEF2FF)
+                                      : AppColors.bg,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isCurrent
+                                        ? const Color(0xFF818CF8)
+                                        : AppColors.border,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.chat_bubble_outline_rounded,
+                                  size: 18,
+                                  color: isCurrent ? AppColors.accentDark : AppColors.textSecondary,
+                                ),
+                              ),
+                              title: Text(
+                                conv.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.inter(
+                                  color: isCurrent ? AppColors.accentDark : AppColors.textPrimary,
+                                  fontWeight: isCurrent ? FontWeight.bold : FontWeight.w500,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              subtitle: Text(
+                                conv.updatedAt.toString().substring(0, 16),
+                                style: GoogleFonts.inter(
+                                  color: AppColors.textMuted,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (isCurrent)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                                      margin: const EdgeInsets.only(right: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFEEF2FF),
+                                        borderRadius: BorderRadius.circular(6),
+                                        border: Border.all(color: const Color(0xFFA5B4FC)),
+                                      ),
+                                      child: Text(
+                                        tr('Active'),
+                                        style: GoogleFonts.inter(
+                                          color: AppColors.accentDark,
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_outline_rounded, color: AppColors.danger, size: 18),
+                                    tooltip: tr('Delete'),
+                                    onPressed: () async {
+                                      await ChatHistoryService.instance.deleteConversation(conv.id);
+                                      setSheetState(() {
+                                        recent.removeAt(index);
+                                      });
+                                      if (isCurrent) {
+                                        await _loadChatHistory();
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                              onTap: () async {
+                                Navigator.pop(ctx);
+                                await TtsService.instance.stop();
+                                await ChatHistoryService.instance.switchConversation(conv.id);
+                                final msgs = await ChatHistoryService.instance.loadMessages(conv.id);
+                                if (mounted) {
+                                  setState(() {
+                                    _currentConversation = conv;
+                                    _messages.clear();
+                                    _messages.addAll(msgs);
+                                  });
+                                  _scrollToBottom();
+                                }
+                              },
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   void _askQuick(String question) {
     _controller.text = question;
@@ -55,8 +276,27 @@ class _AssistantPanelState extends State<AssistantPanel> {
     final text = _controller.text.trim();
     if (text.isEmpty || _isSending) return;
 
+    AnalyticsService.trackFeature('ai_assistant');
+    await TtsService.instance.stop();
+
+    // Ensure conversation exists
+    final conv = _currentConversation ??
+        await ChatHistoryService.instance.getOrCreateActiveConversation();
+    _currentConversation = conv;
+
+    final userMessage = ChatMessage(
+      conversationId: conv.id,
+      text: text,
+      isUser: true,
+      timestamp: DateTime.now(),
+      language: LocaleService.currentLanguage,
+    );
+
+    // Save immediately so it is not lost even if user closes assistant
+    await ChatHistoryService.instance.saveMessage(userMessage);
+
     setState(() {
-      _messages.add(ChatMessage(text: text, isUser: true, timestamp: DateTime.now()));
+      _messages.add(userMessage);
       _isSending = true;
     });
     _controller.clear();
@@ -64,17 +304,26 @@ class _AssistantPanelState extends State<AssistantPanel> {
 
     final answer = await AssistantService.ask(text);
 
-    setState(() {
-      _messages.add(ChatMessage(
-        text: answer.reply,
-        isUser: false,
-        isOnline: answer.isOnline,
-        requiresLogin: answer.requiresLogin,
-        timestamp: DateTime.now(),
-      ));
-      _isSending = false;
-    });
-    _scrollToBottom();
+    final assistantMessage = ChatMessage(
+      conversationId: conv.id,
+      text: answer.reply,
+      isUser: false,
+      isOnline: answer.isOnline,
+      requiresLogin: answer.requiresLogin,
+      timestamp: DateTime.now(),
+      language: LocaleService.currentLanguage,
+    );
+
+    // Save complete AI response immediately
+    await ChatHistoryService.instance.saveMessage(assistantMessage);
+
+    if (mounted) {
+      setState(() {
+        _messages.add(assistantMessage);
+        _isSending = false;
+      });
+      _scrollToBottom();
+    }
   }
 
   Future<void> _openVoiceInput() async {
@@ -103,6 +352,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
 
   @override
   void dispose() {
+    TtsService.instance.stop();
     _controller.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -110,73 +360,82 @@ class _AssistantPanelState extends State<AssistantPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      child: Container(
-        color: AppColors.bg,
-        child: SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              _buildHeader(),
-              ValueListenableBuilder<String?>(
-                valueListenable: AuthService.currentUsername,
-                builder: (context, username, _) {
-                  if (username != null) return const SizedBox.shrink();
-                  return Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    color: AppColors.surface,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            tr('Log in to unlock online AI answers. Offline answers from the LegalGuide library always work.'),
-                            style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12),
-                          ),
+    return ValueListenableBuilder<String>(
+      valueListenable: LocaleService.language,
+      builder: (context, lang, _) {
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: Container(
+            color: AppColors.bg,
+            child: SafeArea(
+              top: false,
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  ValueListenableBuilder<String?>(
+                    valueListenable: AuthService.currentUsername,
+                    builder: (context, username, _) {
+                      if (username != null) return const SizedBox.shrink();
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        color: AppColors.surface,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                tr('Log in to unlock online AI answers. Offline answers from the LegalGuide library always work.'),
+                                style: GoogleFonts.inter(color: AppColors.textSecondary, fontSize: 12),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => const LoginScreen()),
+                              ),
+                              child: Text(tr('Log in'), style: GoogleFonts.inter(color: AppColors.accent, fontWeight: FontWeight.w600)),
+                            ),
+                          ],
                         ),
-                        TextButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const LoginScreen()),
-                          ),
-                          child: Text(tr('Log in'), style: GoogleFonts.inter(color: AppColors.accent, fontWeight: FontWeight.w600)),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              Expanded(
-                child: _messages.isEmpty
-                    ? _buildWelcome()
-                    : ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _messages.length,
-                        itemBuilder: (context, index) => _buildBubble(_messages[index]),
-                      ),
-              ),
-              if (_isSending)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 8),
-                  child: SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF6366F1)),
+                      );
+                    },
                   ),
-                ),
-              _buildInputBar(),
-            ],
+                  Expanded(
+                    child: _isLoadingHistory
+                        ? const Center(
+                            child: CircularProgressIndicator(color: AppColors.accentDark),
+                          )
+                        : (_messages.isEmpty
+                            ? _buildWelcome()
+                            : ListView.builder(
+                                controller: _scrollController,
+                                padding: const EdgeInsets.all(16),
+                                itemCount: _messages.length,
+                                itemBuilder: (context, index) => _buildBubble(_messages[index]),
+                              )),
+                  ),
+                  if (_isSending)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 8),
+                      child: SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF6366F1)),
+                      ),
+                    ),
+                  _buildInputBar(),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 18, 12, 18),
+      padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
       decoration: const BoxDecoration(
         color: Color(0xFF4338CA),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -184,28 +443,47 @@ class _AssistantPanelState extends State<AssistantPanel> {
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 20),
+            child: const Icon(Icons.chat_bubble_rounded, color: Colors.white, size: 19),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(tr('LegalGuide Assistant'),
-                    style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                Text(tr('Ask about Indian law, sections & your rights'),
-                    style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
+                Text(
+                  tr('LegalGuide Assistant'),
+                  softWrap: true,
+                  style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                Text(
+                  tr('Ask about Indian law, sections & your rights'),
+                  maxLines: 2,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(color: Colors.white.withValues(alpha: 0.8), fontSize: 11.5),
+                ),
               ],
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close_rounded, color: Colors.white),
+            icon: const Icon(Icons.history_rounded, color: Colors.white, size: 21),
+            tooltip: tr('Recent Conversations'),
+            onPressed: _showHistorySheet,
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_comment_rounded, color: Colors.white, size: 20),
+            tooltip: tr('New Chat'),
+            onPressed: _startNewChat,
+          ),
+          IconButton(
+            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 22),
+            tooltip: tr('Close'),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -250,7 +528,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
                     backgroundColor: AppColors.surface,
                     side: const BorderSide(color: AppColors.border),
                     labelStyle: GoogleFonts.inter(color: AppColors.textPrimary, fontSize: 12),
-                    onPressed: () => _askQuick(entry.value),
+                    onPressed: () => _askQuick(tr(entry.value)),
                   ),
               ],
             ),
@@ -262,143 +540,133 @@ class _AssistantPanelState extends State<AssistantPanel> {
 
   Widget _buildBubble(ChatMessage message) {
     final isUser = message.isUser;
+    if (!isUser) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: AiResponseCard(message: message),
+      );
+    }
+
     return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: Alignment.centerRight,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(14),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.80),
         decoration: BoxDecoration(
-          color: isUser ? AppColors.accent : AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: isUser ? null : Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (!isUser && message.requiresLogin)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF334155),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    tr('🔒 Log in or create an account for answers beyond app content'),
-                    style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 11),
-                  ),
-                ),
-              )
-            else if (!isUser && message.isOnline == false)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF334155),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    tr('🟠 Offline – Using LegalGuide Knowledge'),
-                    style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 11),
-                  ),
-                ),
-              ),
-            if (!isUser && message.isOnline == true)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF854D0E),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    tr('🟢 Online'),
-                    style: GoogleFonts.inter(color: const Color(0xFFFDE68A), fontSize: 11),
-                  ),
-                ),
-              ),
-            Text(
-              message.text,
-              style: GoogleFonts.inter(
-                color: isUser ? Colors.white : AppColors.textPrimary,
-                fontSize: 14,
-                height: 1.4,
-              ),
+          color: AppColors.accentDark,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(18),
+            topRight: Radius.circular(4),
+            bottomLeft: Radius.circular(18),
+            bottomRight: Radius.circular(18),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accentDark.withValues(alpha: 0.25),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            if (!isUser && message.requiresLogin)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  ),
-                  child: Text(
-                    tr('Log in or create an account →'),
-                    style: GoogleFonts.inter(color: AppColors.accent, fontWeight: FontWeight.w600, fontSize: 12.5),
-                  ),
-                ),
-              ),
           ],
+        ),
+        child: Text(
+          message.text,
+          style: GoogleFonts.inter(
+            color: Colors.white,
+            fontSize: 14.5,
+            height: 1.4,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
   }
 
   Widget _buildInputBar() {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              style: GoogleFonts.inter(color: AppColors.textPrimary),
-              onSubmitted: (_) => _sendMessage(),
-              decoration: InputDecoration(
-                hintText: tr('Ask a question...'),
-                hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
-                filled: true,
-                fillColor: AppColors.surface,
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.mic_rounded, color: AppColors.accent),
-                  tooltip: tr('Speak your question'),
-                  onPressed: _openVoiceInput,
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(
+          top: BorderSide(color: AppColors.border, width: 0.5),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.bg,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.border),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: 40,
+                  maxHeight: 140,
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: AppColors.accent, width: 1.5),
+                child: Scrollbar(
+                  child: TextField(
+                    controller: _controller,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.newline,
+                    minLines: 1,
+                    maxLines: 6,
+                    style: GoogleFonts.inter(
+                      color: AppColors.textPrimary,
+                      fontSize: 14.5,
+                      height: 1.35,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: tr('Ask your legal question...'),
+                      hintStyle: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13.5),
+                      filled: false,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                      isDense: true,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
-            child: IconButton(
-              icon: const Icon(Icons.send_rounded, color: Colors.white),
-              onPressed: _isSending ? null : _sendMessage,
+            const SizedBox(width: 4),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.mic_rounded, color: AppColors.accentDark, size: 22),
+                    tooltip: tr('Speak your question'),
+                    padding: const EdgeInsets.all(6),
+                    constraints: const BoxConstraints(),
+                    onPressed: _openVoiceInput,
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: const BoxDecoration(
+                      color: AppColors.accentDark,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 19),
+                      padding: EdgeInsets.zero,
+                      tooltip: tr('Send'),
+                      onPressed: _isSending ? null : _sendMessage,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

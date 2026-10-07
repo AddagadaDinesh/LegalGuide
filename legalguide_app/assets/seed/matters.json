@@ -6,6 +6,7 @@
     "description": "What happens when someone is arrested, and the rights that apply during the process.",
     "name_te": "అరెస్టు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
     "related_sections": [
       6,
@@ -14,7 +15,9 @@
       9,
       10,
       21
-    ]
+    ],
+    "name_hi": "गिरफ्तारी",
+    "description_hi": ""
   },
   {
     "id": 4,
@@ -23,10 +26,13 @@
     "description": "",
     "name_te": "హత్య",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
     "related_sections": [
       2
-    ]
+    ],
+    "name_hi": "हत्या",
+    "description_hi": ""
   },
   {
     "id": 5,
@@ -35,8 +41,11 @@
     "description": "",
     "name_te": "జామీను",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "जमानत",
+    "description_hi": ""
   },
   {
     "id": 6,
@@ -45,8 +54,11 @@
     "description": "",
     "name_te": "FIR (ఎఫ్‌ఐఆర్)",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "एफआईआर (FIR)",
+    "description_hi": ""
   },
   {
     "id": 7,
@@ -55,8 +67,11 @@
     "description": "",
     "name_te": "క్రిమినల్ ఫిర్యాదు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "आपराधिक शिकायत",
+    "description_hi": ""
   },
   {
     "id": 8,
@@ -65,8 +80,11 @@
     "description": "",
     "name_te": "సోదా & స్వాధీనం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "तलाशी और जब्ती",
+    "description_hi": ""
   },
   {
     "id": 9,
@@ -75,8 +93,11 @@
     "description": "",
     "name_te": "దర్యాప్తు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "जांच / अनुसंधान",
+    "description_hi": ""
   },
   {
     "id": 10,
@@ -85,8 +106,11 @@
     "description": "",
     "name_te": "సాక్ష్యం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "साक्ष्य / सबूत",
+    "description_hi": ""
   },
   {
     "id": 11,
@@ -95,8 +119,11 @@
     "description": "",
     "name_te": "సమన్లు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "समन",
+    "description_hi": ""
   },
   {
     "id": 12,
@@ -105,8 +132,11 @@
     "description": "",
     "name_te": "వారెంట్",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "वारंट",
+    "description_hi": ""
   },
   {
     "id": 13,
@@ -115,8 +145,11 @@
     "description": "",
     "name_te": "విచారణ",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "मुकदमा / सुनवाई",
+    "description_hi": ""
   },
   {
     "id": 14,
@@ -125,10 +158,13 @@
     "description": "",
     "name_te": "జీవించే & స్వేచ్ఛ హక్కు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 2,
     "related_sections": [
       5
-    ]
+    ],
+    "name_hi": "जीवन और व्यक्तिगत स्वतंत्रता का अधिकार",
+    "description_hi": ""
   },
   {
     "id": 15,
@@ -137,10 +173,13 @@
     "description": "",
     "name_te": "న్యాయవాది హక్కు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 2,
     "related_sections": [
       10
-    ]
+    ],
+    "name_hi": "कानूनी वकील का अधिकार",
+    "description_hi": ""
   },
   {
     "id": 16,
@@ -149,8 +188,11 @@
     "description": "",
     "name_te": "వివాహం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 4,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "विवाह",
+    "description_hi": ""
   },
   {
     "id": 17,
@@ -159,10 +201,13 @@
     "description": "",
     "name_te": "విడాకులు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 4,
     "related_sections": [
       24
-    ]
+    ],
+    "name_hi": "तलाक",
+    "description_hi": ""
   },
   {
     "id": 18,
@@ -171,10 +216,13 @@
     "description": "",
     "name_te": "భరణం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 4,
     "related_sections": [
       26
-    ]
+    ],
+    "name_hi": "भरण-पोषण (गुजारा भत्ता)",
+    "description_hi": ""
   },
   {
     "id": 19,
@@ -183,10 +231,13 @@
     "description": "",
     "name_te": "గృహ హింస",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 4,
     "related_sections": [
       25
-    ]
+    ],
+    "name_hi": "घरेलू हिंसा",
+    "description_hi": ""
   },
   {
     "id": 20,
@@ -195,8 +246,11 @@
     "description": "",
     "name_te": "పిల్లల సంరక్షణ (కస్టడీ)",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 4,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "बच्चे की कस्टडी (संरक्षण)",
+    "description_hi": ""
   },
   {
     "id": 21,
@@ -205,8 +259,11 @@
     "description": "",
     "name_te": "దత్తత",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 4,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "गोद लेना (दत्तक ग्रहण)",
+    "description_hi": ""
   },
   {
     "id": 22,
@@ -215,8 +272,11 @@
     "description": "",
     "name_te": "వారసత్వం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 4,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "उत्तराधिकार",
+    "description_hi": ""
   },
   {
     "id": 23,
@@ -225,8 +285,11 @@
     "description": "",
     "name_te": "ఆస్తి యాజమాన్యం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 5,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "संपत्ति का स्वामित्व",
+    "description_hi": ""
   },
   {
     "id": 24,
@@ -235,8 +298,11 @@
     "description": "",
     "name_te": "అద్దె వివాదాలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 5,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "किराया विवाद",
+    "description_hi": ""
   },
   {
     "id": 25,
@@ -245,10 +311,13 @@
     "description": "",
     "name_te": "ఆస్తి అమ్మకం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 5,
     "related_sections": [
       27
-    ]
+    ],
+    "name_hi": "संपत्ति की बिक्री",
+    "description_hi": ""
   },
   {
     "id": 26,
@@ -257,10 +326,13 @@
     "description": "",
     "name_te": "రిజిస్ట్రేషన్",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 5,
     "related_sections": [
       28
-    ]
+    ],
+    "name_hi": "पंजीकरण",
+    "description_hi": ""
   },
   {
     "id": 27,
@@ -269,8 +341,11 @@
     "description": "",
     "name_te": "ఆస్తి పత్రాలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 5,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "संपत्ति के दस्तावेज",
+    "description_hi": ""
   },
   {
     "id": 28,
@@ -279,8 +354,11 @@
     "description": "",
     "name_te": "భూ వివాదాలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 5,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "भूमि विवाद",
+    "description_hi": ""
   },
   {
     "id": 29,
@@ -289,10 +367,13 @@
     "description": "How to file a complaint before the District Consumer Commission.",
     "name_te": "వినియోగదారుల ఫిర్యాదులు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 6,
     "related_sections": [
       23
-    ]
+    ],
+    "name_hi": "उपभोक्ता शिकायतें",
+    "description_hi": ""
   },
   {
     "id": 30,
@@ -301,8 +382,11 @@
     "description": "",
     "name_te": "లోపభూయిష్ట ఉత్పత్తులు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 6,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "दोषपूर्ण उत्पाद",
+    "description_hi": ""
   },
   {
     "id": 31,
@@ -311,8 +395,11 @@
     "description": "",
     "name_te": "సేవా లోపం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 6,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "सेवा में कमी",
+    "description_hi": ""
   },
   {
     "id": 32,
@@ -321,8 +408,11 @@
     "description": "",
     "name_te": "వాపసు (రీఫండ్)",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 6,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "धनवापसी (रिफंड)",
+    "description_hi": ""
   },
   {
     "id": 33,
@@ -331,8 +421,11 @@
     "description": "",
     "name_te": "వినియోగదారుల ఫోరమ్‌లు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 6,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "उपभोक्ता फोरम",
+    "description_hi": ""
   },
   {
     "id": 34,
@@ -341,8 +434,11 @@
     "description": "",
     "name_te": "ట్రాఫిక్ ఉల్లంఘనలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 7,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "यातायात उल्लंघन",
+    "description_hi": ""
   },
   {
     "id": 35,
@@ -351,8 +447,11 @@
     "description": "",
     "name_te": "ప్రమాద క్లెయిమ్‌లు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 7,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "दुर्घटना दावे",
+    "description_hi": ""
   },
   {
     "id": 36,
@@ -361,8 +460,11 @@
     "description": "",
     "name_te": "డ్రైవింగ్ లైసెన్స్",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 7,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "ड्राइविंग लाइसेंस",
+    "description_hi": ""
   },
   {
     "id": 37,
@@ -371,8 +473,11 @@
     "description": "",
     "name_te": "వాహన రిజిస్ట్రేషన్",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 7,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "वाहन पंजीकरण",
+    "description_hi": ""
   },
   {
     "id": 38,
@@ -381,10 +486,13 @@
     "description": "",
     "name_te": "గృహ హింస రక్షణ",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 8,
     "related_sections": [
       25
-    ]
+    ],
+    "name_hi": "घरेलू हिंसा से सुरक्षा",
+    "description_hi": ""
   },
   {
     "id": 39,
@@ -393,10 +501,13 @@
     "description": "",
     "name_te": "కార్యాలయ వేధింపు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 8,
     "related_sections": [
       29
-    ]
+    ],
+    "name_hi": "कार्यस्थल उत्पीड़न",
+    "description_hi": ""
   },
   {
     "id": 40,
@@ -405,10 +516,13 @@
     "description": "",
     "name_te": "భరణం హక్కులు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 8,
     "related_sections": [
       26
-    ]
+    ],
+    "name_hi": "भरण-पोषण अधिकार",
+    "description_hi": ""
   },
   {
     "id": 41,
@@ -417,8 +531,11 @@
     "description": "",
     "name_te": "బాల కార్మిక రక్షణ",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 9,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "बाल श्रम संरक्षण",
+    "description_hi": ""
   },
   {
     "id": 42,
@@ -427,8 +544,11 @@
     "description": "",
     "name_te": "జువెనైల్ న్యాయం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 9,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "किशोर न्याय",
+    "description_hi": ""
   },
   {
     "id": 43,
@@ -437,8 +557,11 @@
     "description": "",
     "name_te": "విద్యా హక్కు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 9,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "शिक्षा का अधिकार",
+    "description_hi": ""
   },
   {
     "id": 44,
@@ -447,8 +570,11 @@
     "description": "",
     "name_te": "వేతనాలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 10,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "मजदूरी / वेतन",
+    "description_hi": ""
   },
   {
     "id": 45,
@@ -457,8 +583,11 @@
     "description": "",
     "name_te": "పారిశ్రామిక వివాదాలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 10,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "औद्योगिक विवाद",
+    "description_hi": ""
   },
   {
     "id": 46,
@@ -467,8 +596,11 @@
     "description": "",
     "name_te": "కార్యాలయ భద్రత",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 10,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "कार्यस्थल सुरक्षा",
+    "description_hi": ""
   },
   {
     "id": 47,
@@ -477,10 +609,13 @@
     "description": "",
     "name_te": "ఉద్యోగం నుండి తొలగింపు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 10,
     "related_sections": [
       34
-    ]
+    ],
+    "name_hi": "नौकरी से समाप्ति",
+    "description_hi": ""
   },
   {
     "id": 49,
@@ -489,8 +624,11 @@
     "description": "",
     "name_te": "సైబర్ వేధింపు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 11,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "साइबर उत्पीड़न",
+    "description_hi": ""
   },
   {
     "id": 50,
@@ -499,10 +637,13 @@
     "description": "Someone using your password, digital signature, or other unique identifier without permission.",
     "name_te": "గుర్తింపు దొంగతనం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 11,
     "related_sections": [
       20
-    ]
+    ],
+    "name_hi": "पहचान की चोरी",
+    "description_hi": ""
   },
   {
     "id": 51,
@@ -511,8 +652,11 @@
     "description": "",
     "name_te": "డేటా/గోప్యతా సమస్యలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 11,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "डेटा और गोपनीयता मुद्दे",
+    "description_hi": ""
   },
   {
     "id": 52,
@@ -521,8 +665,11 @@
     "description": "",
     "name_te": "సైబర్ ఫిర్యాదులు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 11,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "साइबर शिकायतें",
+    "description_hi": ""
   },
   {
     "id": 53,
@@ -531,11 +678,14 @@
     "description": "Taking someone else's property without consent, whether stealthily or by sudden/forcible grabbing.",
     "name_te": "దొంగతనం & చోరీ",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
     "related_sections": [
       11,
       12
-    ]
+    ],
+    "name_hi": "चोरी और झपटमारी",
+    "description_hi": ""
   },
   {
     "id": 54,
@@ -544,11 +694,14 @@
     "description": "Being deceived into handing over money, property, or documents, or entrusted property being misappropriated.",
     "name_te": "మోసం & వంచన",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
     "related_sections": [
       4,
       14
-    ]
+    ],
+    "name_hi": "धोखाधड़ी और कपट",
+    "description_hi": ""
   },
   {
     "id": 55,
@@ -557,10 +710,13 @@
     "description": "",
     "name_te": "దోపిడీ",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
     "related_sections": [
       13
-    ]
+    ],
+    "name_hi": "डकैती और लूट",
+    "description_hi": ""
   },
   {
     "id": 56,
@@ -569,10 +725,13 @@
     "description": "",
     "name_te": "దాడి & గాయం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
     "related_sections": [
       16
-    ]
+    ],
+    "name_hi": "हमला और चोट",
+    "description_hi": ""
   },
   {
     "id": 57,
@@ -581,10 +740,13 @@
     "description": "",
     "name_te": "నేర బెదిరింపు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
     "related_sections": [
       15
-    ]
+    ],
+    "name_hi": "आपराधिक धमकी",
+    "description_hi": ""
   },
   {
     "id": 58,
@@ -593,10 +755,13 @@
     "description": "",
     "name_te": "పరువు నష్టం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
     "related_sections": [
       17
-    ]
+    ],
+    "name_hi": "मानहानि",
+    "description_hi": ""
   },
   {
     "id": 59,
@@ -605,10 +770,13 @@
     "description": "",
     "name_te": "మద్యం సేవించి వాహనం నడపడం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 7,
     "related_sections": [
       22
-    ]
+    ],
+    "name_hi": "शराब पीकर गाड़ी चलाना",
+    "description_hi": ""
   },
   {
     "id": 60,
@@ -617,10 +785,13 @@
     "description": "",
     "name_te": "గౌరవానికి భంగం / వేధింపు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 8,
     "related_sections": [
       18
-    ]
+    ],
+    "name_hi": "शील भंग / उत्पीड़न",
+    "description_hi": ""
   },
   {
     "id": 61,
@@ -629,10 +800,13 @@
     "description": "Being tricked online, over the phone, or via a fake profile into transferring money or sharing credentials.",
     "name_te": "ఆన్‌లైన్ ఆర్థిక మోసం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 11,
     "related_sections": [
       19
-    ]
+    ],
+    "name_hi": "ऑनलाइन वित्तीय धोखाधड़ी",
+    "description_hi": ""
   },
   {
     "id": 62,
@@ -641,10 +815,13 @@
     "description": "",
     "name_te": "వరకట్న వేధింపు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 8,
     "related_sections": [
       30
-    ]
+    ],
+    "name_hi": "दहेज उत्पीड़न",
+    "description_hi": ""
   },
   {
     "id": 63,
@@ -653,11 +830,14 @@
     "description": "",
     "name_te": "పిల్లల లైంగిక వేధింపుల రక్షణ",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 9,
     "related_sections": [
       31,
       32
-    ]
+    ],
+    "name_hi": "बाल यौन शोषण संरक्षण",
+    "description_hi": ""
   },
   {
     "id": 64,
@@ -666,10 +846,13 @@
     "description": "",
     "name_te": "ప్రసూతి ప్రయోజనాలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 10,
     "related_sections": [
       33
-    ]
+    ],
+    "name_hi": "मातृत्व लाभ",
+    "description_hi": ""
   },
   {
     "id": 65,
@@ -678,8 +861,11 @@
     "description": "",
     "name_te": "ముందస్తు జామీను",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "अग्रिम जमानत",
+    "description_hi": ""
   },
   {
     "id": 66,
@@ -688,8 +874,11 @@
     "description": "",
     "name_te": "జామీను పొందదగిన & జామీను పొందలేని నేరాలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "जमानती बनाम गैर-जमानती अपराध",
+    "description_hi": ""
   },
   {
     "id": 67,
@@ -698,8 +887,11 @@
     "description": "",
     "name_te": "కాగ్నిజబుల్ & నాన్-కాగ్నిజబుల్ నేరాలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "संज्ञेय बनाम असंज्ञेय अपराध",
+    "description_hi": ""
   },
   {
     "id": 68,
@@ -708,8 +900,11 @@
     "description": "",
     "name_te": "నేరారోపణపై అప్పీలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "दोषसिद्धि के खिलाफ अपील",
+    "description_hi": ""
   },
   {
     "id": 69,
@@ -718,8 +913,11 @@
     "description": "",
     "name_te": "నేరాల రాజీ (కాంపౌండింగ్)",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 1,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "अपराधों का शमन (राजीनामा)",
+    "description_hi": ""
   },
   {
     "id": 70,
@@ -728,10 +926,13 @@
     "description": "",
     "name_te": "సమానత్వ హక్కు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 2,
     "related_sections": [
       35
-    ]
+    ],
+    "name_hi": "समानता का अधिकार",
+    "description_hi": ""
   },
   {
     "id": 71,
@@ -740,8 +941,11 @@
     "description": "",
     "name_te": "వాక్ & భావ ప్రకటన స్వేచ్ఛ హక్కు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 2,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "वाक और अभिव्यक्ति की स्वतंत्रता",
+    "description_hi": ""
   },
   {
     "id": 72,
@@ -750,8 +954,11 @@
     "description": "",
     "name_te": "దోపిడీకి వ్యతిరేక హక్కు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 2,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "शोषण के विरुद्ध अधिकार",
+    "description_hi": ""
   },
   {
     "id": 73,
@@ -760,8 +967,11 @@
     "description": "",
     "name_te": "మత స్వేచ్ఛ హక్కు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 2,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "धर्म की स्वतंत्रता का अधिकार",
+    "description_hi": ""
   },
   {
     "id": 74,
@@ -770,8 +980,11 @@
     "description": "",
     "name_te": "రాజ్యాంగ పరిష్కారాల హక్కు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 2,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "संवैधानिक उपचारों का अधिकार",
+    "description_hi": ""
   },
   {
     "id": 75,
@@ -780,8 +993,11 @@
     "description": "",
     "name_te": "ప్రాథమిక విధులు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 2,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "मौलिक कर्तव्य",
+    "description_hi": ""
   },
   {
     "id": 76,
@@ -790,8 +1006,11 @@
     "description": "",
     "name_te": "దాంపత్య హక్కుల పునరుద్ధరణ",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 4,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "दांपत्य अधिकारों का प्रत्यास्थापन",
+    "description_hi": ""
   },
   {
     "id": 77,
@@ -800,8 +1019,11 @@
     "description": "",
     "name_te": "న్యాయపరమైన విడిపోవడం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 4,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "न्यायिक पृथक्करण",
+    "description_hi": ""
   },
   {
     "id": 78,
@@ -810,8 +1032,11 @@
     "description": "",
     "name_te": "లివ్-ఇన్ సంబంధాలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 4,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "लिव-इन संबंध",
+    "description_hi": ""
   },
   {
     "id": 79,
@@ -820,8 +1045,11 @@
     "description": "",
     "name_te": "సంరక్షకత్వం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 4,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "अभिभावकत्व / संरक्षण",
+    "description_hi": ""
   },
   {
     "id": 80,
@@ -830,10 +1058,13 @@
     "description": "",
     "name_te": "తనఖా",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 5,
     "related_sections": [
       36
-    ]
+    ],
+    "name_hi": "बंधक / गिरवी",
+    "description_hi": ""
   },
   {
     "id": 81,
@@ -842,8 +1073,11 @@
     "description": "",
     "name_te": "దానం దస్తావేజు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 5,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "दान पत्र (गिफ्ट डीड)",
+    "description_hi": ""
   },
   {
     "id": 82,
@@ -852,8 +1086,11 @@
     "description": "",
     "name_te": "వీలునామా & వారసత్వం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 5,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "वसीयत और उत्तराधिकार",
+    "description_hi": ""
   },
   {
     "id": 83,
@@ -862,8 +1099,11 @@
     "description": "",
     "name_te": "ఆస్తి విభజన",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 5,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "संपत्ति का बंटवारा",
+    "description_hi": ""
   },
   {
     "id": 84,
@@ -872,8 +1112,11 @@
     "description": "",
     "name_te": "అద్దెదారు హక్కులు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 5,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "किरायेदार के अधिकार",
+    "description_hi": ""
   },
   {
     "id": 85,
@@ -882,8 +1125,11 @@
     "description": "",
     "name_te": "ఈ-కామర్స్ వివాదాలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 6,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "ई-कॉमर्स विवाद",
+    "description_hi": ""
   },
   {
     "id": 86,
@@ -892,8 +1138,11 @@
     "description": "",
     "name_te": "అన్యాయ వాణిజ్య పద్ధతులు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 6,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "अनुचित व्यापार प्रथाएं",
+    "description_hi": ""
   },
   {
     "id": 87,
@@ -902,8 +1151,11 @@
     "description": "",
     "name_te": "వారంటీ & గ్యారంటీ క్లెయిమ్‌లు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 6,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "वारंटी और गारंटी दावे",
+    "description_hi": ""
   },
   {
     "id": 88,
@@ -912,8 +1164,11 @@
     "description": "",
     "name_te": "కొట్టి పారిపోయే కేసులు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 7,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "हिट एंड रन मामले",
+    "description_hi": ""
   },
   {
     "id": 89,
@@ -922,8 +1177,11 @@
     "description": "",
     "name_te": "బీమా క్లెయిమ్‌లు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 7,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "बीमा दावे",
+    "description_hi": ""
   },
   {
     "id": 90,
@@ -932,8 +1190,11 @@
     "description": "",
     "name_te": "వాహన స్వాధీనం & చలాన్‌లు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 7,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "वाहन जब्ती और चालान",
+    "description_hi": ""
   },
   {
     "id": 91,
@@ -942,8 +1203,11 @@
     "description": "",
     "name_te": "వెంబడించడం (స్టాకింగ్)",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 8,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "पीछा करना (स्टॉकिंग)",
+    "description_hi": ""
   },
   {
     "id": 92,
@@ -952,8 +1216,11 @@
     "description": "",
     "name_te": "ఆస్తి & వారసత్వ హక్కులు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 8,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "संपत्ति और उत्तराधिकार अधिकार",
+    "description_hi": ""
   },
   {
     "id": 93,
@@ -962,8 +1229,11 @@
     "description": "",
     "name_te": "బాల్య వివాహాల నివారణ",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 9,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "बाल विवाह रोकथाम",
+    "description_hi": ""
   },
   {
     "id": 94,
@@ -972,8 +1242,11 @@
     "description": "",
     "name_te": "పిల్లల అక్రమ రవాణా",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 9,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "बाल तस्करी",
+    "description_hi": ""
   },
   {
     "id": 95,
@@ -982,8 +1255,11 @@
     "description": "",
     "name_te": "ప్రావిడెంట్ ఫండ్",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 10,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "भविष्य निधि (PF)",
+    "description_hi": ""
   },
   {
     "id": 96,
@@ -992,8 +1268,11 @@
     "description": "",
     "name_te": "గ్రాట్యుటీ",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 10,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "ग्रेच्युटी",
+    "description_hi": ""
   },
   {
     "id": 97,
@@ -1002,8 +1281,11 @@
     "description": "",
     "name_te": "కనీస వేతనాలు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 10,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "न्यूनतम मजदूरी",
+    "description_hi": ""
   },
   {
     "id": 98,
@@ -1012,8 +1294,11 @@
     "description": "",
     "name_te": "హ్యాకింగ్ & అనధికార ప్రవేశం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 11,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "हैकिंग और अनधिकृत पहुंच",
+    "description_hi": ""
   },
   {
     "id": 99,
@@ -1022,8 +1307,11 @@
     "description": "",
     "name_te": "ఆన్‌లైన్ పరువు నష్టం",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 11,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "ऑनलाइन मानहानि",
+    "description_hi": ""
   },
   {
     "id": 100,
@@ -1032,7 +1320,10 @@
     "description": "",
     "name_te": "సైబర్ వెంబడింపు",
     "description_te": "",
+    "updated_at": "2026-09-28T07:36:16.565575Z",
     "category": 11,
-    "related_sections": []
+    "related_sections": [],
+    "name_hi": "साइबर पीछा करना (साइबर स्टॉकिंग)",
+    "description_hi": ""
   }
 ]

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'screens/splash_screen.dart';
 import 'services/auth_service.dart';
@@ -34,8 +35,18 @@ class LegalGuideApp extends StatelessWidget {
       valueListenable: LocaleService.language,
       builder: (context, lang, _) {
         return MaterialApp(
-          key: ValueKey('legalguide_root_$lang'),
           title: 'LegalGuide',
+          locale: Locale(lang),
+          supportedLocales: const [
+            Locale('en'),
+            Locale('te'),
+            Locale('hi'),
+          ],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             brightness: Brightness.light,

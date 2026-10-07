@@ -19,14 +19,14 @@ class SectionLookup {
   }
 
   String lawShortNameFor(LegalSection section) =>
-      lawFor(section)?.shortName ?? '';
+      lawFor(section)?.displayShortName ?? '';
 
   String categoryNameFor(LegalSection section) =>
-      categoryFor(section)?.name ?? '';
+      categoryFor(section)?.displayName ?? '';
 
   String breadcrumbFor(LegalSection section) {
     final category = categoryNameFor(section);
-    final law = lawFor(section)?.name ?? '';
+    final law = lawFor(section)?.displayName ?? '';
     if (category.isEmpty && law.isEmpty) return '';
     if (category.isEmpty) return law;
     if (law.isEmpty) return category;

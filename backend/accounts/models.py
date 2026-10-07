@@ -45,3 +45,47 @@ class UserBookmark(models.Model):
     def __str__(self):
         return f"{self.user.username} -> Section {self.section_id}"
 
+
+class UserProfile(models.Model):
+    ROLE_CHOICES = [
+        ("USER", "Regular User"),
+        ("ADMIN", "Administrator"),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="profile",
+    )
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default="USER")
+    last_active_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    last_login_at = models.DateTimeField(null=True, blank=True)
+    device_info = models.CharField(max_length=255, blank=True)
+    welcome_email_sent = models.BooleanField(default=False)
+    welcome_email_sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def is_admin(self):
+        return bool(self.user.is_staff or self.user.is_superuser or self.role == "ADMIN")
+
+    def __str__(self):
+        return f"{self.user.username} ({self.role})"
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    target_role = "ADMIN" if (instance.is_staff or instance.is_superuser) else "USER"
+    profile, prof_created = UserProfile.objects.get_or_create(
+        user=instance,
+        defaults={"role": target_role},
+    )
+    if not prof_created and (instance.is_staff or instance.is_superuser) and profile.role != "ADMIN":
+        profile.role = "ADMIN"
+        profile.save(update_fields=["role"])
+
