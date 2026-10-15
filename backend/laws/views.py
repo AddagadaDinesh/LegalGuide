@@ -358,9 +358,13 @@ class AdminCheckUpdatesView(APIView):
     def post(self, request):
         admin_user = request.user.username if request.user else "admin"
         created = check_official_sources(requested_by=admin_user)
+        sync_info = DatabaseSyncInfo.get_info()
         serializer = LegalUpdateRecordSerializer(created, many=True)
         return Response({
-            "message": f"Source check complete. Found {len(created)} update(s).",
+            "message": f"Source check complete. {sync_info.last_source_check_status}.",
+            "status": sync_info.last_source_check_status,
+            "summary": sync_info.last_source_check_summary,
+            "last_source_check": sync_info.last_source_check.isoformat() if sync_info.last_source_check else None,
             "new_updates_count": len(created),
             "updates": serializer.data,
         }, status=status.HTTP_200_OK)

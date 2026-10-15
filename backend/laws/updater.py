@@ -4,6 +4,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .models import (
+    Category,
     Law,
     LegalSection,
     LegalSectionVersion,
@@ -62,16 +63,18 @@ def validate_legal_update_record(record: LegalUpdateRecord, raise_exception: boo
     }
 
 
-def check_official_sources():
+def check_official_sources(requested_by=None):
     """
     Connects to authoritative government sources (India Code / Official Gazette / Ministry of Law)
-    to check for statutory changes, amendments, changed penalties, or new sections.
-    Measures latency, handles connectivity and limitations honestly, logs the check,
-    and stages candidate changes as pending updates for human admin review.
+    to check reachability and monitors government endpoints.
+    Measures latency, handles connectivity and limitations honestly, and logs the check.
 
-    CRITICAL RULE:
-    The AI and crawler never autonomously alter or publish the law.
-    All detected updates are created with status='pending_review' and require human admin verification.
+    CRITICAL RULES:
+    1. Distinguishes reachability from verified legal change. A reachable website is NOT proof of an amendment.
+    2. Uses standard TLS certificate verification (no disabled hostname verification or ssl.CERT_NONE).
+    3. Never inserts fabricated or merely illustrative candidate records into the real update queue.
+    4. Only genuine legal updates from official sources may be staged, defaulting to unverified or needs-recheck.
+    5. The automatic crawler never publishes changes autonomously.
     """
     import urllib.request
     import ssl
@@ -87,9 +90,8 @@ def check_official_sources():
         ("Ministry of Law and Justice", "https://lawmin.gov.in/"),
     ]
 
+    # Normal TLS verification - standard SSL context
     ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) LegalGuide-Compliance/1.0'
@@ -112,149 +114,19 @@ def check_official_sources():
             results.append(f"{name} ({url}) limited [{type(e).__name__}: {str(e)[:50]}]")
 
     summary_str = "; ".join(results)
-    sync_info.last_source_check_status = f"Verified ({success_count}/{len(sources_to_check)} sources)"
+    if success_count == len(sources_to_check):
+        sync_info.last_source_check_status = f"Reachable ({success_count}/{len(sources_to_check)} sources online)"
+    elif success_count > 0:
+        sync_info.last_source_check_status = f"Partial ({success_count}/{len(sources_to_check)} sources online)"
+    else:
+        sync_info.last_source_check_status = "Unreachable (0 sources reached)"
+
     sync_info.last_source_check_summary = summary_str
     sync_info.save()
 
+    # Zero fabricated records. Official updates require authenticated administrative review
+    # and genuine Gazette notifications.
     created_records = []
-
-    # Detection Pipeline: Compare active sections against newly published Gazette notifications
-    # Candidate 1: BNS Section 303(2) community service guidelines (Amendment)
-    bns_sec = LegalSection.objects.filter(section_number__icontains="303", law__short_name__icontains="BNS").first()
-    if bns_sec and not LegalUpdateRecord.objects.filter(section=bns_sec, status__in=["pending_review", "pending", "detected", "needs_verification"]).exists():
-        proposed_text = (
-            "Section 303. Theft.—\n"
-            "(1) Whoever, intending to take dishonestly any movable property out of the possession "
-            "of any person without that person's consent, moves that property in order to such taking, "
-            "is said to commit theft.\n"
-            "(2) Whoever commits theft shall be punished with imprisonment of either description for a term "
-            "which may extend to three years, or with fine, or with both, and in case of second or subsequent "
-            "conviction, with rigorous imprisonment for a term which shall not be less than one year but which "
-            "may extend to five years and with fine: Provided that where the value of stolen property is less than "
-            "five thousand rupees, and a person is convicted for the first time, with community service."
-        )
-        diff = compute_text_diff(bns_sec.legal_text, proposed_text)
-        record = LegalUpdateRecord.objects.create(
-            section=bns_sec,
-            law=bns_sec.law,
-            act_name=bns_sec.law.name if bns_sec.law else "Bharatiya Nyaya Sanhita, 2023",
-            section_number="303",
-            update_type="amendment",
-            status="pending_review",
-            verification_status="verified",
-            proposed_title=bns_sec.title,
-            existing_legal_text=bns_sec.legal_text,
-            proposed_legal_text=proposed_text,
-            proposed_simple_explanation=bns_sec.simple_explanation,
-            proposed_punishment="Up to 3 years jail, or fine, or both. First-time petty theft (< ₹5,000) punishable by mandatory community service.",
-            proposed_effective_date=date(2024, 7, 1),
-            proposed_amendment_info="Clarification on Community Service guidelines for first-time petty theft under BNS 303(2).",
-            commencement_status="In Force",
-            detected_diff=diff or "Statutory update detected from Gazette Notification.",
-            source_url="https://www.indiacode.gov.in/handle/123456789/20062",
-            source_name="India Code — Bharatiya Nyaya Sanhita, 2023 (Act No. 45 of 2023)",
-            source_publication_date=date(2024, 6, 28),
-        )
-        created_records.append(record)
-
-    # Candidate 2: Motor Vehicles Act Section 185 breath-analyser verification protocol (Changed Penalty)
-    mv_sec = LegalSection.objects.filter(section_number__icontains="185", law_id=6).first()
-    if not mv_sec:
-        mv_sec = LegalSection.objects.filter(section_number__icontains="185").first()
-    if mv_sec and not LegalUpdateRecord.objects.filter(section=mv_sec, status__in=["pending_review", "pending", "detected", "needs_verification"]).exists():
-        proposed_text = (
-            "Section 185. Driving by a drunken person or by a person under the influence of drugs.—\n"
-            "Whoever, while driving, or attempting to drive, a motor vehicle has, in his blood, alcohol "
-            "exceeding 30 mg. per 100 ml. of blood detected by a breath analyser test, or is under the "
-            "influence of a drug to that extent as to be incapable of exercising proper control over the vehicle, "
-            "shall be punishable for the first offence with imprisonment for a term which may extend to six months, "
-            "or with fine of ten thousand rupees, or with both; and for a second or subsequent offence with imprisonment "
-            "for a term which may extend to two years, or with fine of fifteen thousand rupees, or with both."
-        )
-        diff = compute_text_diff(mv_sec.legal_text, proposed_text)
-        record = LegalUpdateRecord.objects.create(
-            section=mv_sec,
-            law=mv_sec.law,
-            act_name=mv_sec.law.name if mv_sec.law else "Motor Vehicles Act, 1988",
-            section_number="185",
-            update_type="changed_penalty",
-            status="pending_review",
-            verification_status="verified",
-            proposed_title=mv_sec.title,
-            existing_legal_text=mv_sec.legal_text,
-            proposed_legal_text=proposed_text,
-            proposed_simple_explanation="Driving with blood alcohol >30 mg per 100 ml is a non-compoundable criminal offence. Police can test using breath analyser and produce you before a magistrate. Fine is ₹10,000 for 1st offence and ₹15,000 / 2 years jail for 2nd offence.",
-            proposed_punishment="1st offence: up to 6 months jail or ₹10,000 fine or both. 2nd offence: up to 2 years jail or ₹15,000 fine or both.",
-            proposed_effective_date=date(2024, 1, 1),
-            proposed_amendment_info="Motor Vehicles (Amendment) Act statutory fine revision & electronic breath-analyser verification protocol.",
-            commencement_status="In Force",
-            detected_diff=diff or "Statutory penalty revision detected.",
-            source_url="https://www.indiacode.gov.in/handle/123456789/1798",
-            source_name="India Code — Motor Vehicles Act, 1988 (Act No. 59 of 1988)",
-            source_publication_date=date(2023, 12, 15),
-        )
-        created_records.append(record)
-
-    # Candidate 3: BNSS Section 107 - Attachment and forfeiture of property (New Section / Provision)
-    bnss_law = Law.objects.filter(short_name__icontains="BNSS").first()
-    if bnss_law and not LegalUpdateRecord.objects.filter(section_number="107", law=bnss_law, status__in=["pending_review", "pending", "detected", "needs_verification"]).exists():
-        existing_107 = LegalSection.objects.filter(section_number="107", law=bnss_law).first()
-        if not existing_107:
-            proposed_text = (
-                "Section 107. Attachment, forfeiture or restoration of property.—\n"
-                "(1) Where a police officer making an investigation has reason to believe that any property "
-                "is derived or obtained, directly or indirectly, as a result of a criminal activity or from the "
-                "commission of any offence, he may, with the prior approval of the Superintendent of Police, "
-                "make an application to the Court having jurisdiction for an order of attachment of such property."
-            )
-            record = LegalUpdateRecord.objects.create(
-                section=None,
-                law=bnss_law,
-                act_name=bnss_law.name,
-                section_number="107",
-                update_type="new_section",
-                status="pending_review",
-                verification_status="verified",
-                proposed_title="Attachment, forfeiture or restoration of property",
-                existing_legal_text="",
-                proposed_legal_text=proposed_text,
-                proposed_simple_explanation="Police investigating an offence may apply to court to attach property derived from criminal activity with SP approval.",
-                proposed_punishment="Judicial attachment and forfeiture of proceeds of crime.",
-                proposed_effective_date=date(2024, 7, 1),
-                proposed_amendment_info="New provision introduced under BNSS 2023 for attachment of proceeds of crime.",
-                commencement_status="In Force",
-                detected_diff="+ New section provision detected under BNSS Chapter VII",
-                source_url="https://www.indiacode.gov.in/handle/123456789/20063",
-                source_name="Official Gazette — Bharatiya Nagarik Suraksha Sanhita, 2023",
-                source_publication_date=date(2024, 6, 25),
-            )
-            created_records.append(record)
-
-    # Candidate 4: Unverified Notification / Errata (Demonstrates verification status handling)
-    if not LegalUpdateRecord.objects.filter(section_number="Draft-Rule-4", status__in=["pending_review", "pending", "detected", "needs_verification"]).exists():
-        record = LegalUpdateRecord.objects.create(
-            section=None,
-            law=bnss_law if bnss_law else None,
-            act_name="State Police Procedure Guidelines (Unverified Circular)",
-            section_number="Draft-Rule-4",
-            update_type="rule_change",
-            status="pending_review",
-            verification_status="unverified",
-            proposed_title="Draft Electronic Summons Delivery Rules",
-            existing_legal_text="",
-            proposed_legal_text="Draft Rule 4: Summons may be served through messaging platforms upon departmental certification.",
-            proposed_simple_explanation="Proposed rule for digital delivery of court summons via approved electronic messaging.",
-            proposed_punishment="Procedural rule only.",
-            proposed_effective_date=date(2026, 12, 1),
-            proposed_amendment_info="Pending official gazette publication; circular forwarded from state portal without digital signature.",
-            commencement_status="Awaiting Notification",
-            detected_diff="+ Draft notice from state law portal requiring ministry confirmation",
-            source_url="https://lawmin.gov.in/draft-rules-summons-notice-2026",
-            source_name="Ministry of Law and Justice (Draft Notice — Unverified)",
-            source_publication_date=date(2026, 10, 1),
-        )
-        created_records.append(record)
-
     return created_records
 
 
@@ -363,30 +235,113 @@ def publish_update(record_id: int, admin_user: str = "admin") -> tuple:
     else:
         # New section creation
         target_law = record.law
-        if not target_law and record.act_name:
-            target_law = Law.objects.filter(name__icontains=record.act_name).first()
-        if not target_law:
-            target_law = Law.objects.first()
+        clean_act_name = (record.act_name or "").strip()
+        if not target_law and clean_act_name:
+            target_law = (
+                Law.objects.filter(name__iexact=clean_act_name).first()
+                or Law.objects.filter(short_name__iexact=clean_act_name).first()
+                or Law.objects.filter(name__icontains=clean_act_name).first()
+            )
 
-        section = LegalSection.objects.create(
-            law=target_law,
-            section_number=record.section_number,
-            title=record.proposed_title,
-            legal_text=record.proposed_legal_text,
-            simple_explanation=record.proposed_simple_explanation or record.proposed_title,
-            purpose=record.proposed_simple_explanation or record.proposed_title,
-            punishment=record.proposed_punishment,
-            effective_date=record.proposed_effective_date,
-            amendment_info=record.proposed_amendment_info,
-            source=record.source_url,
-            source_name=record.source_name,
-            last_verified=date.today(),
-            version=1,
-            status="current",
+        # Support genuinely new Act when explicitly indicated or update_type == 'new_act'
+        if not target_law and record.update_type == "new_act":
+            if not clean_act_name:
+                raise ValidationError("Cannot publish new Act: Act name is required.")
+            eff_year = record.proposed_effective_date.year if record.proposed_effective_date else timezone.now().year
+            category = Category.objects.filter(name__icontains="Criminal").first() or Category.objects.first()
+            if not category:
+                category = Category.objects.create(name="General", description="General statutory laws")
+
+            # Check for duplicate Act before creating
+            target_law = Law.objects.filter(name__iexact=clean_act_name).first()
+            if not target_law:
+                target_law = Law.objects.create(
+                    name=clean_act_name,
+                    short_name=clean_act_name[:50],
+                    year=eff_year,
+                    category=category,
+                    act_number=f"Act of {eff_year}",
+                    source_url=record.source_url or "https://www.indiacode.gov.in/",
+                    source_name=record.source_name or "Official Government Gazette",
+                    status="current",
+                )
+
+        if not target_law:
+            raise ValidationError(
+                f"Cannot publish section: Target Act '{record.act_name or 'Unspecified'}' is not recognized. "
+                f"An update must be associated with a verified Act and cannot use a fallback Act."
+            )
+
+        # Prevent duplicate sections by checking existing section by provision_key or (law, section_number)
+        import re
+        clean_num = re.sub(r'[^a-zA-Z0-9]', '_', str(record.section_number).lower()).strip('_')
+        clean_num = re.sub(r'_+', '_', clean_num)
+        prov_key = f"{target_law.id}_{clean_num}"
+
+        existing_sec = (
+            LegalSection.objects.filter(provision_key=prov_key).first()
+            or LegalSection.objects.filter(law=target_law, section_number=record.section_number).first()
         )
+
+        if existing_sec:
+            # Update existing section transactionally and archive previous version in LegalSectionVersion
+            old_version = existing_sec.version
+            LegalSectionVersion.objects.create(
+                section=existing_sec,
+                version=old_version,
+                legal_text=existing_sec.legal_text,
+                simple_explanation=existing_sec.simple_explanation,
+                purpose=existing_sec.purpose,
+                punishment=existing_sec.punishment,
+                effective_date=existing_sec.effective_date,
+                amendment_info=existing_sec.amendment_info,
+                source_name=existing_sec.source_name,
+                source_url=existing_sec.source,
+                status="historical",
+                verified_by=admin_user,
+                archived_at=timezone.now(),
+                change_summary=f"Superseded by published update {record.id}",
+            )
+            existing_sec.title = record.proposed_title
+            existing_sec.legal_text = record.proposed_legal_text
+            if record.proposed_simple_explanation:
+                existing_sec.simple_explanation = record.proposed_simple_explanation
+            if record.proposed_punishment:
+                existing_sec.punishment = record.proposed_punishment
+            if record.proposed_effective_date:
+                existing_sec.effective_date = record.proposed_effective_date
+            if record.proposed_amendment_info:
+                existing_sec.amendment_info = record.proposed_amendment_info
+            existing_sec.source = record.source_url
+            existing_sec.source_name = record.source_name
+            existing_sec.last_verified = date.today()
+            existing_sec.version += 1
+            existing_sec.status = "current"
+            existing_sec.updated_at = timezone.now()
+            existing_sec.save()
+            section = existing_sec
+        else:
+            section = LegalSection.objects.create(
+                law=target_law,
+                section_number=record.section_number,
+                provision_key=prov_key,
+                title=record.proposed_title,
+                legal_text=record.proposed_legal_text,
+                simple_explanation=record.proposed_simple_explanation or record.proposed_title,
+                purpose=record.proposed_simple_explanation or record.proposed_title,
+                punishment=record.proposed_punishment,
+                effective_date=record.proposed_effective_date,
+                amendment_info=record.proposed_amendment_info,
+                source=record.source_url,
+                source_name=record.source_name,
+                last_verified=date.today(),
+                version=1,
+                status="current",
+            )
+            old_version = 0
+
         record.section = section
         record.law = target_law
-        old_version = 0
 
     # 2. Update record status to published with audit trail
     record.status = "published"

@@ -15,6 +15,7 @@ from laws.models import (
 )
 from laws.updater import (
     approve_update,
+    check_official_sources,
     publish_update,
     reject_update,
     validate_legal_update_record,
@@ -525,4 +526,138 @@ class LegalUpdateWorkflowTests(TestCase):
         res_sec_law = self.client.get(f"/api/sections/?law_id={self.law.id}")
         self.assertEqual(res_sec_law.status_code, status.HTTP_200_OK)
         self.assertFalse(any(s["section_number"] == "106" for s in res_sec_law.data))
+
+    def test_11_check_official_sources_endpoint_authorized_and_unauthorized(self):
+        """
+        Verify check-sources endpoint:
+        - Admin user invokes endpoint -> returns HTTP 200 without TypeError.
+        - Anonymous request -> HTTP 401.
+        - Citizen request -> HTTP 403.
+        """
+        # 1. Anonymous request denied
+        res_anon = self.client.post("/api/admin/legal-updates/check-sources/")
+        self.assertIn(res_anon.status_code, [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN])
+
+        # 2. Citizen user denied
+        self.client.force_authenticate(user=self.citizen)
+        res_cit = self.client.post("/api/admin/legal-updates/check-sources/")
+        self.assertEqual(res_cit.status_code, status.HTTP_403_FORBIDDEN)
+
+        # 3. Admin user allowed and returns controlled structured response
+        self.client.force_authenticate(user=self.admin)
+        res_admin = self.client.post("/api/admin/legal-updates/check-sources/")
+        self.assertEqual(res_admin.status_code, status.HTTP_200_OK)
+        data = res_admin.data
+        self.assertIn("message", data)
+        self.assertIn("status", data)
+        self.assertIn("summary", data)
+        self.assertIn("new_updates_count", data)
+        self.assertEqual(data["new_updates_count"], 0)
+
+    def test_12_source_reachability_does_not_create_fabricated_verified_updates(self):
+        """
+        Reaching an official source does NOT create fabricated updates or mark them verified.
+        No hardcoded provisions (BNS 303, MV 185, BNSS 107, Draft-Rule-4) are created.
+        """
+        initial_records_count = LegalUpdateRecord.objects.count()
+
+        created = check_official_sources(requested_by="dinesh_admin")
+        self.assertEqual(len(created), 0)
+        self.assertEqual(LegalUpdateRecord.objects.count(), initial_records_count)
+
+        # Sync info records reachability honestly without falsely claiming legal changes are verified
+        sync_info = DatabaseSyncInfo.get_info()
+        self.assertIsNotNone(sync_info.last_source_check)
+        self.assertNotIn("Verified", sync_info.last_source_check_status)
+        self.assertTrue(
+            any(w in sync_info.last_source_check_status for w in ["Reachable", "Partial", "Unreachable"])
+        )
+
+    def test_13_publication_refuses_unsafe_fallback_to_arbitrary_act(self):
+        """
+        Attempting to publish a new section with an unknown Act must fail with a clear
+        error and NEVER fall back to Law.objects.first().
+        """
+        # Create a second dummy law to verify it doesn't get arbitrarily picked
+        other_law = Law.objects.create(
+            name="Motor Vehicles Act, 1988",
+            short_name="MVA 1988",
+            category=self.category,
+            year=1988,
+            act_number="Act No. 59 of 1988",
+            source_url="https://www.indiacode.gov.in/",
+            status="current",
+        )
+
+        record = LegalUpdateRecord.objects.create(
+            law=None,
+            act_name="Completely Unknown Fictional Act, 2099",
+            section_number="42",
+            update_type="new_section",
+            status="approved",
+            verification_status="verified",
+            proposed_title="Unknown Section Title",
+            proposed_legal_text="Section text for unknown act",
+            source_url="https://www.indiacode.gov.in/",
+        )
+
+        self.client.force_authenticate(user=self.admin)
+        res_pub = self.client.post("/api/admin/legal-updates/publish/", {"update_id": record.id})
+        self.assertEqual(res_pub.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("not recognized", res_pub.data["error"].lower())
+
+        # Verify no section was created under self.law or other_law
+        self.assertFalse(LegalSection.objects.filter(section_number="42").exists())
+
+    def test_14_publishing_existing_section_updates_in_place_and_preserves_version(self):
+        """
+        When publishing an update for an existing section, the section is updated in place,
+        its version is incremented, and its previous version is archived in LegalSectionVersion.
+        No duplicate LegalSection record is created.
+        """
+        existing_sec = LegalSection.objects.create(
+            law=self.law,
+            section_number="299",
+            provision_key=f"{self.law.id}_299",
+            title="Culpable homicide",
+            legal_text="Original culpable homicide text",
+            simple_explanation="Original simple explanation",
+            version=1,
+            status="current",
+        )
+
+        initial_total_sections = LegalSection.objects.count()
+
+        update_record = LegalUpdateRecord.objects.create(
+            section=existing_sec,
+            law=self.law,
+            act_name=self.law.name,
+            section_number="299",
+            update_type="amendment",
+            status="approved",
+            verification_status="verified",
+            proposed_title="Culpable homicide (Amended)",
+            proposed_legal_text="Amended culpable homicide text with clarified mental element",
+            proposed_simple_explanation="Clarified simple explanation",
+            source_url="https://www.indiacode.gov.in/",
+        )
+
+        self.client.force_authenticate(user=self.admin)
+        res_pub = self.client.post("/api/admin/legal-updates/publish/", {"update_id": update_record.id})
+        self.assertEqual(res_pub.status_code, status.HTTP_200_OK)
+
+        # Section count MUST NOT increase (no duplicate section created)
+        self.assertEqual(LegalSection.objects.count(), initial_total_sections)
+
+        # Existing section was updated in place
+        existing_sec.refresh_from_db()
+        self.assertEqual(existing_sec.version, 2)
+        self.assertEqual(existing_sec.title, "Culpable homicide (Amended)")
+        self.assertEqual(existing_sec.legal_text, "Amended culpable homicide text with clarified mental element")
+
+        # Previous version is in LegalSectionVersion
+        historical = LegalSectionVersion.objects.filter(section=existing_sec, version=1).first()
+        self.assertIsNotNone(historical)
+        self.assertEqual(historical.legal_text, "Original culpable homicide text")
+
 

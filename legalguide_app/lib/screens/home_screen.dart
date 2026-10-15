@@ -55,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
   SectionLookup? _lookup;
   bool _loading = true;
   bool _neverSynced = false;
+  bool _lastSyncSucceeded = true;
   DateTime? _lastSyncTime;
 
   @override
@@ -66,7 +67,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadData() async {
-    final synced = await LegalDataRepository.syncAll();
+    final isOnline = ConnectivityStatusService.isInternetConnected;
+    bool synced = false;
+    if (isOnline) {
+      synced = await LegalDataRepository.syncAll();
+      await LegalUpdateService.loadUpdates(forceSync: true);
+    } else {
+      await LegalUpdateService.loadUpdates(forceSync: false);
+    }
+
     final results = await Future.wait([
       LegalDataRepository.hasSyncedBefore(),
       LegalDataRepository.loadCategories(),
@@ -111,6 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _neverSynced = !synced && !hasSyncedBefore;
+      _lastSyncSucceeded = synced;
       _categories = categories;
       _frequentSections = topFrequent;
       _commonlyReferenced = topCommon;
@@ -151,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _formatDate(DateTime? dt) {
-    if (dt == null) return '01/07/2024';
+    if (dt == null) return tr('Not available');
     final day = dt.day.toString().padLeft(2, '0');
     final month = dt.month.toString().padLeft(2, '0');
     final year = dt.year.toString();
@@ -171,6 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
             final syncDateStr = _formatDate(_lastSyncTime);
             final bool isOffline = networkStatus == NetworkStatus.offline;
             final bool hasUpdates = unreadCount > 0;
+            final bool syncFailed = !_lastSyncSucceeded;
 
             final Color bgColor;
             final Color borderColor;
@@ -178,36 +189,137 @@ class _HomeScreenState extends State<HomeScreen> {
             final IconData iconData;
             final String titleText;
             final String subtitleText;
+            final Widget trailingWidget;
 
-            if (isOffline) {
+            if (isOffline || (syncFailed && !hasUpdates)) {
+              // State D: Offline or failed synchronization
               bgColor = AppColors.warning.withValues(alpha: 0.10);
               borderColor = AppColors.warning.withValues(alpha: 0.4);
               accentColor = AppColors.warning;
               iconData = Icons.cloud_off_rounded;
-              titleText = tr('Offline · Using LegalGuide Knowledge');
+              titleText = tr('Offline — Showing Saved Legal Information');
               subtitleText = '${tr("Last synchronized")}: $syncDateStr';
+              trailingWidget = Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  tr('View Updates'),
+                  style: GoogleFonts.inter(
+                    color: accentColor,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              );
+            } else if (syncFailed && hasUpdates) {
+              // State C: A newer published version is known but synchronization has not succeeded
+              bgColor = const Color(0xFFF97316).withValues(alpha: 0.10);
+              borderColor = const Color(0xFFF97316).withValues(alpha: 0.4);
+              accentColor = const Color(0xFFEA580C);
+              iconData = Icons.sync_problem_rounded;
+              titleText = tr('Update Available — Sync Required');
+              subtitleText = '${tr("Last synchronized")}: $syncDateStr';
+              trailingWidget = Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  tr('Sync Now'),
+                  style: GoogleFonts.inter(
+                    color: accentColor,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              );
             } else if (hasUpdates) {
+              // State B: A published update is available
               bgColor = AppColors.accent.withValues(alpha: 0.08);
               borderColor = AppColors.accent.withValues(alpha: 0.35);
               accentColor = AppColors.accent;
               iconData = Icons.campaign_rounded;
-              titleText = tr('Legal Information Updated');
+              titleText = tr('New Legal Information Available');
               subtitleText = '$unreadCount ${tr("new verified updates available")}';
+              trailingWidget = Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    margin: const EdgeInsets.only(right: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      unreadCount > 1 ? '$unreadCount NEW' : 'NEW',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: accentColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      tr('View Updates'),
+                      style: GoogleFonts.inter(
+                        color: accentColor,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              );
             } else {
+              // State A: No unseen published updates
               bgColor = AppColors.success.withValues(alpha: 0.07);
               borderColor = AppColors.success.withValues(alpha: 0.3);
               accentColor = AppColors.success;
               iconData = Icons.check_circle_rounded;
               titleText = tr('Legal Information Up to Date');
               subtitleText = '${tr("Last synchronized")}: $syncDateStr';
+              trailingWidget = Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: accentColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  tr('View Updates'),
+                  style: GoogleFonts.inter(
+                    color: accentColor,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              );
             }
 
             return InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LegalUpdatesScreen()),
-                ).then((_) => setState(() {}));
+              onTap: () async {
+                if (syncFailed && hasUpdates && !isOffline) {
+                  await _loadData();
+                } else {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LegalUpdatesScreen()),
+                  );
+                  if (mounted) {
+                    await LegalUpdateService.loadUpdates();
+                    await _loadData();
+                  }
+                }
               },
               borderRadius: BorderRadius.circular(AppRadius.card),
               child: Container(
@@ -244,38 +356,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-                    if (hasUpdates && !isOffline)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          unreadCount.toString(),
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      )
-                    else
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: accentColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          tr('View Updates'),
-                          style: GoogleFonts.inter(
-                            color: accentColor,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+                    trailingWidget,
                   ],
                 ),
               ),

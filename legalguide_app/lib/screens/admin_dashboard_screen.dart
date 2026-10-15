@@ -36,7 +36,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   String _selectedRoleFilter = 'ALL'; // 'ALL', 'USER', 'ADMIN', 'ACTIVE'
   final TextEditingController _searchController = TextEditingController();
   final Set<String> _deletingUserIds = <String>{};
-  final Set<dynamic> _promotingUserIds = <dynamic>{};
 
   List<Law>? _acts;
   String _actSearchQuery = '';
@@ -212,200 +211,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     }
   }
 
-  Future<void> _confirmAndPromoteUser(AdminUserData u) async {
-    if (u.role.toUpperCase() == 'ADMIN' || u.isAdmin) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(tr('This user is already an administrator.')),
-          backgroundColor: const Color(0xFF6366F1),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
-    if (_promotingUserIds.contains(u.id)) return;
-
-    final shouldPromote = await showDialog<bool>(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E293B),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFF334155)),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF6366F1).withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.admin_panel_settings_rounded, color: Color(0xFF818CF8), size: 22),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                tr('Promote to Admin'),
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              tr('Are you sure you want to promote this user to Administrator? This will grant full access to the Admin Dashboard, analytics, legal update publication, and user directory.'),
-              style: GoogleFonts.inter(
-                color: const Color(0xFFCBD5E1),
-                fontSize: 13.5,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFF334155)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.person_outline_rounded, color: Color(0xFF94A3B8), size: 16),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${tr("Username")}: ',
-                        style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 12),
-                      ),
-                      Expanded(
-                        child: Text(
-                          u.username,
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(Icons.email_outlined, color: Color(0xFF94A3B8), size: 16),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${tr("Email")}: ',
-                        style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 12),
-                      ),
-                      Expanded(
-                        child: Text(
-                          u.email.isNotEmpty ? u.email : tr('Not provided'),
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFFE2E8F0),
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              tr('The user\'s current session will be revoked, requiring them to sign in again to receive administrator privileges.'),
-              style: GoogleFonts.inter(
-                color: const Color(0xFF94A3B8),
-                fontSize: 11.5,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx, false),
-            child: Text(
-              tr('Cancel'),
-              style: GoogleFonts.inter(
-                color: const Color(0xFF94A3B8),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(dialogCtx, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6366F1),
-              foregroundColor: Colors.white,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            ),
-            child: Text(
-              tr('Confirm Promotion'),
-              style: GoogleFonts.inter(fontWeight: FontWeight.w700),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldPromote != true || !mounted) return;
-
-    setState(() {
-      _promotingUserIds.add(u.id);
-    });
-
-    try {
-      final result = await AdminAnalyticsService.promoteUser(u.id, username: u.username);
-      if (!mounted) return;
-
-      if (result.success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.message ?? tr('User promoted to Administrator successfully.')),
-            backgroundColor: const Color(0xFF10B981),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-
-        // Reload data from central database to update all counts and user lists
-        await _loadData(showRefreshing: true);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(result.error ?? tr('Failed to promote user.')),
-            backgroundColor: const Color(0xFFEF4444),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _promotingUserIds.remove(u.id);
-        });
-      }
-    }
-  }
 
   @override
   void initState() {
@@ -3561,7 +3366,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     final currentAdmin = AuthService.currentUsername.value ?? 'Admin';
     final isCurrentAdmin = u.username.trim().toLowerCase() == currentAdmin.trim().toLowerCase();
     final isDeleting = _deletingUserIds.contains(u.id);
-    final isPromoting = _promotingUserIds.contains(u.id);
 
     final isAdmin = u.role.toUpperCase() == 'ADMIN' || u.isAdmin;
     final isActiveNow = u.status == 'Active Now';
@@ -3719,49 +3523,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (!isAdmin) ...[
-                      if (isPromoting)
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Color(0xFF818CF8),
-                            ),
-                          ),
-                        )
-                      else
-                        InkWell(
-                          onTap: () => _confirmAndPromoteUser(u),
-                          borderRadius: BorderRadius.circular(6),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.5),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF6366F1).withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.45)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.admin_panel_settings_outlined, color: Color(0xFFA5B4FC), size: 14),
-                                const SizedBox(width: 4),
-                                Text(
-                                  tr('Promote to Admin'),
-                                  style: GoogleFonts.inter(
-                                    color: const Color(0xFFA5B4FC),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      const SizedBox(width: 8),
-                    ],
                     if (isDeleting)
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 8),

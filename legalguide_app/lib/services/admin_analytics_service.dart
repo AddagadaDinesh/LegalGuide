@@ -252,20 +252,6 @@ class AdminDeleteUserResult {
   });
 }
 
-class AdminPromoteUserResult {
-  final bool success;
-  final String? error;
-  final String? message;
-  final Map<String, dynamic>? user;
-
-  AdminPromoteUserResult({
-    required this.success,
-    this.error,
-    this.message,
-    this.user,
-  });
-}
-
 class AdminAnalyticsResult {
   final bool success;
   final bool isForbidden;
@@ -631,85 +617,6 @@ class AdminAnalyticsService {
     return AdminDeleteUserResult(
       success: false,
       error: lastError ?? 'Unable to connect to users server.',
-    );
-  }
-
-  /// Promotes an eligible registered citizen/user to ADMINISTRATOR role.
-  /// Requires explicit confirmation by authenticated Administrator.
-  static Future<AdminPromoteUserResult> promoteUser(
-    dynamic userId, {
-    String? username,
-    String? reason,
-  }) async {
-    final token = AuthService.token;
-    if (token == null && !AuthService.isAdmin) {
-      return AdminPromoteUserResult(
-        success: false,
-        error: 'Administrator authentication required.',
-      );
-    }
-
-    final endpoints = [
-      '${ApiService.baseUrl}/admin/users/promote/',
-      '${ApiService.baseUrl}/auth/admin/users/promote/',
-      '${ApiService.baseUrl}/users/promote/',
-    ];
-
-    String? lastError;
-    for (final endpointUrl in endpoints) {
-      try {
-        final uri = Uri.parse(endpointUrl);
-        final payload = <String, dynamic>{
-          'user_id': userId,
-          if (username != null && username.isNotEmpty) 'username': username,
-          if (reason != null && reason.isNotEmpty) 'reason': reason,
-        };
-
-        final response = await http.post(
-          uri,
-          headers: {
-            'Content-Type': 'application/json',
-            if (token != null) 'Authorization': 'Token $token',
-          },
-          body: jsonEncode(payload),
-        ).timeout(const Duration(seconds: 10));
-
-        Map<String, dynamic>? data;
-        try {
-          final decoded = jsonDecode(response.body);
-          if (decoded is Map<String, dynamic>) {
-            data = decoded;
-          }
-        } catch (_) {}
-
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          return AdminPromoteUserResult(
-            success: true,
-            message: data?['message'] as String? ?? 'User promoted to Administrator successfully.',
-            user: data?['user'] as Map<String, dynamic>?,
-          );
-        }
-
-        final errorMsg = data?['error'] as String? ??
-            data?['detail'] as String? ??
-            'Failed to promote user (${response.statusCode})';
-
-        if (response.statusCode == 400 || response.statusCode == 403 || response.statusCode == 404) {
-          return AdminPromoteUserResult(
-            success: false,
-            error: errorMsg,
-          );
-        }
-
-        lastError = errorMsg;
-      } catch (e) {
-        lastError = 'Network error: $e';
-      }
-    }
-
-    return AdminPromoteUserResult(
-      success: false,
-      error: lastError ?? 'Unable to connect to promotion server.',
     );
   }
 
