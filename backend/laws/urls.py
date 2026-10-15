@@ -16,11 +16,14 @@ from .views import (
     # Admin-only endpoints
     AdminCheckUpdatesView,
     AdminApproveUpdateView,
+    AdminPublishUpdateView,
+    AdminApproveAndPublishUpdateView,
     AdminRejectUpdateView,
     AdminPendingUpdatesView,
     AdminAllUpdatesView,
     AdminLegalDatabaseView,
     AdminPublishedUpdatesView,
+    AdminSectionMediaUpdateView,
 )
 from analytics.views import (
     AdminAnalyticsView,
@@ -58,8 +61,11 @@ urlpatterns = [
     path("admin/legal-updates/pending/", AdminPendingUpdatesView.as_view(), name="admin-pending-updates"),
     path("admin/legal-updates/check-sources/", AdminCheckUpdatesView.as_view(), name="admin-check-updates"),
     path("admin/legal-updates/approve/", AdminApproveUpdateView.as_view(), name="admin-approve-update"),
+    path("admin/legal-updates/publish/", AdminPublishUpdateView.as_view(), name="admin-publish-update"),
+    path("admin/legal-updates/approve-and-publish/", AdminApproveAndPublishUpdateView.as_view(), name="admin-approve-publish-update"),
     path("admin/legal-updates/reject/", AdminRejectUpdateView.as_view(), name="admin-reject-update"),
     path("admin/legal-updates/published/", AdminPublishedUpdatesView.as_view(), name="admin-published-updates"),
+    path("admin/legal-sections/<int:pk>/media/", AdminSectionMediaUpdateView.as_view(), name="admin-section-media-update"),
 
     # ── Admin Analytics & Central Tracking ──────────────
     path("admin/analytics/", AdminAnalyticsView.as_view(), name="laws-admin-analytics"),

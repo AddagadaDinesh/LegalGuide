@@ -170,7 +170,7 @@ class LegalDataRepository {
     try {
       return await SqliteLegalDb.getLastVerifiedDate();
     } catch (_) {
-      return '2024-07-01';
+      return 'Not available';
     }
   }
 

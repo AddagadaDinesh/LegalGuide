@@ -50,11 +50,11 @@ class SqliteLegalDb {
         final exampleCount = Sqflite.firstIntValue(
           await db.rawQuery("SELECT COUNT(*) FROM sections WHERE example_situation IS NOT NULL AND example_situation != ''"),
         ) ?? 0;
-        final visualMediaCount = Sqflite.firstIntValue(
-          await db.rawQuery("SELECT COUNT(*) FROM sections WHERE (section_number LIKE '%47%' OR id = 6) AND visual_image_url LIKE '%bnss_47%'"),
+        final sectionsCount = Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM sections'),
         ) ?? 0;
 
-        if (count == null || count == 0 || hiCount == 0 || exampleCount == 0 || visualMediaCount == 0) {
+        if (count == null || count < 32 || sectionsCount < 50 || hiCount == 0 || exampleCount == 0) {
           await _seedInitialData(db);
         }
 
@@ -66,48 +66,116 @@ class SqliteLegalDb {
 
   static Future<void> _cleanupDuplicateSections(Database db) async {
     try {
-      // 1. Identify any duplicate (law_id, section_number) rows
+      // 1. Reconcile duplicate laws if any (e.g. BNS having both id=1 and id=2)
+      final allLaws = await db.query('laws', orderBy: 'id ASC');
+      final lawsByCanon = <int, List<Map<String, dynamic>>>{};
+      for (final law in allLaws) {
+        final rawId = law['id'] as int;
+        final name = law['name'] as String? ?? '';
+        final shortName = law['short_name'] as String? ?? '';
+        final canonId = LegalSection.canonicalLawId(rawId, name, shortName);
+        lawsByCanon.putIfAbsent(canonId, () => []).add(law);
+      }
+      for (final entry in lawsByCanon.entries) {
+        if (entry.value.length > 1) {
+          final canonId = entry.key;
+          for (final lawRow in entry.value) {
+            final rowId = lawRow['id'] as int;
+            if (rowId != canonId) {
+              await db.rawUpdate('UPDATE sections SET law_id = ? WHERE law_id = ?', [canonId, rowId]);
+              await db.delete('laws', where: 'id = ?', whereArgs: [rowId]);
+            }
+          }
+        }
+      }
+
+      // 2. Ensure every section has a canonical provision_key
+      final allSections = await db.query('sections');
+      for (final row in allSections) {
+        final id = row['id'] as int;
+        final lawId = row['law_id'] as int? ?? 0;
+        final secNum = row['section_number']?.toString() ?? '';
+        final canonicalKey = LegalSection.computeProvisionKey(lawId, secNum);
+        if (row['provision_key'] != canonicalKey) {
+          await db.update('sections', {'provision_key': canonicalKey}, where: 'id = ?', whereArgs: [id]);
+        }
+      }
+
+      // 3. Find and cleanly merge duplicate provisions by provision_key
       final duplicates = await db.rawQuery('''
-        SELECT law_id, section_number, COUNT(*) as c
+        SELECT provision_key, COUNT(*) as c
         FROM sections
-        GROUP BY law_id, section_number
+        WHERE provision_key IS NOT NULL AND provision_key != ''
+        GROUP BY provision_key
         HAVING c > 1
       ''');
 
       for (final dup in duplicates) {
-        final lawId = dup['law_id'];
-        final secNum = dup['section_number'];
+        final key = dup['provision_key'] as String;
         final rows = await db.query(
           'sections',
-          where: 'law_id = ? AND section_number = ?',
-          whereArgs: [lawId, secNum],
-          orderBy: 'version DESC, id DESC',
+          where: 'provision_key = ?',
+          whereArgs: [key],
+          orderBy: 'updated_at DESC, version DESC, id DESC',
         );
 
         if (rows.length > 1) {
-          // Keep the best / most recent row (rows.first) and remove inferior duplicates
-          for (int i = 1; i < rows.length; i++) {
-            final removeId = rows[i]['id'];
+          final sorted = List<Map<String, dynamic>>.from(rows);
+          sorted.sort((a, b) {
+            final aImg = (a['visual_image_url'] as String? ?? '').isNotEmpty;
+            final bImg = (b['visual_image_url'] as String? ?? '').isNotEmpty;
+            if (aImg != bImg) return aImg ? -1 : 1;
+
+            final aVid = (a['video_url'] as String? ?? '').isNotEmpty;
+            final bVid = (b['video_url'] as String? ?? '').isNotEmpty;
+            if (aVid != bVid) return aVid ? -1 : 1;
+
+            final aVer = a['version'] as int? ?? 1;
+            final bVer = b['version'] as int? ?? 1;
+            if (aVer != bVer) return bVer.compareTo(aVer);
+
+            final aUp = a['updated_at']?.toString() ?? '';
+            final bUp = b['updated_at']?.toString() ?? '';
+            return bUp.compareTo(aUp);
+          });
+
+          final best = Map<String, dynamic>.from(sorted.first);
+          final bestId = best['id'] as int;
+
+          // Merge non-empty fields from duplicates into best
+          final updateFields = <String, dynamic>{};
+          for (int i = 1; i < sorted.length; i++) {
+            final dupRow = sorted[i];
+            for (final f in [
+              'visual_image_url', 'visual_caption', 'visual_caption_te', 'visual_caption_hi',
+              'visual_alt_text', 'video_url', 'video_title', 'video_duration', 'video_thumbnail_url',
+              'example_situation', 'example_explanation', 'what_you_should_do',
+              'title_te', 'simple_explanation_te', 'title_hi', 'simple_explanation_hi',
+            ]) {
+              final bestVal = (best[f] as String? ?? '').trim();
+              final dupVal = (dupRow[f] as String? ?? '').trim();
+              if (bestVal.isEmpty && dupVal.isNotEmpty) {
+                best[f] = dupVal;
+                updateFields[f] = dupVal;
+              }
+            }
+          }
+
+          if (updateFields.isNotEmpty) {
+            await db.update('sections', updateFields, where: 'id = ?', whereArgs: [bestId]);
+          }
+
+          // Delete other duplicate records
+          for (int i = 1; i < sorted.length; i++) {
+            final removeId = sorted[i]['id'] as int;
             await db.delete('sections', where: 'id = ?', whereArgs: [removeId]);
           }
         }
       }
 
-      // 2. Populate provision_key if null
-      final nullKeys = await db.rawQuery(
-        "SELECT id, law_id, section_number FROM sections WHERE provision_key IS NULL OR provision_key = ''",
-      );
-      for (final row in nullKeys) {
-        final id = row['id'] as int;
-        final lawId = row['law_id'] as int? ?? 0;
-        final secNum = row['section_number']?.toString() ?? '';
-        final key = LegalSection.computeProvisionKey(lawId, secNum);
-        await db.update('sections', {'provision_key': key}, where: 'id = ?', whereArgs: [id]);
-      }
-
-      // 3. Enforce unique index at database level so duplicates can never re-occur
+      // 4. Enforce unique index at database level on provision_key
       await db.execute(
-        'CREATE UNIQUE INDEX IF NOT EXISTS idx_sections_law_sec ON sections(law_id, section_number)',
+        'CREATE UNIQUE INDEX IF NOT EXISTS idx_sections_prov_key ON sections(provision_key)',
       );
     } catch (_) {}
   }
@@ -433,14 +501,31 @@ class SqliteLegalDb {
         }, conflictAlgorithm: ConflictAlgorithm.replace);
       }
 
-      // 3. Sections
+      // 3. Sections (Idempotent Canonical Upsert)
       final secRaw = await rootBundle.loadString('assets/seed/sections.json');
       final List<dynamic> secList = jsonDecode(secRaw);
+
+      final existingRows = await db.query('sections', columns: ['id', 'provision_key', 'law_id', 'section_number']);
+      final existingByKey = <String, int>{};
+      for (final row in existingRows) {
+        final key = (row['provision_key'] as String? ?? '').trim();
+        final rawKey = key.isNotEmpty
+            ? key
+            : LegalSection.computeProvisionKey(row['law_id'] as int? ?? 0, row['section_number']?.toString() ?? '');
+        if (rawKey.isNotEmpty) existingByKey[rawKey] = row['id'] as int;
+      }
+
       for (final item in secList) {
-        batch.insert('sections', {
-          'id': item['id'],
-          'law_id': item['law'] is int ? item['law'] : (item['law']?['id'] ?? 0),
-          'section_number': item['section_number'] ?? '',
+        final rawLawId = item['law'] is int ? item['law'] : (item['law']?['id'] ?? item['law_id'] ?? 0);
+        final lawName = item['law_name']?.toString() ?? '';
+        final lawShortName = item['law_short_name']?.toString() ?? '';
+        final canonLawId = LegalSection.canonicalLawId(rawLawId, lawName, lawShortName);
+        final secNum = item['section_number'] ?? '';
+        final provKey = LegalSection.computeProvisionKey(canonLawId, secNum, lawName: lawName, lawShortName: lawShortName);
+
+        final sectionMap = <String, dynamic>{
+          'law_id': canonLawId,
+          'section_number': secNum,
           'title': item['title'] ?? '',
           'legal_text': item['legal_text'] ?? '',
           'simple_explanation': item['simple_explanation'] ?? '',
@@ -508,11 +593,17 @@ class SqliteLegalDb {
           'what_you_should_do_te': item['what_you_should_do_te'] ?? '',
           'what_you_should_do_hi': item['what_you_should_do_hi'] ?? '',
           'consequences_type': item['consequences_type'] ?? 'penal',
-          'provision_key': LegalSection.computeProvisionKey(
-            item['law'] is int ? item['law'] : (item['law']?['id'] ?? 0),
-            item['section_number'] ?? '',
-          ),
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
+          'provision_key': provKey,
+        };
+
+        if (existingByKey.containsKey(provKey)) {
+          final existingId = existingByKey[provKey]!;
+          await db.update('sections', sectionMap, where: 'id = ?', whereArgs: [existingId]);
+        } else {
+          sectionMap['id'] = item['id'];
+          await db.insert('sections', sectionMap, conflictAlgorithm: ConflictAlgorithm.replace);
+          existingByKey[provKey] = sectionMap['id'] as int;
+        }
       }
 
       // 4. Matters
@@ -540,7 +631,7 @@ class SqliteLegalDb {
 
       batch.insert('sync_metadata', {
         'key': 'server_version',
-        'value': '2',
+        'value': '4',
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
       batch.insert('sync_metadata', {
@@ -555,7 +646,7 @@ class SqliteLegalDb {
 
       batch.insert('sync_metadata', {
         'key': 'last_verified',
-        'value': '2024-07-01',
+        'value': '',
       }, conflictAlgorithm: ConflictAlgorithm.replace);
 
       await batch.commit(noResult: true);
@@ -612,13 +703,29 @@ class SqliteLegalDb {
           }
         }
 
-        // 3. Sections
+        // 3. Sections (Canonical Provision Upsert)
         if (delta['sections'] is List) {
+          final existingRows = await txn.query('sections', columns: ['id', 'provision_key', 'law_id', 'section_number']);
+          final existingByKey = <String, int>{};
+          for (final row in existingRows) {
+            final key = (row['provision_key'] as String? ?? '').trim();
+            final rawKey = key.isNotEmpty
+                ? key
+                : LegalSection.computeProvisionKey(row['law_id'] as int? ?? 0, row['section_number']?.toString() ?? '');
+            if (rawKey.isNotEmpty) existingByKey[rawKey] = row['id'] as int;
+          }
+
           for (final item in delta['sections']) {
-            batch.insert('sections', {
-              'id': item['id'],
-              'law_id': item['law'] is int ? item['law'] : (item['law']?['id'] ?? 0),
-              'section_number': item['section_number'] ?? '',
+            final rawLawId = item['law'] is int ? item['law'] : (item['law']?['id'] ?? item['law_id'] ?? 0);
+            final lawName = item['law_name']?.toString() ?? '';
+            final lawShortName = item['law_short_name']?.toString() ?? '';
+            final canonLawId = LegalSection.canonicalLawId(rawLawId, lawName, lawShortName);
+            final secNum = item['section_number'] ?? '';
+            final provKey = LegalSection.computeProvisionKey(canonLawId, secNum, lawName: lawName, lawShortName: lawShortName);
+
+            final sectionMap = <String, dynamic>{
+              'law_id': canonLawId,
+              'section_number': secNum,
               'title': item['title'] ?? '',
               'legal_text': item['legal_text'] ?? '',
               'simple_explanation': item['simple_explanation'] ?? '',
@@ -686,11 +793,17 @@ class SqliteLegalDb {
               'what_you_should_do_te': item['what_you_should_do_te'] ?? '',
               'what_you_should_do_hi': item['what_you_should_do_hi'] ?? '',
               'consequences_type': item['consequences_type'] ?? 'penal',
-              'provision_key': LegalSection.computeProvisionKey(
-                item['law'] is int ? item['law'] : (item['law']?['id'] ?? 0),
-                item['section_number'] ?? '',
-              ),
-            }, conflictAlgorithm: ConflictAlgorithm.replace);
+              'provision_key': provKey,
+            };
+
+            if (existingByKey.containsKey(provKey)) {
+              final existingId = existingByKey[provKey]!;
+              await txn.update('sections', sectionMap, where: 'id = ?', whereArgs: [existingId]);
+            } else {
+              sectionMap['id'] = item['id'];
+              await txn.insert('sections', sectionMap, conflictAlgorithm: ConflictAlgorithm.replace);
+              existingByKey[provKey] = sectionMap['id'] as int;
+            }
           }
         }
 
@@ -955,7 +1068,11 @@ class SqliteLegalDb {
 
   static Future<String> getLastVerifiedDate() async {
     final meta = await getSyncMetadata();
-    return meta['last_verified'] ?? '2024-07-01';
+    final val = meta['last_verified']?.trim();
+    if (val == null || val.isEmpty || val == '2024-07-01') {
+      return 'Not available';
+    }
+    return val;
   }
 
   static Future<int> updateSectionMedia({
@@ -964,16 +1081,43 @@ class SqliteLegalDb {
     required String visualCaption,
     required String visualAltText,
     required bool isVisualIllustrative,
+    String? visualCaptionTe,
+    String? visualCaptionHi,
+    String? videoUrl,
+    String? videoTitle,
+    String? videoDuration,
+    String? videoThumbnailUrl,
+    String? videoTranscript,
+    String? exampleTitle,
+    String? exampleSituation,
+    String? exampleExplanation,
+    String? exampleDisclaimer,
+    String? whatYouShouldDo,
   }) async {
     final db = await database;
+    final Map<String, dynamic> updateMap = {
+      'visual_image_url': visualImageUrl,
+      'visual_caption': visualCaption,
+      'visual_alt_text': visualAltText,
+      'is_visual_illustrative': isVisualIllustrative ? 1 : 0,
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+    if (visualCaptionTe != null) updateMap['visual_caption_te'] = visualCaptionTe;
+    if (visualCaptionHi != null) updateMap['visual_caption_hi'] = visualCaptionHi;
+    if (videoUrl != null) updateMap['video_url'] = videoUrl;
+    if (videoTitle != null) updateMap['video_title'] = videoTitle;
+    if (videoDuration != null) updateMap['video_duration'] = videoDuration;
+    if (videoThumbnailUrl != null) updateMap['video_thumbnail_url'] = videoThumbnailUrl;
+    if (videoTranscript != null) updateMap['video_transcript'] = videoTranscript;
+    if (exampleTitle != null) updateMap['example_title'] = exampleTitle;
+    if (exampleSituation != null) updateMap['example_situation'] = exampleSituation;
+    if (exampleExplanation != null) updateMap['example_explanation'] = exampleExplanation;
+    if (exampleDisclaimer != null) updateMap['example_disclaimer'] = exampleDisclaimer;
+    if (whatYouShouldDo != null) updateMap['what_you_should_do'] = whatYouShouldDo;
+
     return await db.update(
       'sections',
-      {
-        'visual_image_url': visualImageUrl,
-        'visual_caption': visualCaption,
-        'visual_alt_text': visualAltText,
-        'is_visual_illustrative': isVisualIllustrative ? 1 : 0,
-      },
+      updateMap,
       where: 'id = ?',
       whereArgs: [sectionId],
     );

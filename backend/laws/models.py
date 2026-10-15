@@ -6,6 +6,8 @@ class Category(models.Model):
     description = models.TextField(blank=True)
     name_te = models.CharField(max_length=150, blank=True)
     description_te = models.TextField(blank=True)
+    name_hi = models.CharField(max_length=150, blank=True)
+    description_hi = models.TextField(blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -34,6 +36,12 @@ class Law(models.Model):
         choices=[("current", "Current"), ("amended", "Amended"), ("repealed", "Repealed")]
     )
     last_verified = models.DateField(null=True, blank=True)
+    name_te = models.CharField(max_length=200, blank=True)
+    short_name_te = models.CharField(max_length=100, blank=True)
+    description_te = models.TextField(blank=True)
+    name_hi = models.CharField(max_length=200, blank=True)
+    short_name_hi = models.CharField(max_length=100, blank=True)
+    description_hi = models.TextField(blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -177,9 +185,30 @@ class LegalSection(models.Model):
     provision_key = models.CharField(max_length=120, blank=True, db_index=True, help_text="Unique provision key: actId_section_sub")
 
     @staticmethod
+    def normalize_section_number(raw):
+        """
+        Canonical section number normalization:
+        - Trims whitespace
+        - Strips 'section', 'article', 'sec', 'art' prefixes
+        - Normalizes bracket spacing (e.g. '103 (1)' -> '103(1)')
+        - Preserves subsection information ('103' != '103(1)')
+        """
+        if not raw:
+            return ""
+        import re
+        s = str(raw).strip()
+        s = re.sub(r'^(section|article|sec|art)\.?\s*', '', s, flags=re.I)
+        s = re.sub(r'\s*\(\s*', '(', s)
+        s = re.sub(r'\s*\)\s*', ')', s)
+        s = re.sub(r'\s+', ' ', s).strip()
+        return s
+
+    @staticmethod
     def compute_provision_key(law_id, section_number):
         import re
-        clean_sec = re.sub(r'[^a-z0-9]+', '_', (section_number or '').lower()).strip('_')
+        norm_sec = LegalSection.normalize_section_number(section_number)
+        clean_sec = re.sub(r'[^a-z0-9]+', '_', (norm_sec or '').lower()).strip('_')
+        clean_sec = re.sub(r'_+', '_', clean_sec)
         return f"{law_id}_{clean_sec}"
 
     def save(self, *args, **kwargs):
@@ -233,18 +262,27 @@ class LegalUpdateRecord(models.Model):
     The AI never autonomously alters this table or the active law.
     """
     UPDATE_TYPE_CHOICES = [
-        ("changed_section", "Changed Section / Amendment"),
-        ("new_section", "New Section"),
-        ("repealed_provision", "Repealed Provision"),
-        ("changed_penalty", "Changed Penalty"),
         ("new_act", "New Act"),
+        ("new_section", "New Section"),
+        ("amendment", "Amendment / Changed Section"),
+        ("repeal", "Repeal / Repealed Provision"),
+        ("commencement_change", "Commencement Date Change"),
+        ("correction", "Correction / Errata"),
+        ("rule_change", "Rule Change / Notification"),
+        ("changed_penalty", "Changed Penalty"),
+        ("changed_section", "Changed Section / Amendment"),
+        ("repealed_provision", "Repealed Provision"),
         ("amended_act", "Amended Act"),
         ("new_rule", "New Rule / Notification"),
     ]
 
     STATUS_CHOICES = [
-        ("pending", "Pending Verification"),
-        ("approved", "Approved & Published"),
+        ("detected", "Detected"),
+        ("pending_review", "Pending Review"),
+        ("pending", "Pending Review (Legacy)"),
+        ("needs_verification", "Needs Verification / Correction"),
+        ("approved", "Approved"),
+        ("published", "Published"),
         ("rejected", "Rejected"),
     ]
 
@@ -262,9 +300,16 @@ class LegalUpdateRecord(models.Model):
         blank=True,
         related_name="update_records"
     )
+    act_name = models.CharField(max_length=255, blank=True)
     section_number = models.CharField(max_length=50)
-    update_type = models.CharField(max_length=40, choices=UPDATE_TYPE_CHOICES, default="changed_section")
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="pending")
+    update_type = models.CharField(max_length=40, choices=UPDATE_TYPE_CHOICES, default="amendment")
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="pending_review")
+    verification_status = models.CharField(
+        max_length=50,
+        default="verified",
+        blank=True,
+        help_text="verified, unverified, needs_recheck, source_limited"
+    )
 
     proposed_title = models.CharField(max_length=300)
     proposed_legal_text = models.TextField()
@@ -273,14 +318,40 @@ class LegalUpdateRecord(models.Model):
     proposed_effective_date = models.DateField(null=True, blank=True)
     proposed_amendment_info = models.TextField(blank=True)
 
-    detected_diff = models.TextField(help_text="Detailed comparison / diff between existing and proposed version.")
+    existing_legal_text = models.TextField(blank=True, help_text="Snapshot of previous content before update.")
+    detected_diff = models.TextField(blank=True, help_text="Detailed comparison / diff between existing and proposed version.")
     source_url = models.URLField(default="https://www.indiacode.gov.in/")
     source_name = models.CharField(max_length=200, default="India Code — Ministry of Law & Justice, Govt. of India")
+    source_publication_date = models.DateField(null=True, blank=True)
+    commencement_status = models.CharField(max_length=50, default="In Force", blank=True)
 
     detected_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.CharField(max_length=150, blank=True)
     verified_at = models.DateTimeField(null=True, blank=True)
     verified_by = models.CharField(max_length=150, blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
+    published_by = models.CharField(max_length=150, blank=True)
     admin_notes = models.TextField(blank=True)
+
+    previous_version = models.PositiveIntegerField(null=True, blank=True)
+    approved_version = models.PositiveIntegerField(null=True, blank=True)
+
+    @property
+    def is_pending(self):
+        return self.status in ["detected", "pending_review", "pending", "needs_verification"]
+
+    @property
+    def is_approved(self):
+        return self.status == "approved"
+
+    @property
+    def is_published(self):
+        return self.status == "published"
+
+    @property
+    def is_rejected(self):
+        return self.status == "rejected"
 
     class Meta:
         ordering = ["-detected_at"]
@@ -299,6 +370,8 @@ class DatabaseSyncInfo(models.Model):
         default="India Code (indiacode.gov.in) & Official Gazette of India"
     )
     primary_source_url = models.URLField(default="https://www.indiacode.gov.in/")
+    last_source_check_status = models.CharField(max_length=50, default="verified", blank=True)
+    last_source_check_summary = models.TextField(blank=True)
 
     @classmethod
     def get_info(cls):

@@ -626,6 +626,11 @@ const _te = <String, String>{
   'User deleted successfully.': 'వినియోగదారు విజయవంతంగా తొలగించబడ్డారు.',
   'Failed to delete user.': 'వినియోగదారుని తొలగించడంలో విఫలమైంది.',
   'Deleting user...': 'వినియోగదారుని తొలగిస్తోంది...',
+  'Promote to Admin': 'అడ్మిన్‌గా ప్రమోట్ చేయండి',
+  'Confirm Promotion': 'ప్రమోషన్‌ను నిర్ధారించండి',
+  'User promoted to Administrator successfully.': 'వినియోగదారుడు విజయవంతంగా అడ్మినిస్ట్రేటర్‌గా ప్రమోట్ చేయబడ్డారు.',
+  'Failed to promote user.': 'వినియోగదారుని ప్రమోట్ చేయడంలో విఫలమైంది.',
+  'This user is already an administrator.': 'ఈ వినియోగదారుడు ఇప్పటికే అడ్మినిస్ట్రేటర్.',
   'Current Account': 'ప్రస్తుత ఖాతా',
   'In Simple Words': 'సులభమైన మాటల్లో',
   '💡 Understand With an Example': '💡 ఉదాహరణతో అర్థం చేసుకోండి',
@@ -654,6 +659,8 @@ const _te = <String, String>{
       'కాల్పనిక విద్యా ఉదాహరణ. చట్టపరమైన భావనను వివరించడానికి మాత్రమే ఈ దృష్టాంతం అందించబడింది మరియు ఇది వాస్తవ కేసు కాదు.',
   'Realistic Educational Scenario': 'వాస్తవిక విద్యా దృష్టాంతం',
   'Related Laws & Provisions': 'సంబంధిత చట్టాలు & నిబంధనలు',
+  'Question copied': 'ప్రశ్న కాపీ చేయబడింది',
+  'Copy question': 'ప్రశ్నను కాపీ చేయండి',
 };
 
 const _hi = <String, String>{
@@ -1272,6 +1279,11 @@ const _hi = <String, String>{
   'Never': 'कभी नहीं',
   'Unknown': 'अज्ञात',
   'Email': 'ईमेल',
+  'Promote to Admin': 'एडमिन बनाएं',
+  'Confirm Promotion': 'प्रमोशन की पुष्टि करें',
+  'User promoted to Administrator successfully.': 'उपयोगकर्ता को सफलतापूर्वक एडमिन बना दिया गया है।',
+  'Failed to promote user.': 'उपयोगकर्ता को प्रमोट करने में विफल।',
+  'This user is already an administrator.': 'यह उपयोगकर्ता पहले से ही एडमिन है।',
 
   // Legal Updates (User-facing - no admin terminology)
   'Legal Updates': 'कानूनी अपडेट',
@@ -1342,5 +1354,7 @@ const _hi = <String, String>{
       'काल्पनिक शैक्षिक उदाहरण। यह परिदृश्य केवल कानूनी अवधारणा को समझाने के लिए प्रदान किया गया है और यह कोई वास्तविक मामला नहीं है।',
   'Realistic Educational Scenario': 'यथार्थवादी शैक्षिक परिदृश्य',
   'Related Laws & Provisions': 'संबंधित कानून और प्रावधान',
+  'Question copied': 'प्रश्न कॉपी किया गया',
+  'Copy question': 'प्रश्न कॉपी करें',
 };
 

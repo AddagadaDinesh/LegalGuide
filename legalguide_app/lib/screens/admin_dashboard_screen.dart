@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../localization/app_strings.dart';
 import '../models/law.dart';
+import '../repositories/legal_data_repository.dart';
 import '../services/admin_analytics_service.dart';
 import '../services/auth_service.dart';
 import 'admin_act_detail_screen.dart';
@@ -34,12 +36,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   String _selectedRoleFilter = 'ALL'; // 'ALL', 'USER', 'ADMIN', 'ACTIVE'
   final TextEditingController _searchController = TextEditingController();
   final Set<String> _deletingUserIds = <String>{};
+  final Set<dynamic> _promotingUserIds = <dynamic>{};
 
   List<Law>? _acts;
   String _actSearchQuery = '';
   String _selectedActStatusFilter = 'ALL';
   String _selectedActDomainFilter = 'ALL';
   final TextEditingController _actSearchController = TextEditingController();
+
+  List<AdminPendingUpdateRecord>? _pendingUpdates;
+  AdminPendingUpdatesResult? _pendingUpdatesResult;
+  String? _pendingUpdatesError;
+  final Map<int, TextEditingController> _updateNotesControllers = {};
+  final Set<int> _processingUpdateIds = {};
 
   Future<void> _confirmAndDeleteUser(AdminUserData u) async {
     final currentAdmin = AuthService.currentUsername.value ?? 'Admin';
@@ -203,6 +212,201 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     }
   }
 
+  Future<void> _confirmAndPromoteUser(AdminUserData u) async {
+    if (u.role.toUpperCase() == 'ADMIN' || u.isAdmin) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(tr('This user is already an administrator.')),
+          backgroundColor: const Color(0xFF6366F1),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (_promotingUserIds.contains(u.id)) return;
+
+    final shouldPromote = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFF334155)),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6366F1).withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.admin_panel_settings_rounded, color: Color(0xFF818CF8), size: 22),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                tr('Promote to Admin'),
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              tr('Are you sure you want to promote this user to Administrator? This will grant full access to the Admin Dashboard, analytics, legal update publication, and user directory.'),
+              style: GoogleFonts.inter(
+                color: const Color(0xFFCBD5E1),
+                fontSize: 13.5,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFF334155)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.person_outline_rounded, color: Color(0xFF94A3B8), size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${tr("Username")}: ',
+                        style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 12),
+                      ),
+                      Expanded(
+                        child: Text(
+                          u.username,
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(Icons.email_outlined, color: Color(0xFF94A3B8), size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${tr("Email")}: ',
+                        style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 12),
+                      ),
+                      Expanded(
+                        child: Text(
+                          u.email.isNotEmpty ? u.email : tr('Not provided'),
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFFE2E8F0),
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              tr('The user\'s current session will be revoked, requiring them to sign in again to receive administrator privileges.'),
+              style: GoogleFonts.inter(
+                color: const Color(0xFF94A3B8),
+                fontSize: 11.5,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx, false),
+            child: Text(
+              tr('Cancel'),
+              style: GoogleFonts.inter(
+                color: const Color(0xFF94A3B8),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogCtx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6366F1),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
+            child: Text(
+              tr('Confirm Promotion'),
+              style: GoogleFonts.inter(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldPromote != true || !mounted) return;
+
+    setState(() {
+      _promotingUserIds.add(u.id);
+    });
+
+    try {
+      final result = await AdminAnalyticsService.promoteUser(u.id, username: u.username);
+      if (!mounted) return;
+
+      if (result.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message ?? tr('User promoted to Administrator successfully.')),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        // Reload data from central database to update all counts and user lists
+        await _loadData(showRefreshing: true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.error ?? tr('Failed to promote user.')),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _promotingUserIds.remove(u.id);
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -215,6 +419,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     _tabController.dispose();
     _searchController.dispose();
     _actSearchController.dispose();
+    for (final c in _updateNotesControllers.values) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -236,6 +443,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
       AdminAnalyticsService.fetchUsers(),
       AdminAnalyticsService.fetchAdminStatus(),
       AdminAnalyticsService.fetchAdminActs(),
+      AdminAnalyticsService.fetchPendingUpdates(),
     ]);
 
     if (!mounted) return;
@@ -244,11 +452,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     final usersResult = results[1] as AdminUsersResult;
     final statusResult = results[2] as Map<String, dynamic>?;
     final actsResult = results[3] as List<Law>;
+    final updatesResult = results[4] as AdminPendingUpdatesResult;
 
     setState(() {
       _isLoading = false;
       _isRefreshing = false;
       _acts = actsResult;
+      _pendingUpdatesResult = updatesResult;
+      _pendingUpdates = updatesResult.updates;
+      _pendingUpdatesError = updatesResult.success ? null : updatesResult.error;
+
+      for (final u in updatesResult.updates) {
+        if (!_updateNotesControllers.containsKey(u.id)) {
+          _updateNotesControllers[u.id] = TextEditingController(text: u.adminNotes ?? '');
+        }
+      }
 
       // Analytics
       if (analyticsResult.success && analyticsResult.data != null) {
@@ -364,7 +582,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
               text: tr('Analytics Overview'),
             ),
             Tab(
-              icon: const Icon(Icons.gavel_rounded, size: 18),
+              icon: (_pendingUpdates != null && _pendingUpdates!.isNotEmpty)
+                  ? Badge.count(
+                      count: _pendingUpdates!.length,
+                      backgroundColor: const Color(0xFFF59E0B),
+                      textColor: Colors.black,
+                      child: const Icon(Icons.gavel_rounded, size: 18),
+                    )
+                  : const Icon(Icons.gavel_rounded, size: 18),
               text: tr('Legal Database'),
             ),
             Tab(
@@ -545,6 +770,66 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                 ),
               ),
             ],
+            if (_pendingUpdates != null && _pendingUpdates!.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF59E0B).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.5)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.pending_actions_rounded, color: Color(0xFFF59E0B), size: 22),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${_pendingUpdates!.length} ${_pendingUpdates!.length == 1 ? "Legal Update" : "Legal Updates"} Awaiting Review',
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '${_pendingUpdates!.first.actName} §${_pendingUpdates!.first.sectionNumber} — ${_pendingUpdates!.first.proposedTitle}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFFFDE68A),
+                              fontSize: 11.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFF59E0B),
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                      ),
+                      onPressed: () {
+                        _tabController.animateTo(1);
+                      },
+                      child: Text(
+                        tr('Review'),
+                        style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 11.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
 
             // Active User definition cards (Suggested layout)
@@ -674,13 +959,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             _buildAdminDbSectionHeader(tr('Database Status'), Icons.storage_rounded),
             const SizedBox(height: 10),
             _buildAdminDbInfoCard([
-              _adminDbRow(tr('Sync Version'), (syncData['version'] ?? syncData['server_version'] ?? 'v1.0').toString()),
-              _adminDbRow(tr('Last Synchronization'), _formatAdminDate(syncData['last_synchronized']?.toString())),
+              _adminDbRow(tr('Sync Version'), 'v${syncData['sync_version'] ?? syncData['server_version'] ?? syncData['version'] ?? '4'}'),
+              _adminDbRow(tr('Last Synchronization'), _formatAdminDate((syncData['last_synchronized'] ?? syncData['last_sync_date'] ?? syncData['last_verified_date'] ?? backendData['server_time'])?.toString())),
               _adminDbRow(tr('Total Acts / Laws'), totalActs.toString()),
               _adminDbRow(tr('Total Sections'), totalSections.toString()),
               _adminDbRow(tr('Database Engine'), (syncData['sync_status'] ?? 'SQLite').toString()),
             ]),
             const SizedBox(height: 14),
+
+            // Pending Legal Updates (Review & Approval) - Prioritized for Administrator Action
+            _buildAdminDbSectionHeader(tr('Pending Legal Updates'), Icons.verified_user_rounded),
+            const SizedBox(height: 10),
+            _buildPendingLegalUpdatesSection(),
+            const SizedBox(height: 16),
 
             // Section statuses
             _buildAdminDbSectionHeader(tr('Section Status Breakdown'), Icons.rule_rounded),
@@ -704,10 +995,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             _buildAdminDbSectionHeader(tr('Official Sources'), Icons.link_rounded),
             const SizedBox(height: 10),
             _buildAdminDbInfoCard([
-              _adminDbRow(tr('Primary Source'), tr('India Code — Ministry of Law & Justice, Govt. of India')),
-              _adminDbRow(tr('Source URL'), 'https://www.indiacode.gov.in/'),
+              _adminDbRow(tr('Primary Source'), (syncData['primary_source_name'] ?? tr('India Code — Ministry of Law & Justice, Govt. of India')).toString()),
+              _adminDbRow(tr('Source URL'), (syncData['primary_source_url'] ?? 'https://www.indiacode.gov.in/').toString()),
               _adminDbRow(tr('Gazette Source'), tr('Official Gazette of India')),
-              _adminDbRow(tr('Last Source Check'), _formatAdminDate(backendData['last_source_check']?.toString())),
+              _adminDbRow(tr('Last Source Check'), _formatAdminDate((backendData['last_source_check'] ?? syncData['last_source_check'] ?? syncData['last_sync_date'])?.toString())),
             ]),
             const SizedBox(height: 14),
 
@@ -1264,6 +1555,818 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
         ],
       ),
     );
+  }
+
+  Widget _buildPendingLegalUpdatesSection() {
+    if (_pendingUpdatesError != null) {
+      final isAuthError = _pendingUpdatesResult?.isForbidden == true || AuthService.token == null;
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.4)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444).withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.error_outline_rounded, color: Color(0xFFEF4444), size: 20),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    tr('Unable to Load Pending Legal Updates'),
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFFFCA5A5),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              _pendingUpdatesError!,
+              style: GoogleFonts.inter(
+                color: const Color(0xFFCBD5E1),
+                fontSize: 12.5,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                if (isAuthError)
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.login_rounded, size: 15),
+                    label: Text(
+                      tr('Sign In as Admin'),
+                      style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 12.5),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      ).then((_) => _loadData(showRefreshing: true));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6366F1),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                if (isAuthError) const SizedBox(width: 10),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.refresh_rounded, size: 15, color: Color(0xFFCBD5E1)),
+                  label: Text(
+                    tr('Retry'),
+                    style: GoogleFonts.inter(color: const Color(0xFFCBD5E1), fontSize: 12.5),
+                  ),
+                  onPressed: () => _loadData(showRefreshing: true),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFF475569)),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    final updates = _pendingUpdates;
+
+    if (updates == null || updates.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF334155)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF10B981), size: 20),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                tr('All legal updates are reviewed and up to date. No pending updates requiring action.'),
+                style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 12.5),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.35)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.pending_actions_rounded, color: Color(0xFFF59E0B), size: 18),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '${updates.length} ${updates.length == 1 ? "legal update" : "legal updates"} awaiting human review from official government sources',
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFFFDE68A),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        for (final u in updates) ...[
+          _buildPendingUpdateCard(u),
+          const SizedBox(height: 12),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPendingUpdateCard(AdminPendingUpdateRecord u) {
+    final isProcessing = _processingUpdateIds.contains(u.id);
+    final notesController = _updateNotesControllers[u.id] ??= TextEditingController(text: u.adminNotes ?? '');
+
+    Color statusColor;
+    String statusLabel;
+    if (u.isPublished) {
+      statusColor = const Color(0xFF10B981);
+      statusLabel = tr('PUBLISHED');
+    } else if (u.isApproved) {
+      statusColor = const Color(0xFF3B82F6);
+      statusLabel = tr('APPROVED — READY TO PUBLISH');
+    } else if (u.isRejected) {
+      statusColor = const Color(0xFFEF4444);
+      statusLabel = tr('REJECTED');
+    } else {
+      statusColor = const Color(0xFFF59E0B);
+      statusLabel = tr('PENDING REVIEW');
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E293B),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: u.isApproved ? const Color(0xFF3B82F6).withValues(alpha: 0.6) : const Color(0xFF334155),
+          width: u.isApproved ? 1.5 : 1.0,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header Row: Act, Section & Status Pill
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF6366F1).withValues(alpha: 0.25),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.5)),
+                          ),
+                          child: Text(
+                            'RECORD #${u.id}',
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFFA5B4FC),
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            u.actName.isNotEmpty ? u.actName : tr('Indian Law Act'),
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              color: const Color(0xFF94A3B8),
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${u.sectionNumber.startsWith("Section") ? "" : "Section "}${u.sectionNumber}: ${u.proposedTitle}',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.5)),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: GoogleFonts.inter(
+                    color: statusColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Metadata Badges (Update Type, Verification, Commencement Status, Effective Date)
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [
+              _buildBadgePill(Icons.category_outlined, u.updateTypeDisplay.isNotEmpty ? u.updateTypeDisplay : u.updateType, const Color(0xFF818CF8)),
+              _buildBadgePill(Icons.verified_rounded, u.verificationStatus.toUpperCase(), const Color(0xFF10B981)),
+              _buildBadgePill(Icons.gavel_rounded, u.commencementStatus, const Color(0xFF38BDF8)),
+              if (u.proposedEffectiveDate != null)
+                _buildBadgePill(Icons.event_available_rounded, 'Effective: ${_formatAdminDate(u.proposedEffectiveDate)}', const Color(0xFFA78BFA)),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Source Information with Browser Link
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F172A),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFF334155)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.account_balance_rounded, color: Color(0xFF818CF8), size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        u.sourceName,
+                        style: GoogleFonts.inter(
+                          color: const Color(0xFFE2E8F0),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    if (u.sourceUrl.isNotEmpty && u.sourceUrl.startsWith('http'))
+                      InkWell(
+                        onTap: () async {
+                          final uri = Uri.parse(u.sourceUrl);
+                          if (await canLaunchUrl(uri)) {
+                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF6366F1).withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.5)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                tr('Open Source'),
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFFA5B4FC),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.open_in_new_rounded, color: Color(0xFFA5B4FC), size: 13),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                if (u.sourcePublicationDate != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    '${tr("Publication Date")}: ${_formatAdminDate(u.sourcePublicationDate)}',
+                    style: GoogleFonts.inter(color: const Color(0xFF94A3B8), fontSize: 11),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          // Content Comparison: Existing vs Proposed Statutory Text
+          _buildComparisonCard(
+            title: tr('Proposed Statutory Text'),
+            text: u.proposedLegalText,
+            color: const Color(0xFF10B981),
+            icon: Icons.add_circle_outline_rounded,
+          ),
+          if (u.existingLegalText.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _buildComparisonCard(
+              title: tr('Existing Legal Text (Previous Version)'),
+              text: u.existingLegalText,
+              color: const Color(0xFF94A3B8),
+              icon: Icons.history_rounded,
+            ),
+          ],
+          const SizedBox(height: 10),
+
+          // Plain-Language Explanation
+          if (u.proposedSimpleExplanation.isNotEmpty) ...[
+            Text(
+              tr('Plain-Language Citizen Explanation:'),
+              style: GoogleFonts.inter(
+                color: const Color(0xFFCBD5E1),
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              u.proposedSimpleExplanation,
+              style: GoogleFonts.inter(
+                color: const Color(0xFF94A3B8),
+                fontSize: 12,
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+
+          // Punishment Details
+          if (u.proposedPunishment.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: Color(0xFFF87171), size: 15),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${tr("Penalties")}: ${u.proposedPunishment}',
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFFFCA5A5),
+                        fontSize: 11.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Review Notes Input (for Admin)
+          if (!u.isPublished) ...[
+            TextField(
+              controller: notesController,
+              enabled: !isProcessing,
+              maxLines: 2,
+              style: GoogleFonts.inter(color: Colors.white, fontSize: 12),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
+                hintText: tr('Add review or verification notes...'),
+                hintStyle: GoogleFonts.inter(color: const Color(0xFF64748B), fontSize: 12),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF334155)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF334155)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color(0xFF6366F1)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
+
+          // Action Buttons
+          if (u.isPending) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF10B981),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 11),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      elevation: 0,
+                    ),
+                    icon: isProcessing
+                        ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.check_circle_outline_rounded, size: 16),
+                    label: Text(
+                      tr('Approve Update'),
+                      style: GoogleFonts.inter(fontSize: 12.5, fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: isProcessing ? null : () => _approvePendingUpdate(u),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFEF4444),
+                    side: const BorderSide(color: Color(0xFFEF4444)),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  icon: const Icon(Icons.close_rounded, size: 16),
+                  label: Text(
+                    tr('Reject'),
+                    style: GoogleFonts.inter(fontSize: 12.5, fontWeight: FontWeight.bold),
+                  ),
+                  onPressed: isProcessing ? null : () => _rejectPendingUpdate(u),
+                ),
+              ],
+            ),
+          ] else if (u.isApproved) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFF3B82F6).withValues(alpha: 0.4)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.check_circle_rounded, color: Color(0xFF60A5FA), size: 16),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          tr('Approved by Administrator. Ready for canonical publication.'),
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFF93C5FD),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF3B82F6),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        elevation: 0,
+                      ),
+                      icon: isProcessing
+                          ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : const Icon(Icons.cloud_upload_rounded, size: 16),
+                      label: Text(
+                        tr('Publish to Canonical Database & Sync Clients'),
+                        style: GoogleFonts.inter(fontSize: 12.5, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: isProcessing ? null : () => _publishApprovedUpdate(u),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else if (u.isPublished) ...[
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.4)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.done_all_rounded, color: Color(0xFF34D399), size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${tr("Published version")} v${u.approvedVersion ?? 1} • ${tr("Active in Canonical Database")}',
+                      style: GoogleFonts.inter(
+                        color: const Color(0xFFA7F3D0),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBadgePill(IconData icon, String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 12),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            style: GoogleFonts.inter(
+              color: color,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildComparisonCard({
+    required String title,
+    required String text,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFF334155)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 14),
+              const SizedBox(width: 6),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  color: color,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            text,
+            style: GoogleFonts.inter(
+              color: const Color(0xFFCBD5E1),
+              fontSize: 11.5,
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _approvePendingUpdate(AdminPendingUpdateRecord u) async {
+    if (_processingUpdateIds.contains(u.id)) return;
+    setState(() => _processingUpdateIds.add(u.id));
+
+    final notes = _updateNotesControllers[u.id]?.text.trim() ?? '';
+    try {
+      final res = await AdminAnalyticsService.approveUpdate(u.id, notes: notes);
+      if (!mounted) return;
+
+      if (res['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['message'] ?? tr('Update approved. Ready for publication.')),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        await _loadData(showRefreshing: true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['error'] ?? tr('Approval failed.')),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _processingUpdateIds.remove(u.id));
+    }
+  }
+
+  Future<void> _publishApprovedUpdate(AdminPendingUpdateRecord u) async {
+    if (_processingUpdateIds.contains(u.id)) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.cloud_upload_rounded, color: Color(0xFF3B82F6), size: 22),
+            const SizedBox(width: 10),
+            Text(tr('Publish Legal Update'), style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Text(
+          tr('Publishing will transactionally update the canonical database, increment sync cursor, archive historical version, and notify all mobile clients.\n\nProceed?'),
+          style: GoogleFonts.inter(color: const Color(0xFFCBD5E1), fontSize: 13, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr('Cancel'), style: GoogleFonts.inter(color: const Color(0xFF94A3B8))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF3B82F6)),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(tr('Publish Now'), style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _processingUpdateIds.add(u.id));
+    try {
+      final res = await AdminAnalyticsService.publishUpdate(u.id);
+      if (!mounted) return;
+
+      if (res['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['message'] ?? tr('Update published and synced!')),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        try {
+          await LegalDataRepository.syncAll();
+        } catch (_) {}
+        await _loadData(showRefreshing: true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['error'] ?? tr('Publication failed.')),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _processingUpdateIds.remove(u.id));
+    }
+  }
+
+  Future<void> _rejectPendingUpdate(AdminPendingUpdateRecord u) async {
+    final reasonController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(tr('Reject Legal Update'), style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(tr('Please provide a reason for rejecting this update:'), style: GoogleFonts.inter(color: const Color(0xFFCBD5E1), fontSize: 13)),
+            const SizedBox(height: 10),
+            TextField(
+              controller: reasonController,
+              style: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+              decoration: InputDecoration(
+                hintText: tr('e.g. Unverified gazette circular or errata...'),
+                hintStyle: GoogleFonts.inter(color: const Color(0xFF64748B), fontSize: 13),
+                filled: true,
+                fillColor: const Color(0xFF0F172A),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr('Cancel'), style: GoogleFonts.inter(color: const Color(0xFF94A3B8))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEF4444)),
+            onPressed: () {
+              if (reasonController.text.trim().isEmpty) return;
+              Navigator.pop(ctx, true);
+            },
+            child: Text(tr('Reject'), style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _processingUpdateIds.add(u.id));
+    try {
+      final res = await AdminAnalyticsService.rejectUpdate(u.id, reason: reasonController.text.trim());
+      if (!mounted) return;
+
+      if (res['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['message'] ?? tr('Update rejected.')),
+            backgroundColor: const Color(0xFFF59E0B),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        await _loadData(showRefreshing: true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(res['error'] ?? tr('Rejection failed.')),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _processingUpdateIds.remove(u.id));
+    }
   }
 
   Widget _buildPipelineStep(int step, String title, String subtitle, Color color) {
@@ -2458,8 +3561,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
     final currentAdmin = AuthService.currentUsername.value ?? 'Admin';
     final isCurrentAdmin = u.username.trim().toLowerCase() == currentAdmin.trim().toLowerCase();
     final isDeleting = _deletingUserIds.contains(u.id);
+    final isPromoting = _promotingUserIds.contains(u.id);
 
-    final isAdmin = u.role == 'ADMIN';
+    final isAdmin = u.role.toUpperCase() == 'ADMIN' || u.isAdmin;
     final isActiveNow = u.status == 'Active Now';
     final isActiveToday = u.status == 'Active Today';
 
@@ -2611,42 +3715,94 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
                     ),
                   ),
                 )
-              else if (isDeleting)
-                const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Color(0xFFEF4444),
-                  ),
-                )
               else
-                InkWell(
-                  onTap: () => _confirmAndDeleteUser(u),
-                  borderRadius: BorderRadius.circular(6),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEF4444).withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.35)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.delete_outline_rounded, color: Color(0xFFF87171), size: 14),
-                        const SizedBox(width: 4),
-                        Text(
-                          tr('Delete'),
-                          style: GoogleFonts.inter(
-                            color: const Color(0xFFF87171),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (!isAdmin) ...[
+                      if (isPromoting)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8),
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFF818CF8),
+                            ),
+                          ),
+                        )
+                      else
+                        InkWell(
+                          onTap: () => _confirmAndPromoteUser(u),
+                          borderRadius: BorderRadius.circular(6),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF6366F1).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.45)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.admin_panel_settings_outlined, color: Color(0xFFA5B4FC), size: 14),
+                                const SizedBox(width: 4),
+                                Text(
+                                  tr('Promote to Admin'),
+                                  style: GoogleFonts.inter(
+                                    color: const Color(0xFFA5B4FC),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
+                      const SizedBox(width: 8),
+                    ],
+                    if (isDeleting)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Color(0xFFEF4444),
+                          ),
+                        ),
+                      )
+                    else
+                      InkWell(
+                        onTap: () => _confirmAndDeleteUser(u),
+                        borderRadius: BorderRadius.circular(6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.35)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.delete_outline_rounded, color: Color(0xFFF87171), size: 14),
+                              const SizedBox(width: 4),
+                              Text(
+                                tr('Delete'),
+                                style: GoogleFonts.inter(
+                                  color: const Color(0xFFF87171),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
             ],
           ),

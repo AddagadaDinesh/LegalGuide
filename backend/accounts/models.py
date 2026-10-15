@@ -74,6 +74,48 @@ class UserProfile(models.Model):
         return f"{self.user.username} ({self.role})"
 
 
+class UserRoleAuditLog(models.Model):
+    """Audit log capturing role promotions, demotions, and account deletions.
+    Preserves audit history even if target user is later deleted.
+    """
+
+    ACTION_CHOICES = [
+        ("PROMOTION", "Promotion to Admin"),
+        ("DEMOTION", "Demotion from Admin"),
+        ("DELETION", "Account Deletion"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="role_audit_logs",
+    )
+    target_username = models.CharField(max_length=150)
+    target_email = models.EmailField(blank=True)
+    performed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="performed_role_audits",
+    )
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    previous_role = models.CharField(max_length=20, default="USER")
+    new_role = models.CharField(max_length=20, default="ADMIN")
+    reason = models.CharField(max_length=255, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        actor = self.performed_by.username if self.performed_by else "System"
+        return f"{self.action} of {self.target_username} by {actor} at {self.created_at:%Y-%m-%d %H:%M}"
+
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 

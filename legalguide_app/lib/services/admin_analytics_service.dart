@@ -252,6 +252,20 @@ class AdminDeleteUserResult {
   });
 }
 
+class AdminPromoteUserResult {
+  final bool success;
+  final String? error;
+  final String? message;
+  final Map<String, dynamic>? user;
+
+  AdminPromoteUserResult({
+    required this.success,
+    this.error,
+    this.message,
+    this.user,
+  });
+}
+
 class AdminAnalyticsResult {
   final bool success;
   final bool isForbidden;
@@ -620,6 +634,85 @@ class AdminAnalyticsService {
     );
   }
 
+  /// Promotes an eligible registered citizen/user to ADMINISTRATOR role.
+  /// Requires explicit confirmation by authenticated Administrator.
+  static Future<AdminPromoteUserResult> promoteUser(
+    dynamic userId, {
+    String? username,
+    String? reason,
+  }) async {
+    final token = AuthService.token;
+    if (token == null && !AuthService.isAdmin) {
+      return AdminPromoteUserResult(
+        success: false,
+        error: 'Administrator authentication required.',
+      );
+    }
+
+    final endpoints = [
+      '${ApiService.baseUrl}/admin/users/promote/',
+      '${ApiService.baseUrl}/auth/admin/users/promote/',
+      '${ApiService.baseUrl}/users/promote/',
+    ];
+
+    String? lastError;
+    for (final endpointUrl in endpoints) {
+      try {
+        final uri = Uri.parse(endpointUrl);
+        final payload = <String, dynamic>{
+          'user_id': userId,
+          if (username != null && username.isNotEmpty) 'username': username,
+          if (reason != null && reason.isNotEmpty) 'reason': reason,
+        };
+
+        final response = await http.post(
+          uri,
+          headers: {
+            'Content-Type': 'application/json',
+            if (token != null) 'Authorization': 'Token $token',
+          },
+          body: jsonEncode(payload),
+        ).timeout(const Duration(seconds: 10));
+
+        Map<String, dynamic>? data;
+        try {
+          final decoded = jsonDecode(response.body);
+          if (decoded is Map<String, dynamic>) {
+            data = decoded;
+          }
+        } catch (_) {}
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          return AdminPromoteUserResult(
+            success: true,
+            message: data?['message'] as String? ?? 'User promoted to Administrator successfully.',
+            user: data?['user'] as Map<String, dynamic>?,
+          );
+        }
+
+        final errorMsg = data?['error'] as String? ??
+            data?['detail'] as String? ??
+            'Failed to promote user (${response.statusCode})';
+
+        if (response.statusCode == 400 || response.statusCode == 403 || response.statusCode == 404) {
+          return AdminPromoteUserResult(
+            success: false,
+            error: errorMsg,
+          );
+        }
+
+        lastError = errorMsg;
+      } catch (e) {
+        lastError = 'Network error: $e';
+      }
+    }
+
+    return AdminPromoteUserResult(
+      success: false,
+      error: lastError ?? 'Unable to connect to promotion server.',
+    );
+  }
+
   /// Fetches system and API status for the admin panel.
   static Future<Map<String, dynamic>?> fetchAdminStatus() async {
     final token = AuthService.token;
@@ -729,5 +822,305 @@ class AdminAnalyticsService {
         lastActiveAt: '2026-09-29T20:20:00Z',
       ),
     ];
+  }
+
+  /// Fetches pending legal updates awaiting administrator review.
+  /// Server validates token and verifies ADMIN role.
+  static Future<AdminPendingUpdatesResult> fetchPendingUpdates() async {
+    final token = AuthService.token;
+    if (token == null) {
+      return AdminPendingUpdatesResult.unauthorized(
+        'No administrator session active. Please sign in with an admin account to view and review pending updates.',
+      );
+    }
+
+    final url = '${ApiService.baseUrl}/admin/legal-updates/pending/';
+    assert(() {
+      // ignore: avoid_print
+      print('[AdminAnalytics] Fetching pending updates from: $url');
+      return true;
+    }());
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Token $token',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      assert(() {
+        // ignore: avoid_print
+        print('[AdminAnalytics] Pending updates response status: ${response.statusCode}');
+        return true;
+      }());
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        final list = (decoded['updates'] as List? ?? []);
+        final parsed = <AdminPendingUpdateRecord>[];
+        for (final item in list) {
+          try {
+            parsed.add(AdminPendingUpdateRecord.fromJson(Map<String, dynamic>.from(item as Map)));
+          } catch (pe) {
+            // ignore: avoid_print
+            print('[AdminAnalytics] Error parsing update item: $pe');
+          }
+        }
+        return AdminPendingUpdatesResult.success(
+          parsed,
+          decoded['count'] as int? ?? parsed.length,
+        );
+      } else if (response.statusCode == 401) {
+        return AdminPendingUpdatesResult.unauthorized(
+          'Administrator session expired or invalid token (HTTP 401). Please sign in again.',
+        );
+      } else if (response.statusCode == 403) {
+        return AdminPendingUpdatesResult.forbidden(
+          'Access forbidden (HTTP 403). Only authenticated administrator accounts can view pending updates.',
+        );
+      } else {
+        return AdminPendingUpdatesResult.failure(
+          'Failed to load pending updates: Server returned HTTP ${response.statusCode}',
+          code: response.statusCode,
+        );
+      }
+    } catch (e) {
+      return AdminPendingUpdatesResult.failure(
+        'Unable to connect to updates API ($url): $e',
+      );
+    }
+  }
+
+  /// Approves a pending legal update with optional review notes.
+  static Future<Map<String, dynamic>> approveUpdate(int updateId, {String notes = ''}) async {
+    final token = AuthService.token;
+    if (token == null && !AuthService.isAdmin) {
+      return {'success': false, 'error': 'Administrator authentication required.'};
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/admin/legal-updates/approve/'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Token $token',
+        },
+        body: jsonEncode({
+          'update_id': updateId,
+          'notes': notes,
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>? ?? {};
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': data['message'] ?? 'Update approved successfully.'};
+      } else {
+        return {'success': false, 'error': data['error'] ?? 'Approval failed (${response.statusCode})'};
+      }
+    } catch (e) {
+      return {'success': false, 'error': 'Network error: $e'};
+    }
+  }
+
+  /// Publishes an approved legal update into canonical database and synchronizes with clients.
+  static Future<Map<String, dynamic>> publishUpdate(int updateId) async {
+    final token = AuthService.token;
+    if (token == null && !AuthService.isAdmin) {
+      return {'success': false, 'error': 'Administrator authentication required.'};
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/admin/legal-updates/publish/'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Token $token',
+        },
+        body: jsonEncode({
+          'update_id': updateId,
+        }),
+      ).timeout(const Duration(seconds: 12));
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>? ?? {};
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': data['message'] ?? 'Update published successfully.'};
+      } else {
+        return {'success': false, 'error': data['error'] ?? 'Publication failed (${response.statusCode})'};
+      }
+    } catch (e) {
+      return {'success': false, 'error': 'Network error: $e'};
+    }
+  }
+
+  /// Rejects a pending legal update with mandatory reason.
+  static Future<Map<String, dynamic>> rejectUpdate(int updateId, {required String reason}) async {
+    final token = AuthService.token;
+    if (token == null && !AuthService.isAdmin) {
+      return {'success': false, 'error': 'Administrator authentication required.'};
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiService.baseUrl}/admin/legal-updates/reject/'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Token $token',
+        },
+        body: jsonEncode({
+          'update_id': updateId,
+          'reason': reason,
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      final data = jsonDecode(response.body) as Map<String, dynamic>? ?? {};
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': data['message'] ?? 'Update rejected.'};
+      } else {
+        return {'success': false, 'error': data['error'] ?? 'Rejection failed (${response.statusCode})'};
+      }
+    } catch (e) {
+      return {'success': false, 'error': 'Network error: $e'};
+    }
+  }
+}
+
+class AdminPendingUpdatesResult {
+  final bool success;
+  final bool isForbidden;
+  final int? statusCode;
+  final String? error;
+  final List<AdminPendingUpdateRecord> updates;
+  final int count;
+
+  AdminPendingUpdatesResult({
+    required this.success,
+    this.isForbidden = false,
+    this.statusCode,
+    this.error,
+    this.updates = const [],
+    this.count = 0,
+  });
+
+  factory AdminPendingUpdatesResult.success(List<AdminPendingUpdateRecord> list, int count) =>
+      AdminPendingUpdatesResult(
+        success: true,
+        updates: list,
+        count: count,
+      );
+
+  factory AdminPendingUpdatesResult.unauthorized([String? msg]) =>
+      AdminPendingUpdatesResult(
+        success: false,
+        isForbidden: true,
+        statusCode: 401,
+        error: msg ?? 'Administrator authentication required (401). Please sign in with an administrator account.',
+      );
+
+  factory AdminPendingUpdatesResult.forbidden([String? msg]) =>
+      AdminPendingUpdatesResult(
+        success: false,
+        isForbidden: true,
+        statusCode: 403,
+        error: msg ?? 'Administrator permissions required (403).',
+      );
+
+  factory AdminPendingUpdatesResult.failure(String message, {int? code}) =>
+      AdminPendingUpdatesResult(
+        success: false,
+        statusCode: code,
+        error: message,
+      );
+}
+
+class AdminPendingUpdateRecord {
+  final int id;
+  final String actName;
+  final String sectionNumber;
+  final String updateType;
+  final String updateTypeDisplay;
+  final String status;
+  final String statusDisplay;
+  final String verificationStatus;
+  final String proposedTitle;
+  final String proposedLegalText;
+  final String proposedSimpleExplanation;
+  final String proposedPunishment;
+  final String? proposedEffectiveDate;
+  final String existingLegalText;
+  final String detectedDiff;
+  final String sourceUrl;
+  final String sourceName;
+  final String? sourcePublicationDate;
+  final String commencementStatus;
+  final String? detectedAt;
+  final String? reviewedBy;
+  final String? reviewedAt;
+  final String? adminNotes;
+  final int? previousVersion;
+  final int? approvedVersion;
+
+  AdminPendingUpdateRecord({
+    required this.id,
+    required this.actName,
+    required this.sectionNumber,
+    required this.updateType,
+    required this.updateTypeDisplay,
+    required this.status,
+    required this.statusDisplay,
+    required this.verificationStatus,
+    required this.proposedTitle,
+    required this.proposedLegalText,
+    required this.proposedSimpleExplanation,
+    required this.proposedPunishment,
+    this.proposedEffectiveDate,
+    required this.existingLegalText,
+    required this.detectedDiff,
+    required this.sourceUrl,
+    required this.sourceName,
+    this.sourcePublicationDate,
+    required this.commencementStatus,
+    this.detectedAt,
+    this.reviewedBy,
+    this.reviewedAt,
+    this.adminNotes,
+    this.previousVersion,
+    this.approvedVersion,
+  });
+
+  bool get isPending => status == 'pending_review' || status == 'pending' || status == 'detected';
+  bool get isApproved => status == 'approved';
+  bool get isPublished => status == 'published';
+  bool get isRejected => status == 'rejected';
+
+  factory AdminPendingUpdateRecord.fromJson(Map<String, dynamic> json) {
+    return AdminPendingUpdateRecord(
+      id: json['id'] as int? ?? 0,
+      actName: json['act_name'] as String? ?? json['law_name'] as String? ?? '',
+      sectionNumber: json['section_number'] as String? ?? '',
+      updateType: json['update_type'] as String? ?? 'amendment',
+      updateTypeDisplay: json['update_type_display'] as String? ?? json['update_type'] as String? ?? '',
+      status: json['status'] as String? ?? 'pending_review',
+      statusDisplay: json['status_display'] as String? ?? json['status'] as String? ?? '',
+      verificationStatus: json['verification_status'] as String? ?? 'verified',
+      proposedTitle: json['proposed_title'] as String? ?? '',
+      proposedLegalText: json['proposed_legal_text'] as String? ?? '',
+      proposedSimpleExplanation: json['proposed_simple_explanation'] as String? ?? '',
+      proposedPunishment: json['proposed_punishment'] as String? ?? '',
+      proposedEffectiveDate: json['proposed_effective_date'] as String?,
+      existingLegalText: json['existing_legal_text'] as String? ?? '',
+      detectedDiff: json['detected_diff'] as String? ?? '',
+      sourceUrl: json['source_url'] as String? ?? 'https://www.indiacode.gov.in/',
+      sourceName: json['source_name'] as String? ?? 'India Code',
+      sourcePublicationDate: json['source_publication_date'] as String?,
+      commencementStatus: json['commencement_status'] as String? ?? 'In Force',
+      detectedAt: json['detected_at'] as String?,
+      reviewedBy: json['reviewed_by'] as String?,
+      reviewedAt: json['reviewed_at'] as String?,
+      adminNotes: json['admin_notes'] as String?,
+      previousVersion: json['previous_version'] as int?,
+      approvedVersion: json['approved_version'] as int?,
+    );
   }
 }

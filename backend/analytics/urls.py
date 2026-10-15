@@ -2,6 +2,7 @@ from django.urls import path, re_path
 
 from .views import (
     AdminAnalyticsView,
+    AdminPromoteUserView,
     AdminStatusView,
     AdminUserListView,
     HeartbeatView,
@@ -14,6 +15,8 @@ urlpatterns = [
     re_path(r"^admin/analytics/?$", AdminAnalyticsView.as_view()),
     path("admin/users/", AdminUserListView.as_view(), name="admin-users"),
     re_path(r"^admin/users/?$", AdminUserListView.as_view()),
+    path("admin/users/promote/", AdminPromoteUserView.as_view(), name="admin-users-promote"),
+    re_path(r"^admin/users/promote/?$", AdminPromoteUserView.as_view()),
     path("admin/status/", AdminStatusView.as_view(), name="admin-status"),
     re_path(r"^admin/status/?$", AdminStatusView.as_view()),
 
@@ -22,6 +25,8 @@ urlpatterns = [
     re_path(r"^analytics/?$", AdminAnalyticsView.as_view()),
     path("users/", AdminUserListView.as_view(), name="admin-users-short"),
     re_path(r"^users/?$", AdminUserListView.as_view()),
+    path("users/promote/", AdminPromoteUserView.as_view(), name="admin-users-promote-short"),
+    re_path(r"^users/promote/?$", AdminPromoteUserView.as_view()),
     path("status/", AdminStatusView.as_view(), name="admin-status-short"),
     re_path(r"^status/?$", AdminStatusView.as_view()),
 

@@ -50,3 +50,7 @@ scratch_check_*.py
 window_dump.xml
 
 scratch_search_users.py
+sync_*.py
+**/sync_*.py
+test_prod_*.py
+**/test_prod_*.py

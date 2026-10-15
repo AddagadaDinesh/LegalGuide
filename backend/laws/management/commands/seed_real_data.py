@@ -1659,43 +1659,52 @@ class Command(BaseCommand):
             ),
             dict(
                 law=bnss_maintenance,
-                section_number="BNSS Section 144",
+                section_number="Section 144",
                 title="Order for Maintenance of Wives, Children and Parents",
                 legal_text=(
-                    "A Magistrate of the First Class may order a person "
-                    "of sufficient means who neglects or refuses to "
-                    "maintain his wife (including a divorced, unremarried "
-                    "wife), minor children, major children with a "
-                    "disability, or an indigent parent, to pay a monthly "
-                    "allowance. Non-payment can lead to a warrant for the "
-                    "amount as a fine, and imprisonment of up to one "
-                    "month per default, subject to a one-year limit on "
-                    "claiming arrears."
+                    "144. (1) If any person having sufficient means neglects or refuses to maintain—\n"
+                    "(a) his wife, unable to maintain herself, or\n"
+                    "(b) his legitimate or illegitimate minor child, whether married or not, unable to maintain itself, or\n"
+                    "(c) his legitimate or illegitimate child (not being a married daughter) who has attained majority, "
+                    "where such child is, by reason of any physical or mental abnormality or injury unable to maintain itself, or\n"
+                    "(d) his father or mother, unable to maintain herself or himself,\n"
+                    "a Magistrate of the first class may, upon proof of such neglect or refusal, order such person to make a monthly allowance "
+                    "for the maintenance of his wife or such child, father or mother, at such monthly rate as such Magistrate thinks fit and to pay "
+                    "the same to such person as the Magistrate may from time to time direct.\n\n"
+                    "(3) If any person so ordered fails without sufficient cause to comply with the order, any such Magistrate may, for every breach "
+                    "of the order, issue a warrant for levying the amount due in the manner provided for levying fines, and may sentence such person, "
+                    "for the whole or any part of each month's allowance for the maintenance or the interim maintenance and expenses of proceeding, "
+                    "remaining unpaid after the execution of the warrant, to imprisonment for a term which may extend to one month or until payment "
+                    "if sooner made:\n"
+                    "Provided that no warrant shall be issued for the recovery of any amount due under this section unless application be made to "
+                    "the Court to levy such amount within a period of one year from the date on which it became due."
                 ),
                 simple_explanation=(
-                    "Lets a wife, child, or parent who cannot support "
-                    "themselves claim monthly maintenance from a person "
-                    "of sufficient means who is neglecting to support "
-                    "them — a fast, religion-neutral remedy that replaced "
-                    "the old CrPC Section 125."
+                    "Section 144 of the Bharatiya Nagarik Suraksha Sanhita, 2023 (replacing Section 125 of the former CrPC) provides a summary, "
+                    "speedy, and religion-neutral legal remedy enabling wives, minor children, disabled adult children, and dependent parents "
+                    "who cannot support themselves to claim monthly maintenance from a person with sufficient means who neglects or refuses to support them."
                 ),
-                purpose="Prevents destitution of dependents by providing a quick, summary remedy for maintenance.",
-                punishment="Not a penal provision for the underlying conduct — but non-payment of an ordered maintenance amount can lead to a fine (recovered like a warrant) and imprisonment of up to one month per default.",
+                purpose="Prevents destitution and vagrancy by providing a summary, religion-neutral judicial procedure to enforce maintenance for dependents.",
+                punishment=(
+                    "Section 144 is a civil and protective remedy enforced through criminal courts, not a penal conviction for a crime. "
+                    "If a person fails without sufficient cause to comply with the maintenance order, the Magistrate may issue a warrant to recover "
+                    "the unpaid amount in the manner of levying fines, and may sentence the defaulter to imprisonment for up to one month (or until "
+                    "payment is sooner made) for each month's allowance remaining unpaid. Recovery applications must be filed within one year of the amount falling due."
+                ),
                 key_elements=(
-                    "Applicant's inability to maintain themselves.\n"
-                    "Respondent's sufficient means to pay.\n"
-                    "Neglect or refusal by the respondent to maintain the applicant.\n"
-                    "Relationship (wife, child, or parent) must be established.\n"
-                    "A wife's claim can be barred by disqualifying conduct such as living in adultery."
+                    "1. Applicant's inability to maintain herself/himself.\n"
+                    "2. Respondent's possession of sufficient means.\n"
+                    "3. Proof of neglect or refusal by the respondent to maintain.\n"
+                    "4. Established familial relationship: lawful or divorced (unremarried) wife, minor child, disabled adult child, or indigent parent.\n"
+                    "5. Disqualification: A wife living in adultery or refusing to live with her husband without sufficient reason is disentitled to allowance."
                 ),
                 relevant_information=(
-                    "Proof of relationship — marriage certificate, birth certificates.\n"
-                    "Evidence of the applicant's income/inability to self-support.\n"
-                    "Evidence of the respondent's income and assets.\n"
-                    "Any prior maintenance order (e.g. under the Hindu Marriage Act or DV Act) to avoid double claims."
+                    "Proof of relationship (marriage certificate, birth certificates, Aadhaar cards).\n"
+                    "Affidavits of assets and liabilities and bank statements establishing respondent's means and applicant's lack of independent income.\n"
+                    "Any previous orders passed under the Domestic Violence Act or Hindu Marriage Act, 1955 to prevent double recovery."
                 ),
-                relevant_documents="Marriage/birth certificates, income proof of both parties, any prior maintenance order, application for maintenance.",
-                keywords="maintenance, alimony, wife maintenance, child maintenance, parents maintenance, bnss 144, section 125",
+                relevant_documents="Marriage certificate, birth certificates, income proof/bank statements, affidavit of assets and liabilities, application under Section 144.",
+                keywords="maintenance, alimony, wife maintenance, child maintenance, parents maintenance, bnss 144, section 144, section 125 crpc",
                 source=BNSS_SOURCE_NOTE,
             ),
             dict(
@@ -2180,9 +2189,9 @@ class Command(BaseCommand):
             "BNSS Section 35": ["BNSS Section 47"],
             "BNSS Section 47": ["BNSS Section 35"],
             "Section 185": ["Section 115"],
-            "Section 13": ["BNSS Section 144", "Section 12"],
-            "Section 12": ["BNSS Section 144", "Section 13", "Section 3"],
-            "BNSS Section 144": ["Section 13", "Section 12"],
+            "Section 13": ["Section 144", "Section 12"],
+            "Section 12": ["Section 144", "Section 13", "Section 3"],
+            "Section 144": ["Section 13", "Section 12"],
             "Section 54": ["Section 17", "Section 58"],
             "Section 17": ["Section 54", "Section 58"],
             "Section 58": ["Section 54", "Section 17"],
@@ -2256,7 +2265,7 @@ class Command(BaseCommand):
             dict(category=categories_by_name["Family Law"], name="Divorce", description="",
                  section_numbers=["Section 13"]),
             dict(category=categories_by_name["Family Law"], name="Maintenance", description="",
-                 section_numbers=["BNSS Section 144"]),
+                 section_numbers=["Section 144"]),
             dict(category=categories_by_name["Family Law"], name="Domestic violence", description="",
                  section_numbers=["Section 12"]),
             dict(category=categories_by_name["Family Law"], name="Child custody", description="", section_numbers=[]),
@@ -2306,7 +2315,7 @@ class Command(BaseCommand):
             dict(category=womens_rights, name="Workplace harassment", description="",
                  section_numbers=["Section 9"]),
             dict(category=womens_rights, name="Maintenance rights", description="",
-                 section_numbers=["BNSS Section 144"]),
+                 section_numbers=["Section 144"]),
             dict(category=womens_rights, name="Dowry harassment", description="",
                  section_numbers=["Section 3"]),
             dict(category=womens_rights, name="Stalking", description="", section_numbers=[]),

@@ -1,8 +1,18 @@
-import urllib.request
-import urllib.error
-import time
+import os
+import sys
+from pathlib import Path
 
-TOKEN = 'daebb744fd1e992ce59637e2e27608e78ccee132'
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parent / ".env")
+except ImportError:
+    pass
+
+TOKEN = os.environ.get("PA_API_TOKEN")
+if not TOKEN:
+    print("ERROR: PA_API_TOKEN is not set in environment or backend/.env.")
+    sys.exit(1)
+
 BASE = 'https://www.pythonanywhere.com/api/v0/user/Dinesh03'
 AUTH = {'Authorization': 'Token ' + TOKEN}
 DOMAIN = 'dinesh03.pythonanywhere.com'

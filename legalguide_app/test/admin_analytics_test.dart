@@ -374,5 +374,64 @@ void main() {
       expect(result.error, contains('authentication required'));
     });
   });
+
+  group('Admin User Promotion Service and Result Tests', () {
+    test('AdminPromoteUserResult parses success response with user payload', () {
+      final res = AdminPromoteUserResult(
+        success: true,
+        message: "User 'citizen_jane' has been promoted to Administrator successfully.",
+        user: {
+          'id': '42',
+          'username': 'citizen_jane',
+          'email': 'jane@example.com',
+          'role': 'ADMIN',
+          'is_staff': true,
+          'is_superuser': false,
+        },
+      );
+      expect(res.success, isTrue);
+      expect(res.error, isNull);
+      expect(res.message, contains('promoted'));
+      expect(res.user?['role'], equals('ADMIN'));
+      expect(res.user?['username'], equals('citizen_jane'));
+    });
+
+    test('AdminPromoteUserResult parses failure response correctly', () {
+      final res = AdminPromoteUserResult(
+        success: false,
+        error: "User 'already_admin' is already an administrator.",
+      );
+      expect(res.success, isFalse);
+      expect(res.error, contains('already an administrator'));
+      expect(res.user, isNull);
+    });
+
+    test('promoteUser denies execution without authenticated admin session', () async {
+      AuthService.currentRole.value = 'USER';
+      final result = await AdminAnalyticsService.promoteUser(42, username: 'test_citizen');
+      expect(result.success, isFalse);
+      expect(result.error, contains('authentication required'));
+    });
+
+    test('AdminUserData identifies admin vs eligible citizen accounts correctly', () {
+      final citizen = AdminUserData(
+        id: 1,
+        username: 'regular_citizen',
+        email: 'citizen@example.com',
+        role: 'USER',
+      );
+      expect(citizen.isAdmin, isFalse);
+      expect(citizen.role, equals('USER'));
+
+      final admin = AdminUserData(
+        id: 2,
+        username: 'promoted_admin',
+        email: 'admin@example.com',
+        role: 'ADMIN',
+      );
+      expect(admin.isAdmin, isTrue);
+      expect(admin.role, equals('ADMIN'));
+    });
+  });
 }
 

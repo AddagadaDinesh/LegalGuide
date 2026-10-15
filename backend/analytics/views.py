@@ -10,7 +10,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.models import UserProfile
+from accounts.models import UserProfile, UserRoleAuditLog
+from rest_framework.authtoken.models import Token
 try:
     from laws.models import DatabaseSyncInfo
 except ImportError:
@@ -27,6 +28,16 @@ from .models import (
 from .permissions import IsAdminUserRole
 
 User = get_user_model()
+
+
+def _client_ip(request):
+    cf_ip = request.META.get("HTTP_CF_CONNECTING_IP")
+    if cf_ip:
+        return cf_ip
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR", "unknown")
 
 FEATURE_NAME_MAP = {
     "law_search": "Law Search",
@@ -219,10 +230,13 @@ class AdminAnalyticsView(APIView):
             sync_info = DatabaseSyncInfo.get_info()
             db_sync_data = {
                 "server_version": sync_info.server_version,
+                "sync_version": sync_info.server_version,
                 "last_sync_date": sync_info.last_sync_date.isoformat() if sync_info.last_sync_date else None,
+                "last_synchronized": sync_info.last_sync_date.isoformat() if sync_info.last_sync_date else None,
                 "last_source_check": (
                     sync_info.last_source_check.isoformat() if sync_info.last_source_check else None
                 ),
+                "last_source_check_status": getattr(sync_info, 'last_source_check_status', 'verified'),
                 "primary_source_name": sync_info.primary_source_name,
                 "primary_source_url": sync_info.primary_source_url,
                 "total_categories": Category.objects.count(),
@@ -423,9 +437,13 @@ class AdminUserListView(APIView):
         if not target:
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        # Requirement: Admin must NOT be able to delete their own admin account.
+        # Requirement 8: Admin must NOT be able to delete their own admin account.
         if target.id == request.user.id or target.username.strip().lower() == request.user.username.strip().lower():
             return Response({"error": "You cannot delete your own admin account."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Requirement 8: Preserve Dinesh_Admin primary account
+        if target.username.strip().lower() == "dinesh_admin":
+            return Response({"error": "Cannot delete primary administrator account (Dinesh_Admin)."}, status=status.HTTP_400_BAD_REQUEST)
 
         target_profile = getattr(target, "profile", None)
         target_is_admin = bool(target.is_staff or target.is_superuser or (target_profile and target_profile.role == "ADMIN"))
@@ -434,13 +452,42 @@ class AdminUserListView(APIView):
         if target.is_superuser:
             return Response({"error": "Cannot delete primary administrator account."}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Requirement 8: Do not allow the last administrator to be deleted or removed
+        if target_is_admin:
+            admin_count = User.objects.filter(
+                models.Q(is_staff=True) | models.Q(is_superuser=True) | models.Q(profile__role="ADMIN")
+            ).distinct().count()
+            if admin_count <= 1:
+                return Response(
+                    {"error": "Cannot delete the last remaining administrator account."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         # Admin policy: deleting another administrator requires superuser privileges
         if target_is_admin and not request.user.is_superuser:
             return Response({"error": "Cannot delete administrator accounts without superuser privileges."}, status=status.HTTP_403_FORBIDDEN)
 
         deleted_username = target.username
+        deleted_email = target.email or ""
+        deleted_role = "ADMIN" if target_is_admin else "USER"
         deleted_id = str(target.id)
+
         target.delete()
+
+        # Requirement 8: Record deletion in audit log
+        client_ip = _client_ip(request)
+        UserRoleAuditLog.objects.create(
+            user=None,
+            target_username=deleted_username,
+            target_email=deleted_email,
+            performed_by=request.user,
+            action="DELETION",
+            previous_role=deleted_role,
+            new_role="NONE",
+            reason="Account deleted by administrator",
+            ip_address=client_ip,
+        )
+
         return Response({
             "status": "deleted",
             "success": True,
@@ -448,6 +495,105 @@ class AdminUserListView(APIView):
             "username": deleted_username,
             "user_id": deleted_id,
         }, status=status.HTTP_200_OK)
+
+
+class AdminPromoteUserView(APIView):
+    """
+    Allow an authenticated administrator to promote an existing registered citizen/user
+    to ADMINISTRATOR role.
+    
+    Security & Permissions:
+    - Guaranteed: Accessible only to authenticated users with the ADMIN role (via IsAdminUserRole).
+    - Rejects ordinary users with HTTP 403 Forbidden.
+    - Never trusts any client-provided role or admin flag.
+    - Preserves existing accounts; never duplicates account, deletes user, or resets password.
+    - Revokes active auth tokens for the target user, requiring a secure re-login or fresh session.
+    - Records the role change in UserRoleAuditLog.
+    """
+    permission_classes = [IsAdminUserRole]
+
+    def post(self, request):
+        user_id = request.data.get("user_id") or request.query_params.get("user_id")
+        username = request.data.get("username") or request.query_params.get("username")
+        reason = (request.data.get("reason") or "Promoted to Admin via User Directory").strip()
+
+        if not user_id and not username:
+            return Response(
+                {"error": "user_id or username required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        target = None
+        if user_id:
+            target = User.objects.filter(id=user_id).first()
+        elif username:
+            target = User.objects.filter(username__iexact=str(username).strip()).first()
+
+        if not target:
+            return Response(
+                {"error": "User not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        target_profile, _ = UserProfile.objects.get_or_create(
+            user=target,
+            defaults={"role": "ADMIN" if (target.is_staff or target.is_superuser) else "USER"},
+        )
+        is_already_admin = bool(
+            target.is_staff or target.is_superuser or target_profile.role == "ADMIN"
+        )
+        if is_already_admin:
+            return Response(
+                {
+                    "error": f"User '{target.username}' is already an administrator.",
+                    "already_admin": True,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        prev_role = target_profile.role
+
+        # Update role in existing central production database
+        target.is_staff = True
+        target.save(update_fields=["is_staff"])
+
+        target_profile.role = "ADMIN"
+        target_profile.save(update_fields=["role"])
+
+        # Revoke active auth tokens for target so they must re-login securely
+        tokens_deleted = Token.objects.filter(user=target).delete()
+
+        # Record role promotion in audit log
+        client_ip = _client_ip(request)
+        UserRoleAuditLog.objects.create(
+            user=target,
+            target_username=target.username,
+            target_email=target.email or "",
+            performed_by=request.user,
+            action="PROMOTION",
+            previous_role=prev_role,
+            new_role="ADMIN",
+            reason=reason,
+            ip_address=client_ip,
+        )
+
+        return Response(
+            {
+                "success": True,
+                "status": "promoted",
+                "message": f"User '{target.username}' has been promoted to Administrator successfully. Active session revoked; user must re-authenticate.",
+                "user": {
+                    "id": str(target.id),
+                    "username": target.username,
+                    "email": target.email or "",
+                    "role": "ADMIN",
+                    "is_staff": target.is_staff,
+                    "is_superuser": target.is_superuser,
+                },
+                "tokens_revoked": tokens_deleted[0] if isinstance(tokens_deleted, tuple) else 1,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class AdminStatusView(APIView):

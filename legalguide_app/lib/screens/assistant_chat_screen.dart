@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../localization/app_strings.dart';
 import '../models/chat_message.dart';
@@ -31,7 +32,8 @@ Future<void> showAssistantPanel(BuildContext context) {
 }
 
 class AssistantPanel extends StatefulWidget {
-  const AssistantPanel({super.key});
+  final List<ChatMessage>? initialMessages;
+  const AssistantPanel({super.key, this.initialMessages});
 
   @override
   State<AssistantPanel> createState() => _AssistantPanelState();
@@ -57,7 +59,12 @@ class _AssistantPanelState extends State<AssistantPanel> {
   @override
   void initState() {
     super.initState();
-    _loadChatHistory();
+    if (widget.initialMessages != null) {
+      _messages.addAll(widget.initialMessages!);
+      _isLoadingHistory = false;
+    } else {
+      _loadChatHistory();
+    }
   }
 
   Future<void> _loadChatHistory() async {
@@ -280,8 +287,21 @@ class _AssistantPanelState extends State<AssistantPanel> {
     await TtsService.instance.stop();
 
     // Ensure conversation exists
-    final conv = _currentConversation ??
-        await ChatHistoryService.instance.getOrCreateActiveConversation();
+    Conversation? conv = _currentConversation;
+    if (conv == null) {
+      try {
+        conv = await ChatHistoryService.instance.getOrCreateActiveConversation();
+      } catch (e) {
+        conv = Conversation(
+          id: 'local_conv_${DateTime.now().millisecondsSinceEpoch}',
+          title: text,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          language: LocaleService.currentLanguage,
+          isActive: true,
+        );
+      }
+    }
     _currentConversation = conv;
 
     final userMessage = ChatMessage(
@@ -293,7 +313,9 @@ class _AssistantPanelState extends State<AssistantPanel> {
     );
 
     // Save immediately so it is not lost even if user closes assistant
-    await ChatHistoryService.instance.saveMessage(userMessage);
+    try {
+      await ChatHistoryService.instance.saveMessage(userMessage);
+    } catch (_) {}
 
     setState(() {
       _messages.add(userMessage);
@@ -315,7 +337,9 @@ class _AssistantPanelState extends State<AssistantPanel> {
     );
 
     // Save complete AI response immediately
-    await ChatHistoryService.instance.saveMessage(assistantMessage);
+    try {
+      await ChatHistoryService.instance.saveMessage(assistantMessage);
+    } catch (_) {}
 
     if (mounted) {
       setState(() {
@@ -538,6 +562,20 @@ class _AssistantPanelState extends State<AssistantPanel> {
     );
   }
 
+  void _copyUserQuestion(String question) {
+    Clipboard.setData(ClipboardData(text: question));
+    if (mounted) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(tr('Question copied')),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   Widget _buildBubble(ChatMessage message) {
     final isUser = message.isUser;
     if (!isUser) {
@@ -551,8 +589,8 @@ class _AssistantPanelState extends State<AssistantPanel> {
       alignment: Alignment.centerRight,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.80),
+        padding: const EdgeInsets.fromLTRB(16, 11, 10, 10),
+        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
         decoration: BoxDecoration(
           color: AppColors.accentDark,
           borderRadius: const BorderRadius.only(
@@ -569,14 +607,47 @@ class _AssistantPanelState extends State<AssistantPanel> {
             ),
           ],
         ),
-        child: Text(
-          message.text,
-          style: GoogleFonts.inter(
-            color: Colors.white,
-            fontSize: 14.5,
-            height: 1.4,
-            fontWeight: FontWeight.w500,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Flexible(
+              child: Text(
+                message.text,
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 14.5,
+                  height: 1.4,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Semantics(
+              label: tr('Copy question'),
+              button: true,
+              child: Tooltip(
+                key: const ValueKey('copy_user_question_button'),
+                message: tr('Copy question'),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    key: const ValueKey('copy_user_question_inkwell'),
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () => _copyUserQuestion(message.text),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.copy_rounded,
+                        size: 15,
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -656,6 +727,7 @@ class _AssistantPanelState extends State<AssistantPanel> {
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
+                      key: const ValueKey('send_message_button'),
                       icon: const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 19),
                       padding: EdgeInsets.zero,
                       tooltip: tr('Send'),

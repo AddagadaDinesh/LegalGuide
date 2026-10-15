@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from accounts.models import UserProfile
+from accounts.models import UserProfile, UserRoleAuditLog
 from analytics.models import (
     AIQuestionStat,
     FeatureUsageStat,
@@ -262,4 +262,201 @@ class AdminAnalyticsSecurityAndFunctionalityTests(TestCase):
             format="json",
         )
         self.assertIn(login_res2.status_code, [status.HTTP_400_BAD_REQUEST, status.HTTP_401_UNAUTHORIZED])
+
+
+class AdminPromotionAndAuthorizationTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        # Primary admin (superuser)
+        self.primary_admin = User.objects.create_user(
+            username="PrimaryAdmin",
+            email="primary@legalguide.org",
+            password="PrimaryAdminPass123!",
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.primary_admin_token, _ = Token.objects.get_or_create(user=self.primary_admin)
+
+        # Dinesh_Admin account (critical to preserve)
+        self.dinesh_admin = User.objects.create_user(
+            username="Dinesh_Admin",
+            email="dinesh@legalguide.org",
+            password="DineshAdminPass123!",
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.dinesh_admin_token, _ = Token.objects.get_or_create(user=self.dinesh_admin)
+
+        # Regular citizen user
+        self.citizen_user = User.objects.create_user(
+            username="citizen_jane",
+            email="jane@example.com",
+            password="CitizenPassword123!",
+            is_staff=False,
+            is_superuser=False,
+        )
+        self.citizen_token, _ = Token.objects.get_or_create(user=self.citizen_user)
+
+    def test_admin_promotes_user_success_and_audited(self):
+        """Admin can promote an existing citizen to ADMIN; updates role and writes audit log."""
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.primary_admin_token.key}")
+        response = self.client.post(
+            "/api/admin/users/promote/",
+            {
+                "user_id": self.citizen_user.id,
+                "reason": "Promoted to assist in legal review",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertTrue(data.get("success"))
+        self.assertEqual(data.get("status"), "promoted")
+        self.assertEqual(data["user"]["role"], "ADMIN")
+
+        # Database persistence check
+        self.citizen_user.refresh_from_db()
+        self.assertTrue(self.citizen_user.is_staff)
+        self.assertEqual(self.citizen_user.profile.role, "ADMIN")
+        self.assertTrue(self.citizen_user.profile.is_admin)
+
+        # Token revocation check: active token was deleted
+        self.assertFalse(Token.objects.filter(user=self.citizen_user, key=self.citizen_token.key).exists())
+
+        # Audit log verification
+        audit = UserRoleAuditLog.objects.filter(target_username="citizen_jane", action="PROMOTION").first()
+        self.assertIsNotNone(audit)
+        self.assertEqual(audit.performed_by, self.primary_admin)
+        self.assertEqual(audit.previous_role, "USER")
+        self.assertEqual(audit.new_role, "ADMIN")
+        self.assertEqual(audit.reason, "Promoted to assist in legal review")
+
+    def test_promoted_user_must_relogin_and_can_access_admin_endpoints(self):
+        """Promoted user's old token is revoked; upon re-login, obtains ADMIN session and accesses endpoints."""
+        # Step 1: Promote user
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.primary_admin_token.key}")
+        promote_res = self.client.post(
+            "/api/admin/users/promote/",
+            {"user_id": self.citizen_user.id},
+            format="json",
+        )
+        self.assertEqual(promote_res.status_code, status.HTTP_200_OK)
+
+        # Step 2: Attempting to access admin endpoint with OLD token fails (401)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.citizen_token.key}")
+        denied_res = self.client.get("/api/admin/analytics/")
+        self.assertEqual(denied_res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        # Step 3: Re-login with existing password (not reset or duplicated)
+        self.client.credentials()  # clear credentials
+        login_res = self.client.post(
+            "/api/auth/login/",
+            {"username": "citizen_jane", "password": "CitizenPassword123!"},
+            format="json",
+        )
+        self.assertEqual(login_res.status_code, status.HTTP_200_OK)
+        login_data = login_res.json()
+        new_token = login_data["token"]
+        self.assertNotEqual(new_token, self.citizen_token.key)
+        self.assertEqual(login_data["user"]["role"], "ADMIN")
+
+        # Step 4: Promoted user accesses admin-only endpoints successfully
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {new_token}")
+
+        # Analytics
+        analytics_res = self.client.get("/api/admin/analytics/")
+        self.assertEqual(analytics_res.status_code, status.HTTP_200_OK)
+
+        # User Directory
+        users_res = self.client.get("/api/admin/users/")
+        self.assertEqual(users_res.status_code, status.HTTP_200_OK)
+
+        # Legal Updates
+        updates_res = self.client.get("/api/admin/legal-updates/")
+        self.assertIn(updates_res.status_code, [status.HTTP_200_OK, status.HTTP_404_NOT_FOUND])
+
+    def test_ordinary_citizen_cannot_promote_users(self):
+        """Ordinary users receive 403 Forbidden when attempting to promote anyone."""
+        another_citizen = User.objects.create_user(
+            username="citizen_bob",
+            email="bob@example.com",
+            password="BobPassword123!",
+        )
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.citizen_token.key}")
+        response = self.client.post(
+            "/api/admin/users/promote/",
+            {
+                "user_id": another_citizen.id,
+                "role": "ADMIN",
+                "is_admin": True,
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Verify Bob remains normal user
+        another_citizen.refresh_from_db()
+        self.assertFalse(another_citizen.is_staff)
+        self.assertEqual(another_citizen.profile.role, "USER")
+
+    def test_unauthenticated_request_denied_promotion(self):
+        """Unauthenticated requests are denied promotion."""
+        self.client.credentials()
+        response = self.client.post(
+            "/api/admin/users/promote/",
+            {"user_id": self.citizen_user.id},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_cannot_promote_already_admin(self):
+        """Attempting to promote a user who is already an admin returns 400 Bad Request."""
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.primary_admin_token.key}")
+        response = self.client.post(
+            "/api/admin/users/promote/",
+            {"user_id": self.dinesh_admin.id},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue(response.json().get("already_admin", False))
+
+    def test_cannot_delete_dinesh_admin(self):
+        """Primary Dinesh_Admin account cannot be deleted by any administrator."""
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.primary_admin_token.key}")
+        response = self.client.delete(
+            "/api/admin/users/",
+            {"username": "Dinesh_Admin"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue(User.objects.filter(username="Dinesh_Admin").exists())
+
+    def test_cannot_delete_last_remaining_admin(self):
+        """If only one administrator exists, deleting that admin must be prevented."""
+        # Delete secondary admin accounts so only Dinesh_Admin remains
+        self.primary_admin.delete()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.dinesh_admin_token.key}")
+
+        # Attempt to delete self or only admin
+        response = self.client.delete(
+            "/api/admin/users/",
+            {"user_id": self.dinesh_admin.id},
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertTrue(User.objects.filter(id=self.dinesh_admin.id).exists())
+
+    def test_user_directory_privacy_no_secrets_exposed(self):
+        """User Directory strictly excludes password hashes, tokens, or auth secrets."""
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.primary_admin_token.key}")
+        response = self.client.get("/api/admin/users/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        users = response.json().get("users", [])
+        self.assertGreaterEqual(len(users), 1)
+
+        sensitive_keys = {"password", "password_hash", "token", "auth_token", "secret", "private_key"}
+        for u in users:
+            keys_present = set(u.keys())
+            self.assertTrue(sensitive_keys.isdisjoint(keys_present), f"Sensitive key found in user card: {keys_present & sensitive_keys}")
 

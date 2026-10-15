@@ -201,17 +201,52 @@ class LegalSection {
   bool get isAmended => status.toLowerCase() == 'amended';
   bool get isCurrent => status.toLowerCase() == 'current';
 
-  static String computeProvisionKey(int lawId, String sectionNumber) {
-    final cleanSec = sectionNumber
-        .trim()
+  static String normalizeSectionNumber(String raw) {
+    if (raw.trim().isEmpty) return '';
+    var s = raw.trim();
+    // Normalize spaces around parentheses: "103 (1)" -> "103(1)"
+    s = s.replaceAll(RegExp(r'\s*\(\s*'), '(');
+    s = s.replaceAll(RegExp(r'\s*\)\s*'), ')');
+    // If it starts with "bnss section", "bns section", convert to "section"
+    s = s.replaceFirst(RegExp(r'^(bns|bnss|bsa|crpc|ipc)\s+section\b', caseSensitive: false), 'section');
+    return s;
+  }
+
+  static int canonicalLawId(int lawId, [String lawName = '', String lawShortName = '']) {
+    final nameLower = '$lawName $lawShortName'.toLowerCase().trim();
+    if (nameLower.isNotEmpty) {
+      if (nameLower.contains('nyaya') || nameLower.contains('bns')) return 2;
+      if (nameLower.contains('constitution') || nameLower.contains('coi')) return 3;
+      if (nameLower.contains('arrest') || nameLower.contains('rights')) return 4;
+      if (nameLower.contains('technology') || nameLower.contains('it act')) return 5;
+      if (nameLower.contains('motor') || nameLower.contains('mv act')) return 6;
+      if (nameLower.contains('consumer') || nameLower.contains('cpa')) return 7;
+      if (nameLower.contains('hindu marriage') || nameLower.contains('hma')) return 8;
+      if (nameLower.contains('domestic violence') || nameLower.contains('dv act')) return 9;
+      if (nameLower.contains('nagarik') || nameLower.contains('bnss')) return 10;
+      if (nameLower.contains('property') || nameLower.contains('tpa')) return 11;
+      if (nameLower.contains('registration')) return 12;
+      if (nameLower.contains('posh') || nameLower.contains('workplace')) return 13;
+      if (nameLower.contains('dowry')) return 14;
+      if (nameLower.contains('pocso') || nameLower.contains('children')) return 15;
+      if (nameLower.contains('social security') || nameLower.contains('css')) return 16;
+      if (nameLower.contains('industrial relations') || nameLower.contains('ir code')) return 17;
+    }
+    return lawId;
+  }
+
+  static String computeProvisionKey(int lawId, String sectionNumber, {String lawName = '', String lawShortName = ''}) {
+    final canonLaw = canonicalLawId(lawId, lawName, lawShortName);
+    final normSec = normalizeSectionNumber(sectionNumber);
+    final cleanSec = normSec
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]'), '_')
         .replaceAll(RegExp(r'_+'), '_')
         .replaceAll(RegExp(r'^_|_$'), '');
-    return '${lawId}_$cleanSec';
+    return '${canonLaw}_$cleanSec';
   }
 
-  String get provisionKey => computeProvisionKey(lawId, sectionNumber);
+  String get provisionKey => computeProvisionKey(lawId, sectionNumber, lawName: lawName, lawShortName: lawShortName);
 
   bool get hasRealLifeExample =>
       displayExampleSituation.trim().isNotEmpty ||
@@ -322,7 +357,7 @@ class LegalSection {
     }
   }
 
-  String get versionLabel => 'v$version';
+  String get versionLabel => 'LegalGuide Version: v$version';
 
   String get displayTitle {
     if (LocaleService.isTelugu) {

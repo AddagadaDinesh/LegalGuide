@@ -10,7 +10,13 @@ from .views import (
     SavedItemView,
     SignupView,
 )
-from analytics.views import AdminAnalyticsView, AdminUserListView, HeartbeatView, TrackActivityBatchView
+from analytics.views import (
+    AdminAnalyticsView,
+    AdminPromoteUserView,
+    AdminUserListView,
+    HeartbeatView,
+    TrackActivityBatchView,
+)
 
 urlpatterns = [
     path("signup/", SignupView.as_view(), name="auth-signup"),
@@ -31,6 +37,8 @@ urlpatterns = [
     path("bookmarks/sync/", BookmarkSyncView.as_view(), name="auth-bookmarks-sync"),
     path("admin/analytics/", AdminAnalyticsView.as_view(), name="auth-admin-analytics"),
     path("admin/users/", AdminUserListView.as_view(), name="auth-admin-users"),
+    path("admin/users/promote/", AdminPromoteUserView.as_view(), name="auth-admin-users-promote"),
+    path("admin/users/promote", AdminPromoteUserView.as_view()),
     path("admin/test-email/", AdminEmailTestView.as_view(), name="auth-admin-test-email"),
     path("analytics/heartbeat/", HeartbeatView.as_view(), name="auth-analytics-heartbeat"),
     path("analytics/track/", TrackActivityBatchView.as_view(), name="auth-analytics-track"),
